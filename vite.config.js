@@ -6,5 +6,9 @@ export default defineConfig({
   plugins: [react()],
   resolve: { alias: { '@': path.resolve(__dirname, './src') } },
   server: { port: 5173, strictPort: true },
-  test: { environment: 'jsdom', globals: true },
+  test: {
+    environment: 'jsdom',
+    globals: true,
+    env: { VITE_API_BASE_URL: 'http://localhost:5199' },
+  },
 });

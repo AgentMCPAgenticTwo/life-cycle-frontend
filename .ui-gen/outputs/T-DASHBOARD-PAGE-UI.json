@@ -1,0 +1,132 @@
+{
+  "status": "SUCCESS",
+  "summary": "Built DashboardPage (main status cards, My Tasks panel, High Risk Contracts panel and Dashboard Filters bar), wired to GET /api/v1/dashboard/summary, /my-tasks, /high-risk-contracts, /filters and reusing the existing GET /api/v1/contracts/{id} access-check pattern for row navigation. Verified against the TARGET DESIGN screenshot with a live mock backend (matching layout, card grid, colors and panel content), and lint/build/test all pass.",
+  "task_id": "T-DASHBOARD-PAGE-UI",
+  "story_id": "UC1-MF-001",
+  "code_files": [
+    {
+      "file_path": "src/pages/DashboardPage.jsx",
+      "file_name": "DashboardPage.jsx",
+      "language": "javascript",
+      "file_type": "component",
+      "description": "Route-level PAGE assembling the status cards, filters bar, My Tasks panel and High Risk Contracts panel; owns role-scoping (hides High Risk for Signer), card-click and row-click navigation, the access-denied (403/401) message, and session-expiry (401) redirect to /login."
+    },
+    {
+      "file_path": "src/features/dashboard/components/StatusCardGroup.jsx",
+      "file_name": "StatusCardGroup.jsx",
+      "language": "javascript",
+      "file_type": "component",
+      "description": "Renders the Total/Draft/Negotiation/Pending Approval/Pending Signature/Executed and Expiring 30/60/90 Day cards; each card is a button that reports a status token to the parent's onCardClick."
+    },
+    {
+      "file_path": "src/features/dashboard/components/MyTasksPanel.jsx",
+      "file_name": "MyTasksPanel.jsx",
+      "language": "javascript",
+      "file_type": "component",
+      "description": "Lists contracts awaiting the current user's review/approval/signature with Contract Name, Counterparty, Status (reusing the existing StatusBadge component) and Due Date; renders loading/error/empty/populated states."
+    },
+    {
+      "file_path": "src/features/dashboard/components/HighRiskContractsPanel.jsx",
+      "file_name": "HighRiskContractsPanel.jsx",
+      "language": "javascript",
+      "file_type": "component",
+      "description": "Lists AI-flagged contracts (already ordered by risk score descending by the API) with Contract Name, Counterparty and a read-only, color-coded Risk Score; no accept/reject control is rendered."
+    },
+    {
+      "file_path": "src/features/dashboard/components/DashboardFiltersBar.jsx",
+      "file_name": "DashboardFiltersBar.jsx",
+      "language": "javascript",
+      "file_type": "component",
+      "description": "Contract Type, Department, Counterparty, Owner and Date Range (DD/MM/YYYY) filters with Apply Filters / Clear Filters; keeps local draft state so a no-match Apply retains the user's selections, and validates date format plus start-before-end before calling onApply."
+    },
+    {
+      "file_path": "src/features/dashboard/hooks/useDashboardSummary.js",
+      "file_name": "useDashboardSummary.js",
+      "language": "javascript",
+      "file_type": "hook",
+      "description": "Fetches GET /api/v1/dashboard/summary for the applied filters; exposes data/isLoading/error/refetch."
+    },
+    {
+      "file_path": "src/features/dashboard/hooks/useMyTasks.js",
+      "file_name": "useMyTasks.js",
+      "language": "javascript",
+      "file_type": "hook",
+      "description": "Fetches GET /api/v1/dashboard/my-tasks for the applied filters; exposes data/isLoading/error/refetch."
+    },
+    {
+      "file_path": "src/features/dashboard/hooks/useHighRiskContracts.js",
+      "file_name": "useHighRiskContracts.js",
+      "language": "javascript",
+      "file_type": "hook",
+      "description": "Fetches GET /api/v1/dashboard/high-risk-contracts for the applied filters; accepts a `skip` flag so Signer (a role the endpoint does not authorize) never issues the request."
+    },
+    {
+      "file_path": "src/features/dashboard/hooks/useDashboardFilterOptions.js",
+      "file_name": "useDashboardFilterOptions.js",
+      "language": "javascript",
+      "file_type": "hook",
+      "description": "Fetches GET /api/v1/dashboard/filters once on mount for the filter bar's dropdown option values."
+    },
+    {
+      "file_path": "src/services/dashboardService.js",
+      "file_name": "dashboardService.js",
+      "language": "javascript",
+      "file_type": "api_client",
+      "description": "Typed client for the dashboard resource group (summary, my-tasks, high-risk-contracts, filters), calling exactly the paths/DTOs in the module contract through the shared http client."
+    },
+    {
+      "file_path": "src/store/dashboardFilterSlice.js",
+      "file_name": "dashboardFilterSlice.js",
+      "language": "javascript",
+      "file_type": "store_slice",
+      "description": "zustand dashboardFilterSlice: draft filter fields (contractType, department, counterpartyId, ownerId, dateRangeStart, dateRangeEnd) plus an appliedFilters snapshot, with setFilter/applyFilters/clearFilters actions matching the contract's state shape."
+    },
+    {
+      "file_path": "src/__tests__/DashboardPage.test.jsx",
+      "file_name": "DashboardPage.test.jsx",
+      "language": "javascript",
+      "file_type": "component",
+      "description": "Screen-level tests covering populated render, tenant-empty state, My-Tasks-only-empty state, summary error+retry, Apply Filters sending the selected filter to the dashboard endpoints, and the 403 access-denied row-click flow."
+    },
+    {
+      "file_path": "src/App.jsx",
+      "file_name": "App.jsx",
+      "language": "javascript",
+      "file_type": "component",
+      "description": "Routed DashboardPage at '/' (previously a placeholder div); left the existing '/contracts' route untouched."
+    }
+  ],
+  "pr": {
+    "branch_name": "ui-gen/85f11f263a51",
+    "title": "Build DashboardPage: status cards, My Tasks, High Risk Contracts, filters",
+    "body": "Implements the Dashboard screen (UC1-MF-001 and its alternate-flow/business-rule/field-validation/grid-column stories): StatusCardGroup, MyTasksPanel, HighRiskContractsPanel and DashboardFiltersBar, wired to the dashboard endpoints via a new dashboardService and feature hooks, with a zustand dashboardFilterSlice matching the module's documented store shape. Verified with lint/build/test and a visual comparison against the target design using a local mock backend.",
+    "draft": true,
+    "linked_story": "UC1-MF-001",
+    "linked_task": "T-DASHBOARD-PAGE-UI"
+  },
+  "critic_hints": {
+    "files_to_lint": [
+      "src/pages/DashboardPage.jsx",
+      "src/features/dashboard/components/StatusCardGroup.jsx",
+      "src/features/dashboard/components/MyTasksPanel.jsx",
+      "src/features/dashboard/components/HighRiskContractsPanel.jsx",
+      "src/features/dashboard/components/DashboardFiltersBar.jsx",
+      "src/features/dashboard/hooks/useDashboardSummary.js",
+      "src/features/dashboard/hooks/useMyTasks.js",
+      "src/features/dashboard/hooks/useHighRiskContracts.js",
+      "src/features/dashboard/hooks/useDashboardFilterOptions.js",
+      "src/services/dashboardService.js",
+      "src/store/dashboardFilterSlice.js",
+      "src/__tests__/DashboardPage.test.jsx",
+      "src/App.jsx"
+    ],
+    "openapi_endpoint": null
+  },
+  "blockers": [
+    "Expiring 30/60/90 Day card clicks (UC1-BR-007 AC) are required to open the Contract Repository list 'filtered to contracts expiring within N days', but GET /api/v1/contracts only documents filtering by status, Contract Type, Department, Counterparty, Owner and Date Range — there is no 'expiring within N days' filter parameter in the contract. I implemented this by mapping the click to the existing Date Range filter (today .. today+N days) rather than inventing a new query parameter; this is a best-effort inference from the documented filter set, not a literal 'expiringDays' field.",
+    "UC1-AF-005 requires redirecting to a 'Login screen' with the message 'Your session has expired. Please log in again.' on a 401. No Login screen/route exists anywhere in this repo (it is outside this module's component list and outside T-DASHBOARD-PAGE-UI's ownership). I navigate to '/login' with the message in router state on any 401 from the dashboard endpoints and clear the applied/draft filters first, but '/login' is currently unrouted in App.jsx, so this will render blank until a Login page/task adds that route.",
+    "The New Contract Button (UC1-FV-005) links to '/contracts/new', which is NewContractPage's territory (a separate task/component not owned by T-DASHBOARD-PAGE-UI) and is not yet routed in App.jsx. The link itself is correct and will start working once that page's task adds its route.",
+    "Row clicks in My Tasks / High Risk Contracts Panel (UC1-MF-001 AC7, 'that contract's detail screen opens') navigate to '/contracts/:id' after the GET /api/v1/contracts/{id} access check succeeds, matching ContractRepositoryListPage's existing pattern, but there is no contract-detail PAGE component in this repo yet (also out of this task's ownership) so that route is currently unrouted in App.jsx.",
+    "Inferred/added fields not present verbatim in context.json's DTOs: CounterpartyOptionResponse/OwnerOptionResponse's `{id, name}` shape was used directly as <option value> pairs in DashboardFiltersBar (matches the DTO, no invention needed there). No other DTO fields were invented."
+  ]
+}

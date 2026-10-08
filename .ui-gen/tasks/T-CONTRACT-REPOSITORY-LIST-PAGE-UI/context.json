@@ -1,0 +1,706 @@
+{
+  "group_id": "contract-repository-list-page",
+  "task_id": "T-CONTRACT-REPOSITORY-LIST-PAGE-UI",
+  "primary_story_id": "UC1-AF-006",
+  "story_ids": [
+    "UC1-AF-006",
+    "UC1-BR-007",
+    "UC1-FV-001",
+    "UC1-FV-005"
+  ],
+  "page_component": {
+    "name": "ContractRepositoryListPage",
+    "type": "PAGE",
+    "props": [
+      {
+        "name": "initialFilters",
+        "type": "object"
+      }
+    ],
+    "story_refs": [
+      "UC1-BR-007",
+      "UC1-AF-006",
+      "UC1-FV-001",
+      "UC1-FV-005"
+    ],
+    "description": "Opens pre-filtered by the status and dashboard filters selected on the dashboard; enforces role-based access to contract detail navigation"
+  },
+  "components": [],
+  "hooks": [
+    {
+      "name": "useDashboardSummary",
+      "returns": "{ data: DashboardSummaryResponse; isLoading: boolean }",
+      "story_refs": [
+        "UC1-MF-001",
+        "UC1-AF-001",
+        "UC1-AF-004",
+        "UC1-AF-005",
+        "UC1-BR-001",
+        "UC1-BR-002",
+        "UC1-BR-006",
+        "UC1-BR-008",
+        "UC1-BR-009",
+        "UC1-BR-010",
+        "UC1-BR-011",
+        "UC1-BR-012",
+        "UC1-BR-013",
+        "UC1-BR-014",
+        "UC1-FV-001"
+      ],
+      "description": "Fetches tenant-scoped dashboard status card counts for the applied filters"
+    },
+    {
+      "name": "useContractRepository",
+      "returns": "{ data: ContractListResponse; isLoading: boolean }",
+      "story_refs": [
+        "UC1-MF-001",
+        "UC1-BR-007",
+        "UC1-FV-001",
+        "UC1-FV-005"
+      ],
+      "description": "Fetches the filtered Contract Repository list"
+    },
+    {
+      "name": "useContractDetail",
+      "returns": "{ data: ContractResponse; isLoading: boolean; error: ErrorResponse }",
+      "story_refs": [
+        "UC1-AF-006"
+      ],
+      "description": "Fetches a single contract's detail, enforcing role-based access"
+    }
+  ],
+  "store_slices": [
+    {
+      "name": "contractDraftSlice",
+      "actions": [
+        "setField",
+        "setValidationErrors",
+        "reset"
+      ],
+      "state_shape": "{ formData: CreateContractRequest; validationErrors: FieldErrorResponse[] }"
+    }
+  ],
+  "relevant_endpoints": [
+    {
+      "id": "GET_dashboard_summary",
+      "path": "/api/v1/dashboard/summary",
+      "roles": [
+        "TENANT_ADMIN",
+        "CONTRACT_OWNER",
+        "LEGAL_REVIEWER",
+        "APPROVER",
+        "SIGNER"
+      ],
+      "method": "GET",
+      "summary": "Returns tenant-scoped status card counts (Total, Draft, Negotiation, Pending Approval, Pending Signature, Executed, Expiring 30/60/90) for the applied filters",
+      "is_paged": false,
+      "story_refs": [
+        "UC1-MF-001",
+        "UC1-AF-001",
+        "UC1-AF-004",
+        "UC1-AF-005",
+        "UC1-BR-001",
+        "UC1-BR-002",
+        "UC1-BR-006",
+        "UC1-BR-008",
+        "UC1-BR-009",
+        "UC1-BR-010",
+        "UC1-BR-011",
+        "UC1-BR-012",
+        "UC1-BR-013",
+        "UC1-BR-014",
+        "UC1-FV-001"
+      ],
+      "response_dto": "DashboardSummaryResponse",
+      "auth_required": true
+    },
+    {
+      "id": "GET_contracts",
+      "path": "/api/v1/contracts",
+      "roles": [
+        "TENANT_ADMIN",
+        "CONTRACT_OWNER",
+        "LEGAL_REVIEWER",
+        "APPROVER",
+        "SIGNER"
+      ],
+      "method": "GET",
+      "summary": "Returns the Contract Repository list, filterable by status, Contract Type, Department, Counterparty, Owner and Date Range, enforcing tenant and role-based access",
+      "is_paged": true,
+      "story_refs": [
+        "UC1-MF-001",
+        "UC1-BR-007",
+        "UC1-AF-006",
+        "UC1-FV-001",
+        "UC1-FV-005"
+      ],
+      "response_dto": "ContractListResponse",
+      "auth_required": true
+    },
+    {
+      "id": "GET_contract_detail",
+      "path": "/api/v1/contracts/{id}",
+      "roles": [
+        "TENANT_ADMIN",
+        "CONTRACT_OWNER",
+        "LEGAL_REVIEWER",
+        "APPROVER",
+        "SIGNER"
+      ],
+      "method": "GET",
+      "summary": "Returns full contract detail if the logged-in user's role has permitted actions on it, otherwise denies access",
+      "is_paged": false,
+      "story_refs": [
+        "UC1-AF-006"
+      ],
+      "response_dto": "ContractResponse",
+      "auth_required": true
+    }
+  ],
+  "relevant_dtos": [
+    {
+      "name": "DashboardSummaryResponse",
+      "type": "RESPONSE",
+      "fields": [
+        {
+          "name": "totalContractsCount",
+          "type": "integer",
+          "nullable": false
+        },
+        {
+          "name": "inDraftCount",
+          "type": "integer",
+          "nullable": false
+        },
+        {
+          "name": "inNegotiationCount",
+          "type": "integer",
+          "nullable": false
+        },
+        {
+          "name": "pendingApprovalCount",
+          "type": "integer",
+          "nullable": false
+        },
+        {
+          "name": "pendingSignatureCount",
+          "type": "integer",
+          "nullable": false
+        },
+        {
+          "name": "executedCount",
+          "type": "integer",
+          "nullable": false
+        },
+        {
+          "name": "expiring30DaysCount",
+          "type": "integer",
+          "nullable": false
+        },
+        {
+          "name": "expiring60DaysCount",
+          "type": "integer",
+          "nullable": false
+        },
+        {
+          "name": "expiring90DaysCount",
+          "type": "integer",
+          "nullable": false
+        },
+        {
+          "name": "noContractsMessage",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "noMatchMessage",
+          "type": "string",
+          "nullable": true
+        }
+      ]
+    },
+    {
+      "name": "ContractListItemResponse",
+      "type": "RESPONSE",
+      "fields": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": false
+        },
+        {
+          "name": "contractName",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "name": "contractType",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "name": "department",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "counterpartyName",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "name": "contractOwnerName",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "enum": [
+            "Draft",
+            "In Negotiation",
+            "Pending Approval",
+            "Pending Signature",
+            "Executed"
+          ],
+          "name": "status",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "name": "startDate",
+          "type": "date",
+          "nullable": false
+        },
+        {
+          "name": "endDate",
+          "type": "date",
+          "nullable": false
+        },
+        {
+          "name": "contractValue",
+          "type": "number",
+          "nullable": false
+        },
+        {
+          "name": "currency",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "name": "riskScore",
+          "type": "integer",
+          "nullable": true
+        }
+      ]
+    },
+    {
+      "name": "ContractListResponse",
+      "type": "RESPONSE",
+      "fields": [
+        {
+          "name": "items",
+          "type": "array",
+          "items": {
+            "type": "ContractListItemResponse"
+          },
+          "nullable": false
+        },
+        {
+          "name": "page",
+          "type": "integer",
+          "nullable": false
+        },
+        {
+          "name": "pageSize",
+          "type": "integer",
+          "nullable": false
+        },
+        {
+          "name": "totalCount",
+          "type": "integer",
+          "nullable": false
+        },
+        {
+          "name": "noMatchMessage",
+          "type": "string",
+          "nullable": true
+        }
+      ]
+    },
+    {
+      "name": "ContractResponse",
+      "type": "RESPONSE",
+      "fields": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": false
+        },
+        {
+          "name": "contractName",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "enum": [
+            "NDA",
+            "MSA",
+            "SOW",
+            "Sales Agreement",
+            "Purchase Agreement",
+            "Service Agreement",
+            "Vendor Agreement",
+            "Licensing",
+            "Amendment",
+            "Renewal"
+          ],
+          "name": "contractType",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "enum": [
+            "Product",
+            "Service"
+          ],
+          "name": "industry",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "name": "department",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "templateId",
+          "type": "uuid",
+          "nullable": true
+        },
+        {
+          "name": "thirdPartyPaperFileId",
+          "type": "uuid",
+          "nullable": true
+        },
+        {
+          "name": "counterpartyId",
+          "type": "uuid",
+          "nullable": false
+        },
+        {
+          "name": "counterpartyName",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "name": "counterpartyEmail",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "name": "counterpartyCompany",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "name": "counterpartyAddress",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "counterpartyGstTaxId",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "contractOwnerId",
+          "type": "uuid",
+          "nullable": false
+        },
+        {
+          "name": "contractOwnerName",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "name": "contractValue",
+          "type": "number",
+          "nullable": false
+        },
+        {
+          "enum": [
+            "USD",
+            "EUR",
+            "GBP",
+            "INR"
+          ],
+          "name": "currency",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "name": "startDate",
+          "type": "date",
+          "nullable": false
+        },
+        {
+          "name": "endDate",
+          "type": "date",
+          "nullable": false
+        },
+        {
+          "enum": [
+            "Auto",
+            "Manual",
+            "None"
+          ],
+          "name": "renewalType",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "name": "noticePeriod",
+          "type": "integer",
+          "nullable": true
+        },
+        {
+          "name": "assignedDate",
+          "type": "date",
+          "nullable": false
+        },
+        {
+          "name": "dueDate",
+          "type": "date",
+          "nullable": false
+        },
+        {
+          "enum": [
+            "Draft",
+            "In Negotiation",
+            "Pending Approval",
+            "Pending Signature",
+            "Executed"
+          ],
+          "name": "status",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "name": "riskScore",
+          "type": "integer",
+          "nullable": true
+        },
+        {
+          "name": "createdAt",
+          "type": "datetime",
+          "nullable": false
+        },
+        {
+          "name": "updatedAt",
+          "type": "datetime",
+          "nullable": false
+        }
+      ]
+    },
+    {
+      "name": "ErrorResponse",
+      "type": "RESPONSE",
+      "fields": [
+        {
+          "name": "code",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "name": "message",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "name": "fieldErrors",
+          "type": "array",
+          "items": {
+            "type": "FieldErrorResponse"
+          },
+          "nullable": true
+        }
+      ]
+    },
+    {
+      "name": "FieldErrorResponse",
+      "type": "RESPONSE",
+      "fields": [
+        {
+          "name": "field",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "name": "message",
+          "type": "string",
+          "nullable": false
+        }
+      ]
+    }
+  ],
+  "stories": [
+    {
+      "epic": "Dashboard",
+      "actor": "Approver",
+      "title": "Block access to unauthorized contract detail screen",
+      "images": [
+        "IMG-1"
+      ],
+      "story_id": "UC1-AF-006",
+      "references": [
+        "UC1",
+        "AF-6",
+        "DP-UC1-001",
+        "DP-UC1-002",
+        "DP-UC1-003",
+        "DP-UC1-004",
+        "DP-UC1-005",
+        "DP-UC1-006",
+        "DP-UC1-007",
+        "DP-UC1-008",
+        "DP-UC1-009",
+        "DP-UC1-012",
+        "DP-UC1-013",
+        "DP-UC1-014",
+        "DP-UC1-015",
+        "DP-UC1-016"
+      ],
+      "story_type": "alternate-flow",
+      "story_statement": "As an Approver, I want to be blocked from opening the detail screen of a contract not assigned to me, so that I cannot view or act on contracts outside my permitted role actions.",
+      "source_reference": "UC1 / Alternate Flow / AF-6",
+      "acceptance_criteria": [
+        "Given the dashboard is loaded with the Total Contracts Card, In Draft Card, In Negotiation Card, Pending Approval Card, Pending Signature Card, Executed Card, Expiring in 30 Days Card, Expiring in 60 Days Card, Expiring in 90 Days Card, Contract Type Filter, Department Filter, Counterparty Filter, Owner Filter and Date Range Filter all rendered and populated per the user's tenant and role scope, When the logged-in user's role has no permitted actions on a specific listed contract (e.g. an Approver clicks a contract not assigned to them), Then the message 'You do not have access to this contract' is displayed and navigation to that contract's detail screen is blocked.",
+        "Given the message 'You do not have access to this contract' has been displayed after a blocked click, When the user dismisses the message, Then the user remains on the Dashboard with the Total Contracts Card, In Draft Card, In Negotiation Card, Pending Approval Card, Pending Signature Card, Executed Card, Expiring in 30 Days Card, Expiring in 60 Days Card, Expiring in 90 Days Card, Contract Type Filter, Department Filter, Counterparty Filter, Owner Filter and Date Range Filter unchanged from their prior state.",
+        "Given a user without permitted actions on a contract attempts to click into its detail screen, When the access check fails, Then no navigation occurs to the detail screen and the underlying card counts and filter selections (Contract Type Filter, Department Filter, Counterparty Filter, Owner Filter, Date Range Filter) remain unaffected by the blocked attempt."
+      ]
+    },
+    {
+      "epic": "Dashboard",
+      "actor": "Tenant Admin",
+      "title": "Open Filtered Contract Repository List from Status Card",
+      "images": [
+        "IMG-1"
+      ],
+      "story_id": "UC1-BR-007",
+      "references": [
+        "UC1-BR-007",
+        "DP-UC1-001",
+        "DP-UC1-002",
+        "DP-UC1-003",
+        "DP-UC1-004",
+        "DP-UC1-005",
+        "DP-UC1-006",
+        "DP-UC1-007",
+        "DP-UC1-008",
+        "DP-UC1-009",
+        "DP-UC1-012",
+        "DP-UC1-013",
+        "DP-UC1-014",
+        "DP-UC1-015",
+        "DP-UC1-016"
+      ],
+      "story_type": "business-rule",
+      "story_statement": "As a Tenant Admin, I want to click a status card on the dashboard and open the Contract Repository list filtered to that status plus any currently applied dashboard filters, so that I can quickly drill into the relevant subset of contracts without manually re-applying filters.",
+      "source_reference": "UC1 / Business Rules / BR-7",
+      "notes_assumptions": "Assumes Contract Repository list (external UC) supports receiving both a status parameter and the full set of dashboard filter parameters on navigation.",
+      "acceptance_criteria": [
+        "Given no dashboard filters are applied, When the user clicks the In Draft Card, Then the Contract Repository list opens filtered to show only contracts in Draft status.",
+        "Given no dashboard filters are applied, When the user clicks the In Negotiation Card, Then the Contract Repository list opens filtered to show only contracts in Negotiation status.",
+        "Given no dashboard filters are applied, When the user clicks the Pending Approval Card, Then the Contract Repository list opens filtered to show only contracts in Pending Approval status.",
+        "Given no dashboard filters are applied, When the user clicks the Pending Signature Card, Then the Contract Repository list opens filtered to show only contracts in Pending Signature status.",
+        "Given no dashboard filters are applied, When the user clicks the Executed Card, Then the Contract Repository list opens filtered to show only contracts in Executed status.",
+        "Given no dashboard filters are applied, When the user clicks the Expiring in 30 Days Card, Then the Contract Repository list opens filtered to show only contracts expiring within 30 days.",
+        "Given no dashboard filters are applied, When the user clicks the Expiring in 60 Days Card, Then the Contract Repository list opens filtered to show only contracts expiring within 60 days.",
+        "Given no dashboard filters are applied, When the user clicks the Expiring in 90 Days Card, Then the Contract Repository list opens filtered to show only contracts expiring within 90 days.",
+        "Given the user clicks the Total Contracts Card, When no other filters are applied, Then the Contract Repository list opens unfiltered showing all contracts in the tenant.",
+        "Given the user has applied the Contract Type Filter, Department Filter, Counterparty Filter, Owner Filter and Date Range Filter on the dashboard, When the user clicks any status card, Then the Contract Repository list opens filtered to that card's status combined with the currently applied Contract Type Filter, Department Filter, Counterparty Filter, Owner Filter and Date Range Filter values."
+      ]
+    },
+    {
+      "epic": "Dashboard",
+      "actor": "Tenant Admin",
+      "title": "View status cards and apply filters on the dashboard",
+      "images": [
+        "IMG-1"
+      ],
+      "story_id": "UC1-FV-001",
+      "references": [
+        "UC1",
+        "F-1",
+        "F-2",
+        "F-3",
+        "F-4",
+        "F-5",
+        "F-6",
+        "F-7",
+        "F-8",
+        "F-9",
+        "F-12",
+        "F-13",
+        "F-14",
+        "F-15",
+        "F-16",
+        "F-17",
+        "F-18",
+        "BR-1",
+        "BR-2",
+        "BR-6",
+        "BR-7",
+        "BR-8"
+      ],
+      "story_type": "field-validation",
+      "story_statement": "As a Tenant Admin, I want to view contract status count cards and apply dashboard filters, so that I can quickly assess contract volumes and focus on relevant subsets of contracts.",
+      "source_reference": "UC1 / Fields and Attributes",
+      "acceptance_criteria": [
+        "Given at least one contract exists in the tenant, When the dashboard loads, Then the Total Contracts Card, In Draft Card, In Negotiation Card, Pending Approval Card, Pending Signature Card, Executed Card, Expiring in 30 Days Card, Expiring in 60 Days Card, and Expiring in 90 Days Card each display a non-mandatory count label reflecting current contract data scoped to the logged-in user's tenant.",
+        "Given the dashboard has loaded, When no filters are applied, Then the Contract Type Filter, Department Filter, Counterparty Filter, and Owner Filter display their default unselected state with values drawn from the tenant's configured data.",
+        "Given the user selects values in the Contract Type Filter, Department Filter, Counterparty Filter, Owner Filter, and/or Date Range Filter, When the user clicks Apply Filters, Then all status cards (Total Contracts Card, In Draft Card, In Negotiation Card, Pending Approval Card, Pending Signature Card, Executed Card, Expiring in 30 Days Card, Expiring in 60 Days Card, Expiring in 90 Days Card) recalculate their counts based on the selected filter criteria.",
+        "Given a contract's end date falls within 20 days of today, When the Expiring in 30 Days Card, Expiring in 60 Days Card, and Expiring in 90 Days Card are calculated, Then that contract is counted in all three cards.",
+        "Given the Date Range Filter is set using DD/MM/YYYY format, When Apply Filters is clicked, Then card counts and panel contents are recalculated to match only contracts within that date range.",
+        "Given the user clicks the Total Contracts Card, In Draft Card, In Negotiation Card, Pending Approval Card, Pending Signature Card, or Executed Card, When the click is registered, Then the Contract Repository list opens filtered to that status plus any currently applied Contract Type Filter, Department Filter, Counterparty Filter, Owner Filter, or Date Range Filter values.",
+        "Given filters have been applied, When the user clicks Clear Filters, Then the Contract Type Filter, Department Filter, Counterparty Filter, Owner Filter, and Date Range Filter all reset to default and all status cards refresh to unfiltered counts."
+      ]
+    },
+    {
+      "epic": "Dashboard",
+      "actor": "Contract Owner",
+      "title": "Open New Contract Creation from Dashboard Button",
+      "images": [
+        "IMG-1"
+      ],
+      "story_id": "UC1-FV-005",
+      "references": [
+        "UC1",
+        "UC2",
+        "F-19",
+        "DP-UC1-001",
+        "DP-UC1-002",
+        "DP-UC1-003",
+        "DP-UC1-004",
+        "DP-UC1-005",
+        "DP-UC1-006",
+        "DP-UC1-007",
+        "DP-UC1-008",
+        "DP-UC1-009",
+        "DP-UC1-012",
+        "DP-UC1-013",
+        "DP-UC1-014",
+        "DP-UC1-015",
+        "DP-UC1-016"
+      ],
+      "story_type": "field-validation",
+      "story_statement": "As a Contract Owner, I want to click the New Contract Button on the Dashboard, so that I can launch New Contract Creation (UC2) directly from my dashboard context.",
+      "source_reference": "UC1 / Fields and Attributes",
+      "acceptance_criteria": [
+        "Given I am logged in with a valid tenant account and assigned role and viewing the Dashboard, When the Dashboard loads, Then the New Contract Button [F-19] is visible and enabled regardless of the current state of the Total Contracts Card [DP-UC1-001], In Draft Card [DP-UC1-002], In Negotiation Card [DP-UC1-003], Pending Approval Card [DP-UC1-004], Pending Signature Card [DP-UC1-005], Executed Card [DP-UC1-006], Expiring in 30 Days Card [DP-UC1-007], Expiring in 60 Days Card [DP-UC1-008], and Expiring in 90 Days Card [DP-UC1-009].",
+        "Given I am on the Dashboard with any combination of the Contract Type Filter [DP-UC1-012], Department Filter [DP-UC1-013], Counterparty Filter [DP-UC1-014], Owner Filter [DP-UC1-015], and Date Range Filter [DP-UC1-016] applied, When I click the New Contract Button [F-19], Then New Contract Creation (UC2) opens without requiring the filters to be cleared or reset.",
+        "Given I click the New Contract Button [F-19], When New Contract Creation (UC2) opens, Then the Dashboard's card counts (Total Contracts Card [DP-UC1-001], In Draft Card [DP-UC1-002], In Negotiation Card [DP-UC1-003], Pending Approval Card [DP-UC1-004], Pending Signature Card [DP-UC1-005], Executed Card [DP-UC1-006], Expiring in 30 Days Card [DP-UC1-007], Expiring in 60 Days Card [DP-UC1-008], Expiring in 90 Days Card [DP-UC1-009]) and applied filters (Contract Type Filter [DP-UC1-012], Department Filter [DP-UC1-013], Counterparty Filter [DP-UC1-014], Owner Filter [DP-UC1-015], Date Range Filter [DP-UC1-016]) remain unchanged in the background Dashboard state.",
+        "Given I am logged in as Tenant Admin, Legal Reviewer, Contract Owner, Approver, or Signer, When I click the New Contract Button [F-19], Then New Contract Creation (UC2) opens for my tenant only, consistent with tenant-scoped data shown across Total Contracts Card [DP-UC1-001], In Draft Card [DP-UC1-002], In Negotiation Card [DP-UC1-003], Pending Approval Card [DP-UC1-004], Pending Signature Card [DP-UC1-005], Executed Card [DP-UC1-006], Expiring in 30 Days Card [DP-UC1-007], Expiring in 60 Days Card [DP-UC1-008], Expiring in 90 Days Card [DP-UC1-009], Contract Type Filter [DP-UC1-012], Department Filter [DP-UC1-013], Counterparty Filter [DP-UC1-014], Owner Filter [DP-UC1-015], and Date Range Filter [DP-UC1-016]."
+      ]
+    }
+  ]
+}

@@ -1,0 +1,182 @@
+{
+  "status": "SUCCESS",
+  "summary": "Implemented NewContractPage and its five owned components (ContractTypeIndustryTemplateSelector, UploadThirdPartyPaperControl, CounterpartyPanel, ContractDetailsForm, NewContractAccessGuard), wired to all six contracted endpoints via new templatesService/counterpartiesService/usersService and extended contractsService, backed by the contractDraftSlice zustand store and six new hooks (useTemplates, useCounterpartySearch, useCreateCounterparty, useContractOwners, useUploadThirdPartyPaper, useCreateContract). Covers mandatory-field validation with red-field highlighting, active-template filtering with the no-active-templates prompt, Template/Upload mutual exclusivity, file format/size validation, GST/Tax ID duplicate detection, Start/End and Assigned/Due date validation, Notice-Period conditional requirement, role-gated access via NewContractAccessGuard, and Save-as-Draft. Routed at /contracts/new in App.jsx. Lint, build and all 19 tests (including 8 new) pass; screenshot comparison against IMG-2/IMG-3 shows a close visual match (section layout, field order, helper copy, and header/footer actions all line up).",
+  "task_id": "T-NEW-CONTRACT-PAGE-UI",
+  "story_id": "UC2-MF-001",
+  "code_files": [
+    {
+      "file_path": "src/pages/NewContractPage.jsx",
+      "file_name": "NewContractPage.jsx",
+      "language": "javascript",
+      "file_type": "component",
+      "description": "New Contract Creation page: assembles all owned components, holds the Save validation/submit flow and Assigned Date computation"
+    },
+    {
+      "file_path": "src/features/contracts/components/ContractTypeIndustryTemplateSelector.jsx",
+      "file_name": "ContractTypeIndustryTemplateSelector.jsx",
+      "language": "javascript",
+      "file_type": "component",
+      "description": "Contract Type / Industry / Template dropdowns with active-template filtering and upload mutual-exclusivity"
+    },
+    {
+      "file_path": "src/features/contracts/components/UploadThirdPartyPaperControl.jsx",
+      "file_name": "UploadThirdPartyPaperControl.jsx",
+      "language": "javascript",
+      "file_type": "component",
+      "description": "PDF/DOCX upload control with format/size validation, mutually exclusive with Template"
+    },
+    {
+      "file_path": "src/features/contracts/components/CounterpartyPanel.jsx",
+      "file_name": "CounterpartyPanel.jsx",
+      "language": "javascript",
+      "file_type": "component",
+      "description": "Counterparty search, selection and new-counterparty fields with GST/Tax ID duplicate detection"
+    },
+    {
+      "file_path": "src/features/contracts/components/ContractDetailsForm.jsx",
+      "file_name": "ContractDetailsForm.jsx",
+      "language": "javascript",
+      "file_type": "component",
+      "description": "Contract Owner/Value/Currency/Dates/Renewal Type/Notice Period/Assigned Date/Due Date fields"
+    },
+    {
+      "file_path": "src/features/contracts/components/NewContractAccessGuard.jsx",
+      "file_name": "NewContractAccessGuard.jsx",
+      "language": "javascript",
+      "file_type": "component",
+      "description": "Blocks non Tenant-Admin/Contract-Owner roles and redirects to Dashboard"
+    },
+    {
+      "file_path": "src/features/contracts/components/NewContractAccessGuard.test.jsx",
+      "file_name": "NewContractAccessGuard.test.jsx",
+      "language": "javascript",
+      "file_type": "component",
+      "description": "Tests allowed/disallowed role rendering and redirect behavior"
+    },
+    {
+      "file_path": "src/features/contracts/hooks/useTemplates.js",
+      "file_name": "useTemplates.js",
+      "language": "javascript",
+      "file_type": "hook",
+      "description": "Fetches templates filtered by Contract Type/Industry/Status, skipped until both are selected"
+    },
+    {
+      "file_path": "src/features/contracts/hooks/useCounterpartySearch.js",
+      "file_name": "useCounterpartySearch.js",
+      "language": "javascript",
+      "file_type": "hook",
+      "description": "Searches counterparties by name/company/GST, skipped while the search term is empty"
+    },
+    {
+      "file_path": "src/features/contracts/hooks/useCreateCounterparty.js",
+      "file_name": "useCreateCounterparty.js",
+      "language": "javascript",
+      "file_type": "hook",
+      "description": "Mutation hook creating a new counterparty record"
+    },
+    {
+      "file_path": "src/features/contracts/hooks/useContractOwners.js",
+      "file_name": "useContractOwners.js",
+      "language": "javascript",
+      "file_type": "hook",
+      "description": "Fetches users eligible for the Contract Owner role"
+    },
+    {
+      "file_path": "src/features/contracts/hooks/useUploadThirdPartyPaper.js",
+      "file_name": "useUploadThirdPartyPaper.js",
+      "language": "javascript",
+      "file_type": "hook",
+      "description": "Mutation hook uploading the third party paper file"
+    },
+    {
+      "file_path": "src/features/contracts/hooks/useCreateContract.js",
+      "file_name": "useCreateContract.js",
+      "language": "javascript",
+      "file_type": "hook",
+      "description": "Mutation hook creating the contract and saving it as Draft"
+    },
+    {
+      "file_path": "src/store/contractDraftSlice.js",
+      "file_name": "contractDraftSlice.js",
+      "language": "javascript",
+      "file_type": "store_slice",
+      "description": "Zustand store holding formData (CreateContractRequest shape) and validationErrors"
+    },
+    {
+      "file_path": "src/services/templatesService.js",
+      "file_name": "templatesService.js",
+      "language": "javascript",
+      "file_type": "service",
+      "description": "Typed client for GET /api/v1/templates"
+    },
+    {
+      "file_path": "src/services/counterpartiesService.js",
+      "file_name": "counterpartiesService.js",
+      "language": "javascript",
+      "file_type": "service",
+      "description": "Typed client for GET/POST /api/v1/counterparties"
+    },
+    {
+      "file_path": "src/services/usersService.js",
+      "file_name": "usersService.js",
+      "language": "javascript",
+      "file_type": "service",
+      "description": "Typed client for GET /api/v1/users"
+    },
+    {
+      "file_path": "src/services/contractsService.js",
+      "file_name": "contractsService.js",
+      "language": "javascript",
+      "file_type": "service",
+      "description": "Extended (additively) with POST /api/v1/contracts/third-party-paper and POST /api/v1/contracts, alongside the existing GET endpoints from another task"
+    },
+    {
+      "file_path": "src/App.jsx",
+      "file_name": "App.jsx",
+      "language": "javascript",
+      "file_type": "component",
+      "description": "Added the /contracts/new route wrapped in NewContractAccessGuard, without touching existing routes"
+    },
+    {
+      "file_path": "src/__tests__/NewContractPage.test.jsx",
+      "file_name": "NewContractPage.test.jsx",
+      "language": "javascript",
+      "file_type": "component",
+      "description": "Screen-level tests: render, mandatory-field blocking, template filtering, no-active-templates message, End<Start blocking, successful Save"
+    }
+  ],
+  "pr": {
+    "branch_name": "ui-gen/85f11f263a51",
+    "title": "Add New Contract Creation screen (UC2)",
+    "body": "Implements NewContractPage and its owned components (ContractTypeIndustryTemplateSelector, UploadThirdPartyPaperControl, CounterpartyPanel, ContractDetailsForm, NewContractAccessGuard), wired to the templates/counterparties/users/contracts endpoints via new/extended service modules, the contractDraftSlice store, and six hooks. Covers UC2's mandatory-field validation, active-template filtering with the no-active-template prompt, Template/Upload mutual exclusivity, file format/size checks, GST/Tax ID duplicate detection, date-range validation, conditional Notice Period, role-gated access, and Save-as-Draft. See blockers for inferred query params and a couple of judgement calls made where the contract was silent.",
+    "draft": true,
+    "linked_story": "UC2-MF-001",
+    "linked_task": "T-NEW-CONTRACT-PAGE-UI"
+  },
+  "critic_hints": {
+    "files_to_lint": [
+      "src/pages/NewContractPage.jsx",
+      "src/features/contracts/components/ContractTypeIndustryTemplateSelector.jsx",
+      "src/features/contracts/components/UploadThirdPartyPaperControl.jsx",
+      "src/features/contracts/components/CounterpartyPanel.jsx",
+      "src/features/contracts/components/ContractDetailsForm.jsx",
+      "src/features/contracts/components/NewContractAccessGuard.jsx",
+      "src/store/contractDraftSlice.js",
+      "src/services/contractsService.js",
+      "src/services/counterpartiesService.js",
+      "src/services/templatesService.js",
+      "src/services/usersService.js",
+      "src/App.jsx"
+    ],
+    "openapi_endpoint": null
+  },
+  "blockers": [
+    "GET /api/v1/templates, GET /api/v1/counterparties and GET /api/v1/users all have an undocumented request DTO ('—') in context.json. I inferred query parameter names from this repo's existing list-endpoint convention (contractsService.listContracts' `search`/`sortBy` style): templatesService sends `contractType`/`industry`/`status`; counterpartiesService sends a single `search` string used for both the main Counterparty Search field and the GST/Tax ID duplicate pre-check; usersService sends `role`. None of these field names appear in any DTO, so they are query-string inferences, not invented response/request fields.",
+    "UC2-AF-008 (duplicate GST/Tax ID) has no dedicated duplicate-check endpoint in the contract. I implemented it by issuing a second GET /api/v1/counterparties search keyed on the GST/Tax ID field and reading CounterpartySearchResponse's existing `duplicateWarning`/`items[0]` fields — no new DTO fields were added, but this wiring (searching on GST specifically, live, before Save) is inferred from the story rather than stated outright.",
+    "CLAUDE.md's global API-layer contract states non-2xx bodies are `{ error, details: string[] }`, and the existing shared src/services/http.js (not mine to rewrite) already implements HttpError against that shape. This module's ErrorResponse/FieldErrorResponse DTOs instead describe `{ code, message, fieldErrors: [{field, message}] }`. Per CLAUDE.md's precedence over module DTOs for API-layer conventions, I followed http.js: Save failures show `err.message` in the banner, but there is no per-field highlighting driven by a structured fieldErrors response from the server (client-side mandatory/date validation still highlights fields red before any request is sent).",
+    "NewContractAccessGuard (UC2-AF-007/BR-013) redirects disallowed roles to '/' with `state.accessDeniedMessage`, but DashboardPage.jsx (owned by a different task) does not read or render that state — out of scope for me to modify per the task's 'other screens' content is NOT yours' boundary, so the access-denied message is not currently visible on the Dashboard after redirect, only the redirect itself happens.",
+    "AF-003 quotes 'End date cannot be earlier than start date' for End < Start; BR-007 additionally blocks End == Start but gives no distinct quoted message for that case. I reused the AF-003 message for both earlier-than and equal-to, since no other wording is specified anywhere in the stories.",
+    "CreateContractRequest has no `assignedDate` field (only ContractResponse does, as system-generated). Assigned Date is therefore computed client-side as today's date purely for display/validation (Due Date >= Assigned Date) and is never sent in the POST /api/v1/contracts body — consistent with it being backend-generated, but this is an inference since no field for it exists to omit explicitly.",
+    "The design screenshots show no separate 'save counterparty' step — Name/Email/Company/GST/Address fields sit directly under the search result with only the page-level Save button. I inferred that when no existing counterparty was selected, useCreateCounterparty().mutate() should run automatically inside the main Save flow (before POST /api/v1/contracts) to obtain a backend-generated counterparty id, per CLAUDE.md's 'ids are generated by the backend, never by the frontend' rule, rather than adding a UI control not shown in the design."
+  ]
+}

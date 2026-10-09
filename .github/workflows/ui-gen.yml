@@ -34,9 +34,9 @@ jobs:
       - name: Run the coding agent for each task package
         env:
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          CLAUDE_CODE_EFFORT_LEVEL: "medium"
           CLAUDE_CODE_OAUTH_TOKENS_JSON: ${{ secrets.CLAUDE_CODE_OAUTH_TOKENS_JSON }}
           CLAUDE_CODE_OAUTH_TOKEN_LABELS_JSON: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN_LABELS_JSON }}
-          CLAUDE_CODE_EFFORT_LEVEL: "medium"
           IS_MODEL_RAIL: ${{ secrets.IS_MODEL_RAIL }}
           MODEL_RAIL_URL: ${{ secrets.MODEL_RAIL_URL }}
           MODEL_RAIL_ORG_ID: ${{ secrets.MODEL_RAIL_ORG_ID }}

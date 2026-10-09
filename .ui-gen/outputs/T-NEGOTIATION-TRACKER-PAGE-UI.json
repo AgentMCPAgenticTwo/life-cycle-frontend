@@ -1,0 +1,181 @@
+{
+  "status": "PARTIAL",
+  "summary": "Implemented NegotiationTrackerPage (route /contracts/:contractId/negotiation) with RoutingPanel, ReviewerList, OverdueFlagBadge, SendReminderButton, CompareVersionsModal, CommentBoxPanel and MarkAgreedButton, wired to all 10 contract endpoints via an extended lifecycleNegotiationService.js (the sibling External Review task's module, extended rather than duplicated). OtpVerificationForm was already built by T-EXTERNAL-REVIEW-PAGE-UI and is reused unchanged. Verified visually against IMG-3/4 (Routing Panel), IMG-5 (Tracker) and IMG-6/7 (Compare Versions) with mocked API responses at 1440x900 — layout, copy, badges and color language match closely. Lint, build and the full test suite (41/41, including 6 new tests) pass.",
+  "task_id": "T-NEGOTIATION-TRACKER-PAGE-UI",
+  "story_id": "UC5-AF-001",
+  "code_files": [
+    {
+      "file_path": "src/pages/NegotiationTrackerPage.jsx",
+      "file_name": "NegotiationTrackerPage.jsx",
+      "language": "javascript",
+      "file_type": "component",
+      "description": "Top-level Negotiation Tracker screen: role gating, loading/empty(not-routed)/error/populated states, status banner, version history, reviewer list, comment panel, reviewer actions, and the Compare Versions modal trigger."
+    },
+    {
+      "file_path": "src/features/negotiation/components/RoutingPanel.jsx",
+      "file_name": "RoutingPanel.jsx",
+      "language": "javascript",
+      "file_type": "component",
+      "description": "Send for Review form: Routing Type, Internal Reviewers, External Party Name/Email, Assigned/Due Date, client-side AF-001 validation blocking submission with no reviewer and no external party."
+    },
+    {
+      "file_path": "src/features/negotiation/components/ReviewerList.jsx",
+      "file_name": "ReviewerList.jsx",
+      "language": "javascript",
+      "file_type": "component",
+      "description": "Lists internal reviewers ordered by sequence, with Mandatory badge, review status pill and overdue flag."
+    },
+    {
+      "file_path": "src/features/negotiation/components/OverdueFlagBadge.jsx",
+      "file_name": "OverdueFlagBadge.jsx",
+      "language": "javascript",
+      "file_type": "component",
+      "description": "Renders an Overdue pill when a reviewer's Due Date has passed without submission."
+    },
+    {
+      "file_path": "src/features/negotiation/components/SendReminderButton.jsx",
+      "file_name": "SendReminderButton.jsx",
+      "language": "javascript",
+      "file_type": "component",
+      "description": "Manual reminder button, enabled only once Due Date has passed; calls useSendReminder."
+    },
+    {
+      "file_path": "src/features/negotiation/components/CompareVersionsModal.jsx",
+      "file_name": "CompareVersionsModal.jsx",
+      "language": "javascript",
+      "file_type": "component",
+      "description": "Version A/B selectors, additions/deletions/comments/clauses-affected stats, side-by-side redline comparison and the comment list for the selected version pair."
+    },
+    {
+      "file_path": "src/features/negotiation/components/CommentBoxPanel.jsx",
+      "file_name": "CommentBoxPanel.jsx",
+      "language": "javascript",
+      "file_type": "component",
+      "description": "Free-text comment entry tied to a clause and the current negotiation version; pushes the saved comment into negotiationSlice."
+    },
+    {
+      "file_path": "src/features/negotiation/components/MarkAgreedButton.jsx",
+      "file_name": "MarkAgreedButton.jsx",
+      "language": "javascript",
+      "file_type": "component",
+      "description": "Legal-Reviewer-only confirm-then-submit control that calls useMarkAgreed."
+    },
+    {
+      "file_path": "src/features/negotiation/hooks/useSubmitRouting.js",
+      "file_name": "useSubmitRouting.js",
+      "language": "javascript",
+      "file_type": "hook",
+      "description": "Submits RoutingRequest to POST .../negotiation/routing."
+    },
+    {
+      "file_path": "src/features/negotiation/hooks/useNegotiationTracker.js",
+      "file_name": "useNegotiationTracker.js",
+      "language": "javascript",
+      "file_type": "hook",
+      "description": "Fetches GET .../negotiation, syncs negotiationSlice, and exposes a notRouted flag on 404 so the page can show the Routing Panel instead of an error."
+    },
+    {
+      "file_path": "src/features/negotiation/hooks/useSubmitReview.js",
+      "file_name": "useSubmitReview.js",
+      "language": "javascript",
+      "file_type": "hook",
+      "description": "Submits SubmitReviewRequest to POST .../negotiation/reviews and surfaces 409 version conflicts."
+    },
+    {
+      "file_path": "src/features/negotiation/hooks/useGenerateExternalLink.js",
+      "file_name": "useGenerateExternalLink.js",
+      "language": "javascript",
+      "file_type": "hook",
+      "description": "Calls POST .../negotiation/external-link."
+    },
+    {
+      "file_path": "src/features/negotiation/hooks/useCompareVersions.js",
+      "file_name": "useCompareVersions.js",
+      "language": "javascript",
+      "file_type": "hook",
+      "description": "Fetches GET .../negotiation/compare for a selected version pair."
+    },
+    {
+      "file_path": "src/features/negotiation/hooks/useSendReminder.js",
+      "file_name": "useSendReminder.js",
+      "language": "javascript",
+      "file_type": "hook",
+      "description": "Calls POST .../negotiation/reminder."
+    },
+    {
+      "file_path": "src/features/negotiation/hooks/useMarkAgreed.js",
+      "file_name": "useMarkAgreed.js",
+      "language": "javascript",
+      "file_type": "hook",
+      "description": "Calls POST .../negotiation/mark-agreed."
+    },
+    {
+      "file_path": "src/features/negotiation/hooks/useAddComment.js",
+      "file_name": "useAddComment.js",
+      "language": "javascript",
+      "file_type": "hook",
+      "description": "Calls POST .../negotiation/comments."
+    },
+    {
+      "file_path": "src/services/lifecycleNegotiationService.js",
+      "file_name": "lifecycleNegotiationService.js",
+      "language": "javascript",
+      "file_type": "service",
+      "description": "Extended (not duplicated) to add submitRouting, getNegotiationTracker, submitReview, generateExternalLink, compareVersions, sendReminder, markAgreed and addComment alongside the pre-existing verifyOtp/externalSubmit."
+    },
+    {
+      "file_path": "src/store/negotiationSlice.js",
+      "file_name": "negotiationSlice.js",
+      "language": "javascript",
+      "file_type": "store_slice",
+      "description": "setNegotiation now derives the slice's nested `routing` object from NegotiationTrackerResponse's flat routing fields when a pre-built routing object isn't supplied; actions/state_shape otherwise unchanged."
+    },
+    {
+      "file_path": "src/App.jsx",
+      "file_name": "App.jsx",
+      "language": "javascript",
+      "file_type": "component",
+      "description": "Registered the /contracts/:contractId/negotiation route for NegotiationTrackerPage."
+    },
+    {
+      "file_path": "src/__tests__/NegotiationTrackerPage.test.jsx",
+      "file_name": "NegotiationTrackerPage.test.jsx",
+      "language": "javascript",
+      "file_type": "component",
+      "description": "Screen-level tests: not-routed state shows Routing Panel, AF-001 blocking validation, populated tracker renders reviewers/version history, role-gated view access, and Mark as Agreed visibility restricted to Legal Reviewer."
+    }
+  ],
+  "pr": {
+    "branch_name": "ui-gen/7abd1f420802",
+    "title": "feat(ui-gen): Negotiation Tracker page (UC5)",
+    "body": "Implements NegotiationTrackerPage and its owned components (RoutingPanel, ReviewerList, OverdueFlagBadge, SendReminderButton, CompareVersionsModal, CommentBoxPanel, MarkAgreedButton) per T-NEGOTIATION-TRACKER-PAGE-UI, wired to the UC5 Negotiation & Routing endpoints. Extends the shared lifecycleNegotiationService.js and negotiationSlice.js started by the External Review task rather than duplicating them; reuses its existing OtpVerificationForm unchanged.\n\nSee blockers for inferred fields and a hard endpoint gap (BR-1/BR-2 pre-submission auto-add banners).",
+    "draft": true,
+    "linked_story": "UC5-AF-001",
+    "linked_task": "T-NEGOTIATION-TRACKER-PAGE-UI"
+  },
+  "critic_hints": {
+    "files_to_lint": [
+      "src/pages/NegotiationTrackerPage.jsx",
+      "src/features/negotiation/components/RoutingPanel.jsx",
+      "src/features/negotiation/components/ReviewerList.jsx",
+      "src/features/negotiation/components/OverdueFlagBadge.jsx",
+      "src/features/negotiation/components/SendReminderButton.jsx",
+      "src/features/negotiation/components/CompareVersionsModal.jsx",
+      "src/features/negotiation/components/CommentBoxPanel.jsx",
+      "src/features/negotiation/components/MarkAgreedButton.jsx",
+      "src/services/lifecycleNegotiationService.js",
+      "src/store/negotiationSlice.js",
+      "src/__tests__/NegotiationTrackerPage.test.jsx"
+    ],
+    "openapi_endpoint": null
+  },
+  "blockers": [
+    "BR-1/BR-2 auto-add banners (IMG-3: 'Contract value exceeds ₹10,00,000 — Finance Head added as mandatory reviewer' / 'Flagged High Risk by AI Clause Analysis — Legal Reviewer added as mandatory reviewer') need the contract's value and High-Risk flag *before* the Contract Owner submits routing. No endpoint in this task's contract (or the UC4 module's) exposes contract value/risk score to RoutingPanel pre-submission — only ContractMetadataResponse/ClauseResponse from a different module, fetched by contractId, carry that data, and RoutingPanel's only prop is contractId with no endpoint listed to resolve it from. I did not invent a URL to fetch it. RoutingPanel therefore does not render these two pre-submission banners; after submission, ReviewerList does show Finance Head/Legal Reviewer with the Mandatory badge once the backend's RoutingResponse/NegotiationTrackerResponse reflects them, since isMandatory is a documented ReviewerResponse field.",
+    "GET /negotiation/compare is documented with no request DTO and no query parameters, but the design (IMG-6) and DP-UC5-012/013 plainly require user-selectable Version A/B selectors. I inferred optional `versionA`/`versionB` query parameters on the existing GET endpoint (no new URL) so CompareVersionsModal can request a specific pair; see compareVersions() in lifecycleNegotiationService.js. If the backend ignores these and always returns the latest two versions, the selectors in the modal become display-only until the backend adds param support.",
+    "NegotiationTrackerResponse's `internalReviewers` is typed ReviewerResponse[] without a nested `routing` object, while the negotiationSlice contract's state_shape names a `routing: RoutingResponse` field. I derived the slice's `routing` object from the flat routingType/internalReviewers/externalPartyName/externalPartyEmail/assignedDate/dueDate fields already on the response rather than inventing a new field — see the updated setNegotiation in negotiationSlice.js.",
+    "RoutingPanel's 'Send for Review' top-of-tracker button (visible in IMG-5 even once routing already exists) isn't explained by any story as a distinct action from the initial Draft-to-With-Internal routing call — there is one POST .../negotiation/routing endpoint and no 're-route' or 'new review cycle' endpoint. I reused the same RoutingPanel/useSubmitRouting for this button (toggled in-page, not a separate route) as the closest faithful interpretation; it is only shown to CONTRACT_OWNER and hidden once negotiationStatus is 'Agreed'.",
+    "Used GET .../negotiation returning 404 as the signal that a contract has not yet been routed (Draft status, RoutingPanel should render instead of an error). The module contract does not document a 404 response for this endpoint; this is the standard not-found convention and is treated as the Draft-state determinant since no separate 'has this contract been routed yet' endpoint exists.",
+    "Visual verification was done by intercepting the three negotiation endpoints with Playwright network mocks (no live backend in this environment) and screenshotting at 1440x900 against IMG-3/4 (Routing Panel), IMG-5 (Tracker) and IMG-6/7 (Compare Versions). Layout, section order, labels, badge styles and color language match closely; exact pixel spacing/gradient stops were approximated with Tailwind utilities rather than pixel-measured from the PNGs.",
+    "OtpVerificationForm, listed as owned by this task, was already implemented by the sibling T-EXTERNAL-REVIEW-PAGE-UI task (src/features/negotiation/components/OtpVerificationForm.jsx) and is reused unchanged rather than rebuilt, per CLAUDE.md's module-addition rule."
+  ]
+}

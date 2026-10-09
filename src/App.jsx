@@ -3,6 +3,9 @@ import DashboardPage from '@/pages/DashboardPage';
 import ContractRepositoryListPage from '@/pages/ContractRepositoryListPage';
 import NewContractPage from '@/pages/NewContractPage';
 import TemplateClauseLibraryPage from '@/pages/TemplateClauseLibraryPage';
+import ClauseAnalysisPage from '@/pages/ClauseAnalysisPage';
+import ExternalReviewPage from '@/pages/ExternalReviewPage';
+import NegotiationTrackerPage from '@/pages/NegotiationTrackerPage';
 import NewContractAccessGuard from '@/features/contracts/components/NewContractAccessGuard';
 
 const NEW_CONTRACT_ALLOWED_ROLES = ['TENANT_ADMIN', 'CONTRACT_OWNER'];
@@ -22,6 +25,9 @@ export default function App() {
         }
       />
       <Route path="/settings/template-clause-library" element={<TemplateClauseLibraryPage />} />
+      <Route path="/contracts/:contractId/clause-analysis" element={<ClauseAnalysisPage />} />
+      <Route path="/negotiation/external/:linkToken" element={<ExternalReviewPage />} />
+      <Route path="/contracts/:contractId/negotiation" element={<NegotiationTrackerPage />} />
     </Routes>
   );
 }

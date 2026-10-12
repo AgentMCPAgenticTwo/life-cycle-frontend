@@ -1,0 +1,445 @@
+{
+  "group_id": "user-status-action-control",
+  "task_id": "T-USER-STATUS-ACTION-CONTROL-UI",
+  "primary_story_id": "UC11-AF-005",
+  "story_ids": [
+    "UC11-AF-005",
+    "UC11-BR-003",
+    "UC11-BR-013",
+    "UC11-BR-014",
+    "UC11-BR-015"
+  ],
+  "page_component": null,
+  "components": [
+    {
+      "name": "UserStatusActionControl",
+      "type": "COMPONENT",
+      "props": [
+        "user"
+      ],
+      "story_refs": [
+        "UC11-AF-005",
+        "UC11-BR-003",
+        "UC11-BR-013",
+        "UC11-BR-014",
+        "UC11-BR-015"
+      ],
+      "description": "Deactivate/Reactivate controls guarding last Tenant Admin"
+    }
+  ],
+  "hooks": [
+    {
+      "name": "useUpdateUserStatus",
+      "returns": "{ updateStatus: (userId: string, req: UpdateUserStatusRequest) => Promise<UserListItemResponse> }",
+      "story_refs": [
+        "UC11-AF-005",
+        "UC11-BR-003",
+        "UC11-BR-014",
+        "UC11-BR-015"
+      ],
+      "description": "Updates user status (deactivate/reactivate)"
+    }
+  ],
+  "store_slices": [
+    {
+      "name": "trackerFiltersSlice",
+      "actions": [
+        "setPeriod",
+        "setContractTypeFilter",
+        "setOwnerFilter",
+        "setDateRange",
+        "setActiveTab",
+        "resetOnOpen"
+      ],
+      "state_shape": "{ period: string; contractTypeFilter: string; ownerFilter: string; dateRangeFrom: string | null; dateRangeTo: string | null; activeTab: string }"
+    },
+    {
+      "name": "settingsAdminSlice",
+      "actions": [
+        "setActiveTab",
+        "setUsers",
+        "setApprovalRules",
+        "setIntegrations",
+        "setNotificationEvents"
+      ],
+      "state_shape": "{ activeTab: string; users: UserListItemResponse[]; approvalRules: ApprovalRuleResponse[]; integrations: IntegrationResponse[]; notificationEvents: NotificationEventResponse[] }"
+    },
+    {
+      "name": "auditLogSlice",
+      "actions": [
+        "setEntries",
+        "setFilterDateRange",
+        "clearFilter"
+      ],
+      "state_shape": "{ entries: AuditLogEntryResponse[]; filterDateRangeFrom: string | null; filterDateRangeTo: string | null }"
+    }
+  ],
+  "relevant_endpoints": [
+    {
+      "id": "PATCH_settings_user_status",
+      "path": "/api/v1/settings/users/{userId}/status",
+      "roles": [
+        "TENANT_ADMIN"
+      ],
+      "method": "PATCH",
+      "summary": "Deactivate, reactivate, or auto-activate a user; blocks removing last active Tenant Admin",
+      "is_paged": false,
+      "story_refs": [
+        "UC11-AF-005",
+        "UC11-BR-003",
+        "UC11-BR-013",
+        "UC11-BR-014",
+        "UC11-BR-015"
+      ],
+      "request_dto": "UpdateUserStatusRequest",
+      "response_dto": "UserListItemResponse",
+      "auth_required": true
+    },
+    {
+      "id": "GET_settings_audit_log",
+      "path": "/api/v1/settings/audit-log",
+      "roles": [
+        "TENANT_ADMIN"
+      ],
+      "method": "GET",
+      "summary": "Get read-only audit log entries sorted newest first with Filter Date Range",
+      "is_paged": true,
+      "story_refs": [
+        "UC11-MF-001",
+        "UC11-AF-002",
+        "UC11-AF-004",
+        "UC11-AF-006",
+        "UC11-AF-007",
+        "UC11-BR-001",
+        "UC11-BR-003",
+        "UC11-BR-004",
+        "UC11-BR-005",
+        "UC11-BR-006",
+        "UC11-BR-010",
+        "UC11-BR-011",
+        "UC11-BR-013",
+        "UC11-BR-014",
+        "UC11-BR-015",
+        "UC11-BR-016",
+        "UC11-BR-017",
+        "UC11-FV-005",
+        "UC11-GC-003"
+      ],
+      "request_dto": "AuditLogQueryParams",
+      "response_dto": "AuditLogEntryResponse",
+      "auth_required": true
+    }
+  ],
+  "relevant_dtos": [
+    {
+      "name": "UserListItemResponse",
+      "type": "RESPONSE",
+      "fields": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": false
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "name": "email",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "enum": [
+            "Tenant Admin",
+            "Legal Reviewer",
+            "Contract Owner",
+            "Approver",
+            "External Party",
+            "Signer"
+          ],
+          "name": "role",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "enum": [
+            "Invited",
+            "Active",
+            "Deactivated"
+          ],
+          "name": "status",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "name": "lastLogin",
+          "type": "datetime",
+          "nullable": true
+        }
+      ]
+    },
+    {
+      "name": "UpdateUserStatusRequest",
+      "type": "REQUEST",
+      "fields": [
+        {
+          "enum": [
+            "Invited",
+            "Active",
+            "Deactivated"
+          ],
+          "name": "status",
+          "type": "string",
+          "nullable": false
+        }
+      ]
+    },
+    {
+      "name": "AuditLogQueryParams",
+      "type": "REQUEST",
+      "fields": [
+        {
+          "name": "filterDateRangeFrom",
+          "type": "date",
+          "nullable": true
+        },
+        {
+          "name": "filterDateRangeTo",
+          "type": "date",
+          "nullable": true
+        },
+        {
+          "name": "userFilter",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "actionTypeFilter",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "page",
+          "type": "integer",
+          "nullable": true
+        },
+        {
+          "name": "pageSize",
+          "type": "integer",
+          "nullable": true
+        }
+      ]
+    },
+    {
+      "name": "AuditLogEntryResponse",
+      "type": "RESPONSE",
+      "fields": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": false
+        },
+        {
+          "name": "logDateTime",
+          "type": "datetime",
+          "nullable": false
+        },
+        {
+          "name": "logUser",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "enum": [
+            "Created",
+            "Updated",
+            "Deleted"
+          ],
+          "name": "logAction",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "name": "logEntity",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "name": "details",
+          "type": "string",
+          "nullable": true
+        }
+      ]
+    }
+  ],
+  "stories": [
+    {
+      "epic": "Settings / Admin",
+      "actor": "Tenant Admin",
+      "title": "Block deletion of the last remaining Tenant Admin account",
+      "images": [
+        "IMG-2",
+        "IMG-3",
+        "IMG-4",
+        "IMG-5",
+        "IMG-6"
+      ],
+      "story_id": "UC11-AF-005",
+      "references": [
+        "UC11",
+        "BR-3",
+        "F-2",
+        "F-4",
+        "F-5"
+      ],
+      "story_type": "alternate-flow",
+      "story_statement": "As a Tenant Admin, I want to be blocked from deleting the last remaining Tenant Admin account, so that the tenant always retains at least one active administrator who can manage users, Routing & Approval rules, integrations, notifications, and the audit log.",
+      "source_reference": "UC11 / Alternate Flow / AF-5",
+      "notes_assumptions": "The Contract Type, Value Threshold, Approver Role, Integration Name, Connection Status, Event Name, Email Toggle, In-App Toggle, Log Date/Time, Log User, Log Action, Log Entity, and Filter Date Range data points are referenced to confirm they remain unaffected and accessible when this alternate flow blocks deletion of the last Tenant Admin; they are not directly involved in the deletion validation itself.",
+      "acceptance_criteria": [
+        "Given the User Management Tab lists only one user with User Role 'Tenant Admin' and User Status 'Active', When the Tenant Admin attempts to delete that account, Then the system displays the message 'At least one Tenant Admin must remain active' and blocks the deletion.",
+        "Given the deletion of the last active Tenant Admin is blocked, When the Tenant Admin dismisses the error message, Then the User Management Tab remains unchanged showing the account with User Status 'Active' and no deletion occurs.",
+        "Given the Tenant Admin is prevented from deleting the last active Tenant Admin, When the Tenant Admin instead navigates to the Routing & Approval Tab to review associated data, Then the system still permits full access to all other Settings / Admin data groups, including Contract Type, Value Threshold, Approver Role (Routing & Approval Tab), Integration Name, Connection Status (Integrations Tab), Event Name, Email Toggle, In-App Toggle (Notifications Tab), and Log Date/Time, Log User, Log Action, Log Entity, Filter Date Range (Audit Log Tab).",
+        "Given more than one Tenant Admin exists, When the Tenant Admin deletes one of them, Then the deletion succeeds because at least one Tenant Admin remains active."
+      ]
+    },
+    {
+      "epic": "Settings / Admin",
+      "actor": "Tenant Admin",
+      "title": "Prevent deactivation or deletion of the last active Tenant Admin",
+      "images": [
+        "IMG-2",
+        "IMG-3",
+        "IMG-4",
+        "IMG-5",
+        "IMG-6"
+      ],
+      "story_id": "UC11-BR-003",
+      "references": [
+        "UC11-BR-003",
+        "BR-3"
+      ],
+      "story_type": "business-rule",
+      "story_statement": "As a Tenant Admin, I want to be blocked from deactivating or deleting the last remaining active Tenant Admin account, so that the tenant always retains at least one active administrator able to manage settings.",
+      "source_reference": "UC11 / Business Rules / BR-3",
+      "notes_assumptions": "The listed data points (Contract Type, Value Threshold, Approver Role, Integration Name, Connection Status, Event Name, Email Toggle, In-App Toggle, Log Date/Time, Log User, Log Action, Log Entity, Filter Date Range) belong to other UC11 screens/tabs unrelated to admin deactivation logic; they are enumerated here solely to satisfy coverage traceability and are noted as non-impacting on this rule, except for audit log fields which are populated when the blocked action is logged.",
+      "acceptance_criteria": [
+        "Given exactly one active Tenant Admin account exists in the tenant, when that Tenant Admin attempts to deactivate or delete their own or another admin's account, then the system must block the action and display an error explaining that at least one active Tenant Admin must remain.",
+        "Given more than one active Tenant Admin account exists in the tenant, when a Tenant Admin deactivates or deletes one of the admin accounts, then the action must succeed as long as at least one active Tenant Admin remains afterward.",
+        "Given the User Management Tab displays the users table, when the last active Tenant Admin's row is viewed, then the system must prevent the status-change action regardless of other field values such as Contract Type [DP-UC11-003], Value Threshold [DP-UC11-004], Approver Role [DP-UC11-005], Integration Name [DP-UC11-008], Connection Status [DP-UC11-009], Event Name [DP-UC11-012], Email Toggle [DP-UC11-013], In-App Toggle [DP-UC11-014], Log Date/Time [DP-UC11-016], Log User [DP-UC11-017], Log Action [DP-UC11-018], Log Entity [DP-UC11-019], and Filter Date Range [DP-UC11-020], none of which influence this rule.",
+        "Given a blocked deactivation or deletion attempt on the last active Tenant Admin, when the action is rejected, then an audit log entry is still recorded capturing the Log Date/Time [DP-UC11-016], Log User [DP-UC11-017], Log Action [DP-UC11-018] showing the attempt was denied, and Log Entity [DP-UC11-019] identifying the User record."
+      ]
+    },
+    {
+      "epic": "Settings / Admin",
+      "actor": "Tenant Admin",
+      "title": "Auto-activate user upon invitation acceptance",
+      "images": [
+        "IMG-2",
+        "IMG-3",
+        "IMG-4",
+        "IMG-5",
+        "IMG-6"
+      ],
+      "story_id": "UC11-BR-013",
+      "references": [
+        "UC11-BR-013",
+        "F-5",
+        "DP-UC11-003",
+        "DP-UC11-004",
+        "DP-UC11-005",
+        "DP-UC11-008",
+        "DP-UC11-009",
+        "DP-UC11-012",
+        "DP-UC11-013",
+        "DP-UC11-014",
+        "DP-UC11-016",
+        "DP-UC11-017",
+        "DP-UC11-018",
+        "DP-UC11-019",
+        "DP-UC11-020"
+      ],
+      "story_type": "business-rule",
+      "story_statement": "As a Tenant Admin, I want a User record to transition automatically from Invited to Active when the user accepts the invitation, so that no manual status update is required to grant access.",
+      "source_reference": "UC11 / Business Rules / BR-13",
+      "notes_assumptions": "Required data points unrelated to user status transitions (Contract Type, Value Threshold, Approver Role, Integration Name, Connection Status, Event Name, Email Toggle, In-App Toggle, Log Date/Time, Log User, Log Action, Log Entity, Filter Date Range) are enumerated per coverage requirement to confirm no impact from this transition, except Log Date/Time, Log User, Log Action, and Log Entity which are directly populated by the resulting audit log entry.",
+      "acceptance_criteria": [
+        "Given a User record exists with User Status 'Invited', when the invited user accepts the invitation, then the User Status automatically changes to 'Active' with no manual action required by the Tenant Admin.",
+        "Given the User Status transitions from Invited to Active, when the Tenant Admin views the User Management Tab, then the updated User Status label 'Active' is displayed for that user without any additional save or confirmation step.",
+        "Given a User record transitions from Invited to Active, when the system records this event in the audit log, then the Audit Log Tab displays an entry containing Log Date/Time, Log User, Log Action, and Log Entity for the transition.",
+        "Given the Audit Log Tab is displayed, when the Tenant Admin applies the Filter Date Range using the Apply Filter Button, then entries for the user-activation event are filterable by the specified Filter Date Range.",
+        "Given the Routing & Approval Tab, Integrations Tab, and Notifications Tab are unrelated to user invitation acceptance, when BR-13 is evaluated, then no changes occur to Contract Type, Value Threshold, Approver Role, Integration Name, Connection Status, Event Name, Email Toggle, or In-App Toggle as a result of this transition."
+      ]
+    },
+    {
+      "epic": "Settings / Admin",
+      "actor": "Tenant Admin",
+      "title": "Deactivate a user account via Tenant Admin action",
+      "images": [
+        "IMG-2",
+        "IMG-3",
+        "IMG-4",
+        "IMG-5",
+        "IMG-6"
+      ],
+      "story_id": "UC11-BR-014",
+      "references": [
+        "UC11-BR-014",
+        "DP-UC11-003",
+        "DP-UC11-004",
+        "DP-UC11-005",
+        "DP-UC11-008",
+        "DP-UC11-009",
+        "DP-UC11-012",
+        "DP-UC11-013",
+        "DP-UC11-014",
+        "DP-UC11-016",
+        "DP-UC11-017",
+        "DP-UC11-018",
+        "DP-UC11-019",
+        "DP-UC11-020"
+      ],
+      "story_type": "business-rule",
+      "story_statement": "As a Tenant Admin, I want to deactivate an Active user, so that the user's access is revoked while their record is preserved for audit and reactivation purposes.",
+      "source_reference": "UC11 / Business Rules / BR-14",
+      "notes_assumptions": "Required data points DP-UC11-003/004/005/008/009/012/013/014/020 pertain to other Settings/Admin tabs and are included here only to confirm they remain unaffected by the user deactivation action, as mandated by the coverage requirement; DP-UC11-016/017/018/019 are directly relevant as audit log fields generated by this transition.",
+      "acceptance_criteria": [
+        "Given a User record with status Active, When the Tenant Admin selects the deactivate action for that user, Then the User Status transitions from Active to Deactivated.",
+        "Given a User record with status Active, When no Tenant Admin action is taken, Then the User Status remains Active and does not transition to Deactivated automatically or through any other role's action.",
+        "Given a non-Tenant-Admin role attempts to deactivate a user, When the action is submitted, Then the system blocks the transition and the User Status remains unchanged.",
+        "Given the Tenant Admin deactivates a user, When the deactivation completes, Then an audit log entry is created recording Log Date/Time, Log User, Log Action, and Log Entity for the deactivation.",
+        "Given the Tenant Admin deactivates a user, When the related Settings / Admin screens are reviewed afterward, Then unrelated configuration data remains unaffected, including Contract Type, Value Threshold, Approver Role, Integration Name, Connection Status, Event Name, Email Toggle, In-App Toggle, and Filter Date Range."
+      ]
+    },
+    {
+      "epic": "Settings / Admin",
+      "actor": "Tenant Admin",
+      "title": "Reactivate a deactivated user",
+      "images": [
+        "IMG-2",
+        "IMG-3",
+        "IMG-4",
+        "IMG-5",
+        "IMG-6"
+      ],
+      "story_id": "UC11-BR-015",
+      "references": [
+        "UC11-BR-015",
+        "F-5",
+        "F-1"
+      ],
+      "story_type": "business-rule",
+      "story_statement": "As a Tenant Admin, I want to reactivate a Deactivated user, so that the user can regain access to the system under my explicit authorization.",
+      "source_reference": "UC11 / Business Rules / BR-15",
+      "notes_assumptions": "DP-UC11-003 through DP-UC11-020 relate to other tabs on the same Settings / Admin screen; they are referenced here only to confirm screen-wide data integrity is unaffected by the user reactivation action, per the mandated coverage requirement for this unit.",
+      "acceptance_criteria": [
+        "Given a User record in the Deactivated status on the User Management Tab, When the Tenant Admin selects the reactivate action for that user, Then the User Status transitions from Deactivated to Active.",
+        "Given no user action other than the Tenant Admin's explicit reactivation, When any other role or automated process attempts to change the status, Then the transition from Deactivated to Active must not occur.",
+        "Given the reactivation is performed, When the Tenant Admin navigates across the Settings / Admin screen tabs, Then the following data points remain intact and correctly displayed in their respective tabs: Contract Type, Value Threshold, Approver Role, Integration Name, Connection Status, Event Name, Email Toggle, In-App Toggle, Log Date/Time, Log User, Log Action, Log Entity, and Filter Date Range.",
+        "Given the reactivation event occurs, When the audit log is generated for this action, Then the audit log entry must capture Log Date/Time, Log User, Log Action, and Log Entity corresponding to the reactivation, and must be viewable via the Filter Date Range and Apply Filter Button without being editable."
+      ]
+    }
+  ]
+}

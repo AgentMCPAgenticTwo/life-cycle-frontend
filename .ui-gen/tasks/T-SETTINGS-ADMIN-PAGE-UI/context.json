@@ -1,0 +1,1768 @@
+{
+  "group_id": "settings-admin-page",
+  "task_id": "T-SETTINGS-ADMIN-PAGE-UI",
+  "primary_story_id": "UC11-AF-002",
+  "story_ids": [
+    "UC11-AF-002",
+    "UC11-AF-003",
+    "UC11-AF-006",
+    "UC11-BR-001",
+    "UC11-BR-002",
+    "UC11-BR-004",
+    "UC11-BR-005",
+    "UC11-BR-006",
+    "UC11-BR-007",
+    "UC11-BR-008",
+    "UC11-BR-009",
+    "UC11-BR-010",
+    "UC11-BR-011",
+    "UC11-BR-016",
+    "UC11-BR-017",
+    "UC11-FV-001",
+    "UC11-FV-002",
+    "UC11-FV-003",
+    "UC11-FV-004",
+    "UC11-FV-005",
+    "UC11-GC-001",
+    "UC11-GC-002",
+    "UC11-GC-003",
+    "UC11-MF-001"
+  ],
+  "page_component": {
+    "name": "SettingsAdminPage",
+    "type": "PAGE",
+    "props": [],
+    "story_refs": [
+      "UC11-MF-001",
+      "UC11-BR-001"
+    ],
+    "description": "Top-level Settings/Admin screen with five tabs"
+  },
+  "components": [
+    {
+      "name": "UserManagementTab",
+      "type": "COMPONENT",
+      "props": [],
+      "story_refs": [
+        "UC11-MF-001",
+        "UC11-GC-001",
+        "UC11-FV-001"
+      ],
+      "description": "Users table with Add User action"
+    },
+    {
+      "name": "AddUserForm",
+      "type": "COMPONENT",
+      "props": [
+        "onSubmit"
+      ],
+      "story_refs": [
+        "UC11-MF-001",
+        "UC11-AF-002",
+        "UC11-BR-002",
+        "UC11-FV-001"
+      ],
+      "description": "Form for Name/Email/Role with validation"
+    },
+    {
+      "name": "RoutingApprovalTab",
+      "type": "COMPONENT",
+      "props": [],
+      "story_refs": [
+        "UC11-MF-001",
+        "UC11-GC-002",
+        "UC11-FV-002"
+      ],
+      "description": "Approval matrix table with Add Rule action"
+    },
+    {
+      "name": "AddRuleForm",
+      "type": "COMPONENT",
+      "props": [
+        "onSubmit"
+      ],
+      "story_refs": [
+        "UC11-MF-001",
+        "UC11-AF-003",
+        "UC11-BR-004",
+        "UC11-FV-002"
+      ],
+      "description": "Form for Contract Type/Value Threshold/Approver Role with validation"
+    },
+    {
+      "name": "IntegrationsTab",
+      "type": "COMPONENT",
+      "props": [],
+      "story_refs": [
+        "UC11-MF-001",
+        "UC11-FV-003",
+        "UC11-BR-009",
+        "UC11-BR-016",
+        "UC11-BR-017"
+      ],
+      "description": "Integration cards with Connect/Disconnect actions"
+    },
+    {
+      "name": "NotificationsTab",
+      "type": "COMPONENT",
+      "props": [],
+      "story_refs": [
+        "UC11-MF-001",
+        "UC11-FV-004",
+        "UC11-BR-007"
+      ],
+      "description": "Event list with Email/In-App toggles"
+    },
+    {
+      "name": "AuditLogTab",
+      "type": "COMPONENT",
+      "props": [],
+      "story_refs": [
+        "UC11-MF-001",
+        "UC11-GC-003",
+        "UC11-FV-005",
+        "UC11-BR-005",
+        "UC11-BR-006",
+        "UC11-BR-011",
+        "UC11-AF-006"
+      ],
+      "description": "Read-only audit log table sorted newest first with Filter Date Range"
+    },
+    {
+      "name": "AuditLogFilterPanel",
+      "type": "COMPONENT",
+      "props": [
+        "onApplyFilter"
+      ],
+      "story_refs": [
+        "UC11-MF-001",
+        "UC11-FV-005"
+      ],
+      "description": "Filter Date Range and Apply Filter Button"
+    }
+  ],
+  "hooks": [
+    {
+      "name": "useTenantUsers",
+      "returns": "{ data: UserListItemResponse[]; isLoading: boolean }",
+      "story_refs": [
+        "UC11-MF-001",
+        "UC11-GC-001"
+      ],
+      "description": "Fetches tenant users list"
+    },
+    {
+      "name": "useCreateUser",
+      "returns": "{ createUser: (req: CreateUserRequest) => Promise<UserListItemResponse> }",
+      "story_refs": [
+        "UC11-MF-001",
+        "UC11-AF-002",
+        "UC11-BR-002"
+      ],
+      "description": "Creates a new tenant user"
+    },
+    {
+      "name": "useApprovalRules",
+      "returns": "{ data: ApprovalRuleResponse[]; isLoading: boolean }",
+      "story_refs": [
+        "UC11-MF-001",
+        "UC11-GC-002"
+      ],
+      "description": "Fetches approval matrix rules"
+    },
+    {
+      "name": "useCreateApprovalRule",
+      "returns": "{ createRule: (req: CreateApprovalRuleRequest) => Promise<ApprovalRuleResponse> }",
+      "story_refs": [
+        "UC11-MF-001",
+        "UC11-AF-003",
+        "UC11-BR-004"
+      ],
+      "description": "Creates a new approval rule"
+    },
+    {
+      "name": "useIntegrations",
+      "returns": "{ data: IntegrationResponse[]; isLoading: boolean }",
+      "story_refs": [
+        "UC11-MF-001",
+        "UC11-FV-003"
+      ],
+      "description": "Fetches integration cards"
+    },
+    {
+      "name": "useConnectIntegration",
+      "returns": "{ connect: (name: string, req: ConnectIntegrationRequest) => Promise<IntegrationResponse> }",
+      "story_refs": [
+        "UC11-AF-004",
+        "UC11-AF-007",
+        "UC11-BR-016"
+      ],
+      "description": "Authorizes integration connection"
+    },
+    {
+      "name": "useDisconnectIntegration",
+      "returns": "{ disconnect: (name: string) => Promise<IntegrationResponse> }",
+      "story_refs": [
+        "UC11-BR-017"
+      ],
+      "description": "Disconnects an integration"
+    },
+    {
+      "name": "useNotificationEvents",
+      "returns": "{ data: NotificationEventResponse[]; isLoading: boolean }",
+      "story_refs": [
+        "UC11-MF-001",
+        "UC11-FV-004",
+        "UC11-BR-007"
+      ],
+      "description": "Fetches notification event toggles"
+    },
+    {
+      "name": "useUpdateNotificationEvent",
+      "returns": "{ updateEvent: (eventName: string, req: UpdateNotificationEventRequest) => Promise<NotificationEventResponse> }",
+      "story_refs": [
+        "UC11-MF-001",
+        "UC11-FV-004"
+      ],
+      "description": "Updates an event's toggles"
+    },
+    {
+      "name": "useAuditLog",
+      "returns": "{ data: AuditLogEntryResponse[]; isLoading: boolean }",
+      "story_refs": [
+        "UC11-MF-001",
+        "UC11-FV-005",
+        "UC11-GC-003"
+      ],
+      "description": "Fetches filtered audit log entries"
+    }
+  ],
+  "store_slices": [
+    {
+      "name": "settingsAdminSlice",
+      "actions": [
+        "setActiveTab",
+        "setUsers",
+        "setApprovalRules",
+        "setIntegrations",
+        "setNotificationEvents"
+      ],
+      "state_shape": "{ activeTab: string; users: UserListItemResponse[]; approvalRules: ApprovalRuleResponse[]; integrations: IntegrationResponse[]; notificationEvents: NotificationEventResponse[] }"
+    }
+  ],
+  "relevant_endpoints": [
+    {
+      "id": "GET_settings_users",
+      "path": "/api/v1/settings/users",
+      "roles": [
+        "TENANT_ADMIN"
+      ],
+      "method": "GET",
+      "summary": "List tenant users table (Name/Email/Role/Status/Last Login)",
+      "is_paged": true,
+      "story_refs": [
+        "UC11-MF-001",
+        "UC11-AF-001",
+        "UC11-FV-001",
+        "UC11-GC-001",
+        "UC11-BR-001",
+        "UC11-BR-010",
+        "UC11-BR-012"
+      ],
+      "response_dto": "UserListItemResponse",
+      "auth_required": true
+    },
+    {
+      "id": "POST_settings_users",
+      "path": "/api/v1/settings/users",
+      "roles": [
+        "TENANT_ADMIN"
+      ],
+      "method": "POST",
+      "summary": "Add a new user with Name/Email/Role, validate uniqueness",
+      "is_paged": false,
+      "story_refs": [
+        "UC11-MF-001",
+        "UC11-AF-002",
+        "UC11-BR-002",
+        "UC11-FV-001"
+      ],
+      "request_dto": "CreateUserRequest",
+      "response_dto": "UserListItemResponse",
+      "auth_required": true
+    },
+    {
+      "id": "GET_settings_approval_rules",
+      "path": "/api/v1/settings/approval-rules",
+      "roles": [
+        "TENANT_ADMIN"
+      ],
+      "method": "GET",
+      "summary": "List approval matrix rules (Contract Type/Value Threshold/Approver Role)",
+      "is_paged": true,
+      "story_refs": [
+        "UC11-MF-001",
+        "UC11-BR-001",
+        "UC11-BR-010",
+        "UC11-GC-002"
+      ],
+      "response_dto": "ApprovalRuleResponse",
+      "auth_required": true
+    },
+    {
+      "id": "POST_settings_approval_rules",
+      "path": "/api/v1/settings/approval-rules",
+      "roles": [
+        "TENANT_ADMIN"
+      ],
+      "method": "POST",
+      "summary": "Add approval rule, validate required fields and duplicate combination",
+      "is_paged": false,
+      "story_refs": [
+        "UC11-MF-001",
+        "UC11-AF-003",
+        "UC11-BR-004",
+        "UC11-FV-002"
+      ],
+      "request_dto": "CreateApprovalRuleRequest",
+      "response_dto": "ApprovalRuleResponse",
+      "auth_required": true
+    },
+    {
+      "id": "GET_settings_integrations",
+      "path": "/api/v1/settings/integrations",
+      "roles": [
+        "TENANT_ADMIN"
+      ],
+      "method": "GET",
+      "summary": "List integration cards (Integration Name/Connection Status)",
+      "is_paged": false,
+      "story_refs": [
+        "UC11-MF-001",
+        "UC11-BR-001",
+        "UC11-BR-009",
+        "UC11-BR-010",
+        "UC11-FV-003"
+      ],
+      "response_dto": "IntegrationResponse",
+      "auth_required": true
+    },
+    {
+      "id": "POST_settings_integration_connect",
+      "path": "/api/v1/settings/integrations/{integrationName}/connect",
+      "roles": [
+        "TENANT_ADMIN"
+      ],
+      "method": "POST",
+      "summary": "Submit credentials and authorize integration connection, masks credentials on success",
+      "is_paged": false,
+      "story_refs": [
+        "UC11-MF-001",
+        "UC11-AF-004",
+        "UC11-AF-007",
+        "UC11-BR-009",
+        "UC11-BR-016",
+        "UC11-BR-017",
+        "UC11-FV-003"
+      ],
+      "request_dto": "ConnectIntegrationRequest",
+      "response_dto": "IntegrationResponse",
+      "auth_required": true
+    },
+    {
+      "id": "POST_settings_integration_disconnect",
+      "path": "/api/v1/settings/integrations/{integrationName}/disconnect",
+      "roles": [
+        "TENANT_ADMIN"
+      ],
+      "method": "POST",
+      "summary": "Manually disconnect an integration",
+      "is_paged": false,
+      "story_refs": [
+        "UC11-BR-017",
+        "UC11-FV-003"
+      ],
+      "response_dto": "IntegrationResponse",
+      "auth_required": true
+    },
+    {
+      "id": "GET_settings_notifications",
+      "path": "/api/v1/settings/notifications",
+      "roles": [
+        "TENANT_ADMIN"
+      ],
+      "method": "GET",
+      "summary": "List notification events with Email/In-App toggles",
+      "is_paged": false,
+      "story_refs": [
+        "UC11-MF-001",
+        "UC11-BR-001",
+        "UC11-BR-007",
+        "UC11-BR-010",
+        "UC11-FV-004"
+      ],
+      "response_dto": "NotificationEventResponse",
+      "auth_required": true
+    },
+    {
+      "id": "PUT_settings_notifications",
+      "path": "/api/v1/settings/notifications/{eventName}",
+      "roles": [
+        "TENANT_ADMIN"
+      ],
+      "method": "PUT",
+      "summary": "Update Email Toggle and/or In-App Toggle for a notification event",
+      "is_paged": false,
+      "story_refs": [
+        "UC11-MF-001",
+        "UC11-BR-007",
+        "UC11-FV-004"
+      ],
+      "request_dto": "UpdateNotificationEventRequest",
+      "response_dto": "NotificationEventResponse",
+      "auth_required": true
+    },
+    {
+      "id": "GET_settings_audit_log",
+      "path": "/api/v1/settings/audit-log",
+      "roles": [
+        "TENANT_ADMIN"
+      ],
+      "method": "GET",
+      "summary": "Get read-only audit log entries sorted newest first with Filter Date Range",
+      "is_paged": true,
+      "story_refs": [
+        "UC11-MF-001",
+        "UC11-AF-002",
+        "UC11-AF-004",
+        "UC11-AF-006",
+        "UC11-AF-007",
+        "UC11-BR-001",
+        "UC11-BR-003",
+        "UC11-BR-004",
+        "UC11-BR-005",
+        "UC11-BR-006",
+        "UC11-BR-010",
+        "UC11-BR-011",
+        "UC11-BR-013",
+        "UC11-BR-014",
+        "UC11-BR-015",
+        "UC11-BR-016",
+        "UC11-BR-017",
+        "UC11-FV-005",
+        "UC11-GC-003"
+      ],
+      "request_dto": "AuditLogQueryParams",
+      "response_dto": "AuditLogEntryResponse",
+      "auth_required": true
+    }
+  ],
+  "relevant_dtos": [
+    {
+      "name": "UserListItemResponse",
+      "type": "RESPONSE",
+      "fields": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": false
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "name": "email",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "enum": [
+            "Tenant Admin",
+            "Legal Reviewer",
+            "Contract Owner",
+            "Approver",
+            "External Party",
+            "Signer"
+          ],
+          "name": "role",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "enum": [
+            "Invited",
+            "Active",
+            "Deactivated"
+          ],
+          "name": "status",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "name": "lastLogin",
+          "type": "datetime",
+          "nullable": true
+        }
+      ]
+    },
+    {
+      "name": "CreateUserRequest",
+      "type": "REQUEST",
+      "fields": [
+        {
+          "name": "name",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "name": "email",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "enum": [
+            "Tenant Admin",
+            "Legal Reviewer",
+            "Contract Owner",
+            "Approver",
+            "External Party",
+            "Signer"
+          ],
+          "name": "role",
+          "type": "string",
+          "nullable": false
+        }
+      ]
+    },
+    {
+      "name": "ApprovalRuleResponse",
+      "type": "RESPONSE",
+      "fields": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": false
+        },
+        {
+          "enum": [
+            "Product",
+            "Service"
+          ],
+          "name": "contractType",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "name": "valueThreshold",
+          "type": "number",
+          "nullable": false
+        },
+        {
+          "enum": [
+            "Approver",
+            "Legal Reviewer",
+            "Tenant Admin"
+          ],
+          "name": "approverRole",
+          "type": "string",
+          "nullable": false
+        }
+      ]
+    },
+    {
+      "name": "CreateApprovalRuleRequest",
+      "type": "REQUEST",
+      "fields": [
+        {
+          "enum": [
+            "Product",
+            "Service"
+          ],
+          "name": "contractType",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "name": "valueThreshold",
+          "type": "number",
+          "nullable": false
+        },
+        {
+          "enum": [
+            "Approver",
+            "Legal Reviewer",
+            "Tenant Admin"
+          ],
+          "name": "approverRole",
+          "type": "string",
+          "nullable": false
+        }
+      ]
+    },
+    {
+      "name": "IntegrationResponse",
+      "type": "RESPONSE",
+      "fields": [
+        {
+          "enum": [
+            "Salesforce",
+            "HubSpot",
+            "ERP",
+            "Google Drive",
+            "SharePoint",
+            "DocuSign",
+            "Adobe Sign"
+          ],
+          "name": "integrationName",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "enum": [
+            "Connected",
+            "Disconnected",
+            "Disconnected - reconnect required"
+          ],
+          "name": "connectionStatus",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "name": "maskedCredential",
+          "type": "string",
+          "nullable": true
+        }
+      ]
+    },
+    {
+      "name": "ConnectIntegrationRequest",
+      "type": "REQUEST",
+      "fields": [
+        {
+          "name": "credentials",
+          "type": "object",
+          "nullable": false
+        }
+      ]
+    },
+    {
+      "name": "NotificationEventResponse",
+      "type": "RESPONSE",
+      "fields": [
+        {
+          "name": "eventName",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "name": "emailToggle",
+          "type": "boolean",
+          "nullable": false
+        },
+        {
+          "name": "inAppToggle",
+          "type": "boolean",
+          "nullable": false
+        }
+      ]
+    },
+    {
+      "name": "UpdateNotificationEventRequest",
+      "type": "REQUEST",
+      "fields": [
+        {
+          "name": "emailToggle",
+          "type": "boolean",
+          "nullable": true
+        },
+        {
+          "name": "inAppToggle",
+          "type": "boolean",
+          "nullable": true
+        }
+      ]
+    },
+    {
+      "name": "AuditLogQueryParams",
+      "type": "REQUEST",
+      "fields": [
+        {
+          "name": "filterDateRangeFrom",
+          "type": "date",
+          "nullable": true
+        },
+        {
+          "name": "filterDateRangeTo",
+          "type": "date",
+          "nullable": true
+        },
+        {
+          "name": "userFilter",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "actionTypeFilter",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "page",
+          "type": "integer",
+          "nullable": true
+        },
+        {
+          "name": "pageSize",
+          "type": "integer",
+          "nullable": true
+        }
+      ]
+    },
+    {
+      "name": "AuditLogEntryResponse",
+      "type": "RESPONSE",
+      "fields": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": false
+        },
+        {
+          "name": "logDateTime",
+          "type": "datetime",
+          "nullable": false
+        },
+        {
+          "name": "logUser",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "enum": [
+            "Created",
+            "Updated",
+            "Deleted"
+          ],
+          "name": "logAction",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "name": "logEntity",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "name": "details",
+          "type": "string",
+          "nullable": true
+        }
+      ]
+    }
+  ],
+  "stories": [
+    {
+      "epic": "Settings / Admin",
+      "actor": "Tenant Admin",
+      "title": "Block duplicate email on user creation",
+      "images": [
+        "IMG-2",
+        "IMG-3",
+        "IMG-4",
+        "IMG-5",
+        "IMG-6"
+      ],
+      "story_id": "UC11-AF-002",
+      "references": [
+        "UC11",
+        "BR-2",
+        "F-3",
+        "F-6"
+      ],
+      "story_type": "alternate-flow",
+      "story_statement": "As a Tenant Admin, I want to be blocked from adding a user whose email is already registered in the tenant, so that each user account remains uniquely identifiable and tenant data integrity is preserved.",
+      "source_reference": "UC11 / Alternate Flow / AF-2",
+      "notes_assumptions": "Assumes blocked duplicate-email attempts are recorded in the audit log as a failed action; if the system does not log failed attempts, the Audit Log criterion would instead confirm the log remains unchanged aside from existing entries.",
+      "acceptance_criteria": [
+        "Given the Tenant Admin is on the User Management Tab and opens the Add User form via the Add User Button, When they enter a User Name, a User Email that already exists for another user in the same tenant, and a User Role, and submit the form, Then the system displays the message 'A user with this email already exists' and does not create the new user record.",
+        "Given the duplicate-email error is displayed, When the Tenant Admin reviews the User Management Tab table, Then the existing user's User Name, User Email, User Role, and User Status remain unchanged and no duplicate record is added.",
+        "Given the duplicate-email error on the User Management Tab, When the Tenant Admin navigates to the Routing & Approval Tab, Then the Contract Type [DP-UC11-003], Value Threshold [DP-UC11-004], and Approver Role [DP-UC11-005] settings remain unaffected by the blocked user creation attempt.",
+        "Given the duplicate-email error on the User Management Tab, When the Tenant Admin navigates to the Integrations Tab, Then the Integration Name [DP-UC11-008] and Connection Status [DP-UC11-009] of each integration remain unaffected by the blocked user creation attempt.",
+        "Given the duplicate-email error on the User Management Tab, When the Tenant Admin navigates to the Notifications Tab, Then the Event Name [DP-UC11-012], Email Toggle [DP-UC11-013], and In-App Toggle [DP-UC11-014] settings remain unaffected by the blocked user creation attempt.",
+        "Given the duplicate-email error on the User Management Tab, When the Tenant Admin navigates to the Audit Log Tab and uses the Filter Date Range [DP-UC11-020], Then a new entry is visible in the log showing Log Date/Time [DP-UC11-016], Log User [DP-UC11-017], Log Action [DP-UC11-018] (e.g. a failed/blocked Create attempt), and Log Entity [DP-UC11-019] reflecting the blocked user creation attempt."
+      ]
+    },
+    {
+      "epic": "Settings / Admin",
+      "actor": "Tenant Admin",
+      "title": "Block Saving Incomplete Approval Rule",
+      "images": [
+        "IMG-2",
+        "IMG-3",
+        "IMG-4",
+        "IMG-5",
+        "IMG-6"
+      ],
+      "story_id": "UC11-AF-003",
+      "references": [
+        "UC11-AF-003",
+        "F-8",
+        "F-9",
+        "F-10",
+        "F-11",
+        "DP-UC11-003",
+        "DP-UC11-004",
+        "DP-UC11-005",
+        "DP-UC11-008",
+        "DP-UC11-009",
+        "DP-UC11-012",
+        "DP-UC11-013",
+        "DP-UC11-014",
+        "DP-UC11-016",
+        "DP-UC11-017",
+        "DP-UC11-018",
+        "DP-UC11-019",
+        "DP-UC11-020"
+      ],
+      "story_type": "alternate-flow",
+      "story_statement": "As a Tenant Admin, I want to be blocked from saving an approval rule when required fields are missing, so that the approval matrix remains complete and accurate.",
+      "source_reference": "UC11 / Alternate Flow / AF-3",
+      "acceptance_criteria": [
+        "Given the Tenant Admin is on the Routing & Approval Tab and opens the Add Rule form via the Add Rule Button, when they submit the form with Contract Type or Approver Role left blank, then the system displays 'Please complete all required fields' and does not save the rule.",
+        "Given the Add Rule form is displayed, when the Tenant Admin attempts to submit without a selected Contract Type, then the rule is not persisted and the Contract Type field is flagged as required.",
+        "Given the Add Rule form is displayed, when the Tenant Admin attempts to submit without a selected Approver Role, then the rule is not persisted and the Approver Role field is flagged as required.",
+        "Given the Add Rule form, when the Tenant Admin enters a Value Threshold but omits Contract Type or Approver Role, then the save is blocked and the error message is shown.",
+        "Given the Settings / Admin screen contains the Integrations Tab, Notifications Tab, and Audit Log Tab, then the Integration Name, Connection Status, Event Name, Email Toggle, In-App Toggle, Log Date/Time, Log User, Log Action, Log Entity, and Filter Date Range fields remain unaffected by this validation and continue to function as defined elsewhere in the screen.",
+        "Given all required fields are not completed, when the Tenant Admin clicks save again, then the system re-displays 'Please complete all required fields' until Contract Type, Value Threshold, and Approver Role are all provided."
+      ]
+    },
+    {
+      "epic": "Settings / Admin",
+      "actor": "Tenant Admin",
+      "title": "Block Edit or Delete of Audit Log Entries",
+      "images": [
+        "IMG-2",
+        "IMG-3",
+        "IMG-4",
+        "IMG-5",
+        "IMG-6"
+      ],
+      "story_id": "UC11-AF-006",
+      "references": [
+        "UC11",
+        "BR-5",
+        "BR-11",
+        "AF-6",
+        "F-20",
+        "F-21",
+        "F-22",
+        "F-23",
+        "F-24",
+        "F-25",
+        "F-26"
+      ],
+      "story_type": "alternate-flow",
+      "story_statement": "As a Tenant Admin, I want to be blocked from editing or deleting audit log entries, so that the integrity of the audit trail is preserved.",
+      "source_reference": "UC11 / Alternate Flow / AF-6",
+      "acceptance_criteria": [
+        "Given a Tenant Admin is viewing the Audit Log Tab table showing entries with Log Date/Time, Log User, Log Action, and Log Entity, When the Tenant Admin attempts to edit or delete any entry, Then the system blocks the action and displays 'Audit log entries cannot be modified or deleted'.",
+        "Given the Tenant Admin has applied a Filter Date Range and clicked Apply Filter Button to narrow the displayed log entries, When the Tenant Admin attempts to edit or delete any of the filtered entries, Then the system blocks the action and displays 'Audit log entries cannot be modified or deleted'.",
+        "Given an audit log entry was generated as a result of an action on Contract Type, Value Threshold, or Approver Role configuration in the Routing & Approval Tab, When the Tenant Admin attempts to edit or delete that entry, Then the system blocks the action and displays 'Audit log entries cannot be modified or deleted'.",
+        "Given an audit log entry was generated as a result of an Integration Name connection change reflected in Connection Status, When the Tenant Admin attempts to edit or delete that entry, Then the system blocks the action and displays 'Audit log entries cannot be modified or deleted'.",
+        "Given an audit log entry was generated as a result of a Notifications Tab change to Event Name, Email Toggle, or In-App Toggle, When the Tenant Admin attempts to edit or delete that entry, Then the system blocks the action and displays 'Audit log entries cannot be modified or deleted'.",
+        "Given any audit log entry regardless of its Log Action or Log Entity value, When the Tenant Admin attempts to edit or delete it, Then no modification or deletion is persisted and the blocking message 'Audit log entries cannot be modified or deleted' is shown."
+      ]
+    },
+    {
+      "epic": "Settings / Admin",
+      "actor": "Tenant Admin",
+      "title": "Restrict Settings / Admin screen access to Tenant Admin role",
+      "images": [
+        "IMG-2",
+        "IMG-3",
+        "IMG-4",
+        "IMG-5",
+        "IMG-6"
+      ],
+      "story_id": "UC11-BR-001",
+      "references": [
+        "UC11-BR-001",
+        "DP-UC11-003",
+        "DP-UC11-004",
+        "DP-UC11-005",
+        "DP-UC11-008",
+        "DP-UC11-009",
+        "DP-UC11-012",
+        "DP-UC11-013",
+        "DP-UC11-014",
+        "DP-UC11-016",
+        "DP-UC11-017",
+        "DP-UC11-018",
+        "DP-UC11-019",
+        "DP-UC11-020"
+      ],
+      "story_type": "business-rule",
+      "story_statement": "As a Tenant Admin, I want to be the only role able to access the Settings / Admin screen, so that sensitive configuration and audit data remain protected from unauthorized roles.",
+      "source_reference": "UC11 / Business Rules / BR-1",
+      "acceptance_criteria": [
+        "Given a user logged in with the Tenant Admin role, When they navigate the application, Then the Settings / Admin menu entry is visible and accessible.",
+        "Given a user logged in with any role other than Tenant Admin (Legal Reviewer, Contract Owner, Approver, External Party, Signer), When they view the application navigation, Then no Settings / Admin menu entry is displayed and direct access attempts are blocked.",
+        "Given a Tenant Admin has accessed the Settings / Admin screen, When they open the Routing & Approval Tab, Then the approval matrix displays Contract Type, Value Threshold, and Approver Role for each rule.",
+        "Given a Tenant Admin has accessed the Settings / Admin screen, When they open the Integrations Tab, Then each integration card displays Integration Name and Connection Status.",
+        "Given a Tenant Admin has accessed the Settings / Admin screen, When they open the Notifications Tab, Then the notification events list displays Event Name alongside its Email Toggle and In-App Toggle.",
+        "Given a Tenant Admin has accessed the Settings / Admin screen, When they open the Audit Log Tab, Then the audit log table displays Log Date/Time, Log User, Log Action, and Log Entity for each entry, and a Filter Date Range control is available to narrow the displayed results.",
+        "Given a non-Tenant Admin user attempts to directly request the Settings / Admin URL, When the request is processed, Then access is denied regardless of knowledge of the screen's existence."
+      ]
+    },
+    {
+      "epic": "Settings / Admin",
+      "actor": "Tenant Admin",
+      "title": "Block duplicate user email within tenant on creation",
+      "images": [
+        "IMG-2",
+        "IMG-3",
+        "IMG-4",
+        "IMG-5",
+        "IMG-6"
+      ],
+      "story_id": "UC11-BR-002",
+      "references": [
+        "UC11-BR-002",
+        "F-3"
+      ],
+      "story_type": "business-rule",
+      "story_statement": "As a Tenant Admin, I want to be blocked from creating a new user with an email already in use within my tenant, so that each user account remains uniquely identifiable and data integrity is preserved.",
+      "source_reference": "UC11 / Business Rules / BR-2",
+      "notes_assumptions": "The listed required data points (DP-UC11-003 through DP-UC11-020) belong to other tabs of the Settings / Admin screen and are unrelated to email uniqueness; they are enumerated here solely to satisfy the mandated coverage requirement for this unit.",
+      "acceptance_criteria": [
+        "Given the Tenant Admin is on the User Management Tab and clicks the Add User Button, When they submit a new user with User Name, User Email, and User Role where the User Email already exists for another user in the same tenant, Then the system blocks creation and displays a duplicate-email error without creating the record.",
+        "Given the Tenant Admin submits a new user with a User Email that does not exist in the tenant, When the form is validated, Then the system accepts the email as unique and proceeds to create the User record with status Invited.",
+        "Given the Tenant Admin is managing the full Settings / Admin screen, When reviewing related configuration areas beyond user uniqueness, Then the screen also maintains Contract Type, Value Threshold, Approver Role, Integration Name, Connection Status, Event Name, Email Toggle, In-App Toggle, Log Date/Time, Log User, Log Action, Log Entity, and Filter Date Range as distinct data points across their respective tabs, none of which are merged with or substitute for the User Email uniqueness check."
+      ]
+    },
+    {
+      "epic": "Settings / Admin",
+      "actor": "Tenant Admin",
+      "title": "Prevent duplicate approval rule combinations",
+      "images": [
+        "IMG-2",
+        "IMG-3",
+        "IMG-4",
+        "IMG-5",
+        "IMG-6"
+      ],
+      "story_id": "UC11-BR-004",
+      "references": [
+        "UC11-BR-004",
+        "F-8",
+        "F-9",
+        "F-10",
+        "F-11"
+      ],
+      "story_type": "business-rule",
+      "story_statement": "As a Tenant Admin, I want to be blocked from creating an approval rule with a duplicate Contract Type and Value Threshold combination, so that the routing and approval matrix remains unambiguous for every contract.",
+      "source_reference": "UC11 / Business Rules / BR-4",
+      "notes_assumptions": "Approver Role is not part of the uniqueness key per BR-4; only Contract Type and Value Threshold must be unique within the tenant.",
+      "acceptance_criteria": [
+        "Given an existing approval rule in the Routing & Approval Tab with a specific Contract Type and Value Threshold, when the Tenant Admin uses the Add Rule Button to submit a new rule with the identical Contract Type and Value Threshold combination (regardless of the selected Approver Role), then the system rejects the submission and displays a duplicate-rule validation error.",
+        "Given the Tenant Admin is adding or editing an approval rule, when the combination of Contract Type and Value Threshold does not match any existing rule within the tenant, then the system allows the rule to be saved with the chosen Approver Role.",
+        "Given the approval rule duplication check is enforced, when reviewing the Routing & Approval Tab, Integrations Tab, Notifications Tab, and Audit Log Tab, then the following data points remain correctly scoped and unaffected by this rule: Contract Type, Value Threshold, Approver Role, Integration Name, Connection Status, Event Name, Email Toggle, In-App Toggle, Log Date/Time, Log User, Log Action, Log Entity, and Filter Date Range.",
+        "Given a duplicate rule creation attempt is blocked, when the Audit Log Tab is reviewed, then no new rule entry is recorded, and the Log Date/Time, Log User, Log Action, and Log Entity fields remain unchanged for that failed attempt."
+      ]
+    },
+    {
+      "epic": "Settings / Admin",
+      "actor": "Tenant Admin",
+      "title": "Prevent Editing or Deletion of Audit Log Entries",
+      "images": [
+        "IMG-2",
+        "IMG-3",
+        "IMG-4",
+        "IMG-5",
+        "IMG-6"
+      ],
+      "story_id": "UC11-BR-005",
+      "references": [
+        "UC11-BR-005",
+        "DP-UC11-003",
+        "DP-UC11-004",
+        "DP-UC11-005",
+        "DP-UC11-008",
+        "DP-UC11-009",
+        "DP-UC11-012",
+        "DP-UC11-013",
+        "DP-UC11-014",
+        "DP-UC11-016",
+        "DP-UC11-017",
+        "DP-UC11-018",
+        "DP-UC11-019",
+        "DP-UC11-020"
+      ],
+      "story_type": "business-rule",
+      "story_statement": "As a Tenant Admin, I want audit log entries to remain system-generated and read-only, so that the historical record of tenant activity cannot be altered or destroyed by any user.",
+      "source_reference": "UC11 / Business Rules / BR-5",
+      "acceptance_criteria": [
+        "Given I navigate to the Audit Log Tab, When the table loads, Then each row displays Log Date/Time, Log User, Log Action, and Log Entity as system-generated, non-editable labels with no edit or delete controls available, regardless of my role including Tenant Admin.",
+        "Given an audit log entry exists for an action performed elsewhere in the system (such as a change to a User, a Contract Type/Value Threshold/Approver Role approval rule, an Integration Name/Connection Status change, or an Event Name/Email Toggle/In-App Toggle notification change), When I attempt to modify or remove that entry via any UI or API path, Then the system rejects the attempt and the entry remains unchanged.",
+        "Given I use the Filter Date Range picker and click Apply Filter Button, When the audit log table refreshes, Then only the display is filtered and no underlying Log Date/Time, Log User, Log Action, or Log Entity values are editable or deletable as a result of filtering.",
+        "Given I am logged in as Tenant Admin, When I inspect the Audit Log Tab, Then no Add, Edit, or Delete button is present for any row, confirming the log is strictly view-only."
+      ]
+    },
+    {
+      "epic": "Settings / Admin",
+      "actor": "Tenant Admin",
+      "title": "View auto-logged AI clause accept/reject actions in audit log",
+      "images": [
+        "IMG-2",
+        "IMG-3",
+        "IMG-4",
+        "IMG-5",
+        "IMG-6"
+      ],
+      "story_id": "UC11-BR-006",
+      "references": [
+        "UC11-BR-006",
+        "F-20",
+        "F-21",
+        "F-22",
+        "F-23",
+        "F-24",
+        "F-25",
+        "F-26",
+        "DP-UC11-003",
+        "DP-UC11-004",
+        "DP-UC11-005",
+        "DP-UC11-008",
+        "DP-UC11-009",
+        "DP-UC11-012",
+        "DP-UC11-013",
+        "DP-UC11-014",
+        "DP-UC11-016",
+        "DP-UC11-017",
+        "DP-UC11-018",
+        "DP-UC11-019",
+        "DP-UC11-020"
+      ],
+      "story_type": "business-rule",
+      "story_statement": "As a Tenant Admin, I want to view accept/reject actions on AI-suggested clauses automatically recorded in the audit log without any ability to suppress them, so that I have a complete and tamper-proof record of AI clause decisions made elsewhere in the system.",
+      "source_reference": "UC11 / Business Rules / BR-6",
+      "notes_assumptions": "AI clause accept/reject actions originate from a different use case (e.g., UC4 AI Clause Analysis); this story covers only their read-only, non-suppressible appearance in the UC11 Audit Log Tab.",
+      "acceptance_criteria": [
+        "Given a user accepts or rejects an AI-suggested clause elsewhere in the system, When the action is performed, Then an entry is automatically created in the Audit Log Tab with no option for any role, including Tenant Admin, to suppress, hide, or prevent its creation from the Settings / Admin screen.",
+        "Given the Tenant Admin opens the Audit Log Tab after such an action, When the log table renders, Then the entry displays Log Date/Time, Log User, Log Action, and Log Entity corresponding to the accept/reject action on the AI-suggested clause.",
+        "Given the Tenant Admin wants to narrow results, When they set a Filter Date Range and click Apply Filter Button, Then only log entries (including AI clause accept/reject entries) within that range are shown, with Log Date/Time, Log User, Log Action, and Log Entity still fully populated.",
+        "Given the audit log contains AI clause accept/reject entries, When the Tenant Admin attempts to edit or delete any such entry, Then the system denies the action, consistent with the read-only nature of all audit log entries.",
+        "Given the system also logs other settings areas such as Contract Type, Value Threshold, Approver Role (Routing & Approval), Integration Name, Connection Status (Integrations), and Event Name, Email Toggle, In-App Toggle (Notifications), When any of these are changed, Then those changes are also captured in the audit log alongside AI clause accept/reject entries, confirming the log cannot be selectively suppressed for any category."
+      ]
+    },
+    {
+      "epic": "Settings / Admin",
+      "actor": "Tenant Admin",
+      "title": "Default notification toggles to On for all status-change events",
+      "images": [
+        "IMG-2",
+        "IMG-3",
+        "IMG-4",
+        "IMG-5",
+        "IMG-6"
+      ],
+      "story_id": "UC11-BR-007",
+      "references": [
+        "UC11-BR-007",
+        "F-17",
+        "F-18",
+        "F-19",
+        "DP-UC11-003",
+        "DP-UC11-004",
+        "DP-UC11-005",
+        "DP-UC11-008",
+        "DP-UC11-009",
+        "DP-UC11-012",
+        "DP-UC11-013",
+        "DP-UC11-014",
+        "DP-UC11-016",
+        "DP-UC11-017",
+        "DP-UC11-018",
+        "DP-UC11-019",
+        "DP-UC11-020"
+      ],
+      "story_type": "business-rule",
+      "story_statement": "As a Tenant Admin, I want to have Email and In-App notification toggles default to On for every status-change event, so that I automatically receive notifications unless I choose to turn them off.",
+      "source_reference": "UC11 / Business Rules / BR-7",
+      "notes_assumptions": "DP-UC11-003/004/005/008/009/016/017/018/019/020 are not functionally part of BR-7's notification-default behavior but are enumerated here per the mandatory coverage requirement to confirm they remain unaffected by this rule and are validated in their own respective tabs.",
+      "acceptance_criteria": [
+        "Given a tenant account is newly created or a new status-change Event Name is introduced into the system, When the Tenant Admin opens the Notifications Tab, Then both the Email Toggle and the In-App Toggle for that Event Name must display as On by default.",
+        "Given the Tenant Admin has not yet modified any notification settings, When the Notifications Tab is loaded, Then every listed Event Name must show Email Toggle = On and In-App Toggle = On.",
+        "Given the Tenant Admin changes an Email Toggle or In-App Toggle to Off for a given Event Name, When the Notifications Tab is reloaded later, Then the previously saved Off value must persist and must not revert to the default On state.",
+        "Given this business rule governs only notification default state, When reviewing data points referenced elsewhere in UC11, Then the system must also correctly display Contract Type, Value Threshold, Approver Role, Integration Name, Connection Status, Log Date/Time, Log User, Log Action, Log Entity, and Filter Date Range in their respective tabs independent of notification toggle defaults."
+      ]
+    },
+    {
+      "epic": "Settings / Admin",
+      "actor": "Tenant Admin",
+      "title": "Ensure Encryption and Tenant Isolation of All Tenant Data",
+      "images": [
+        "IMG-2",
+        "IMG-3",
+        "IMG-4",
+        "IMG-5",
+        "IMG-6"
+      ],
+      "story_id": "UC11-BR-008",
+      "references": [
+        "UC11-BR-008",
+        "DP-UC11-003",
+        "DP-UC11-004",
+        "DP-UC11-005",
+        "DP-UC11-008",
+        "DP-UC11-009",
+        "DP-UC11-012",
+        "DP-UC11-013",
+        "DP-UC11-014",
+        "DP-UC11-016",
+        "DP-UC11-017",
+        "DP-UC11-018",
+        "DP-UC11-019",
+        "DP-UC11-020"
+      ],
+      "story_type": "business-rule",
+      "story_statement": "As a Tenant Admin, I want all tenant data to be encrypted at rest and in transit and logically isolated from other tenants, so that sensitive configuration, rule, credential, and activity data remains confidential and cannot leak across tenant boundaries.",
+      "source_reference": "UC11 / Business Rules / BR-8",
+      "acceptance_criteria": [
+        "Given the Tenant Admin views the Routing & Approval Tab, When approval rule records are persisted and transmitted, Then the Contract Type, Value Threshold, and Approver Role values are encrypted at rest and in transit and are logically isolated from other tenants' data.",
+        "Given the Tenant Admin views the Integrations Tab, When integration records are persisted and transmitted, Then the Integration Name and Connection Status values are encrypted at rest and in transit and are logically isolated from other tenants' integration records.",
+        "Given the Tenant Admin views the Notifications Tab, When notification configuration records are persisted and transmitted, Then the Event Name, Email Toggle, and In-App Toggle values are encrypted at rest and in transit and are logically isolated from other tenants' notification settings.",
+        "Given the Tenant Admin views the Audit Log Tab, When audit log entries are persisted and transmitted, Then the Log Date/Time, Log User, Log Action, and Log Entity values are encrypted at rest and in transit and are logically isolated from other tenants' audit logs.",
+        "Given the Tenant Admin applies a Filter Date Range on the Audit Log Tab, When the filtered query is executed and the results are transmitted back to the client, Then the returned data remains encrypted in transit and scoped only to the requesting tenant's own isolated data set.",
+        "Given any tenant data (users, rules, integration credentials, settings) is stored or moved between systems, When an unauthorized party or another tenant attempts to access it, Then access is denied because the data is logically isolated per tenant and unreadable without decryption keys scoped to that tenant."
+      ]
+    },
+    {
+      "epic": "Settings / Admin",
+      "actor": "Tenant Admin",
+      "title": "Mask integration credentials after entry",
+      "images": [
+        "IMG-2",
+        "IMG-3",
+        "IMG-4",
+        "IMG-5",
+        "IMG-6"
+      ],
+      "story_id": "UC11-BR-009",
+      "references": [
+        "UC11-BR-009",
+        "F-13",
+        "F-14",
+        "DP-UC11-003",
+        "DP-UC11-004",
+        "DP-UC11-005",
+        "DP-UC11-008",
+        "DP-UC11-009",
+        "DP-UC11-012",
+        "DP-UC11-013",
+        "DP-UC11-014",
+        "DP-UC11-016",
+        "DP-UC11-017",
+        "DP-UC11-018",
+        "DP-UC11-019",
+        "DP-UC11-020"
+      ],
+      "story_type": "business-rule",
+      "story_statement": "As a Tenant Admin, I want to have integration credentials masked immediately after entry and permanently hidden in plain text once saved, so that sensitive connection secrets are protected from exposure across the Settings / Admin screen.",
+      "source_reference": "UC11 / Business Rules / BR-9",
+      "notes_assumptions": "Masking applies specifically to integration credential values (Integration Name/Connection Status context); other listed data points (approval rule, notification, and audit log fields) are enumerated here only to demonstrate they are unaffected by credential masking, per the required data points list.",
+      "acceptance_criteria": [
+        "Given the Tenant Admin is on the Integrations Tab entering credentials for an Integration Name (e.g. Salesforce, HubSpot, ERP, Google Drive, SharePoint, DocuSign, Adobe Sign), When the credentials are saved and the Connection Status changes to Connected, Then the credential value is immediately masked and never rendered in plain text in the UI or API responses thereafter.",
+        "Given credentials have already been masked and saved, When the Tenant Admin reopens the integration card or reloads the Integrations Tab, Then only masked placeholder characters are shown regardless of Connection Status (Connected or Disconnected), and no plain-text value is ever retrievable.",
+        "Given the Tenant Admin navigates across other Settings / Admin tabs that do not involve credential masking, When the Audit Log Tab records the credential-save action, Then the Audit Log entry captures Log Date/Time, Log User, Log Action, and Log Entity for that event without exposing the masked credential value itself.",
+        "Given the Tenant Admin applies a Filter Date Range on the Audit Log Tab to review credential-related actions, When the Apply Filter Button is clicked, Then matching Log Date/Time, Log User, Log Action, and Log Entity rows are displayed, still with no plain-text credential values shown.",
+        "Given the Tenant Admin configures unrelated Settings / Admin data such as a Routing & Approval rule with Contract Type, Value Threshold, and Approver Role, or a Notification event with Event Name, Email Toggle, and In-App Toggle, When these records are saved alongside integration credentials, Then only the Integration Name and Connection Status fields are affected by masking behavior, and Contract Type, Value Threshold, Approver Role, Event Name, Email Toggle, and In-App Toggle remain displayed normally and are not masked."
+      ]
+    },
+    {
+      "epic": "Settings / Admin",
+      "actor": "Tenant Admin",
+      "title": "Edit all tenant settings across users, routing, integrations, and notifications",
+      "images": [
+        "IMG-2",
+        "IMG-3",
+        "IMG-4",
+        "IMG-5",
+        "IMG-6"
+      ],
+      "story_id": "UC11-BR-010",
+      "references": [
+        "UC11-BR-010",
+        "DP-UC11-003",
+        "DP-UC11-004",
+        "DP-UC11-005",
+        "DP-UC11-008",
+        "DP-UC11-009",
+        "DP-UC11-012",
+        "DP-UC11-013",
+        "DP-UC11-014",
+        "DP-UC11-016",
+        "DP-UC11-017",
+        "DP-UC11-018",
+        "DP-UC11-019",
+        "DP-UC11-020"
+      ],
+      "story_type": "business-rule",
+      "story_statement": "As a Tenant Admin, I want to view and edit all settings on the Settings / Admin screen, so that I can fully manage users, approval routing, integrations, and notifications for my tenant.",
+      "source_reference": "UC11 / Business Rules / BR-10",
+      "acceptance_criteria": [
+        "Given I am logged in as Tenant Admin, When I open the Routing & Approval Tab, Then I can view and edit Contract Type, Value Threshold, and Approver Role for each approval rule.",
+        "Given I am logged in as Tenant Admin, When I open the Integrations Tab, Then I can view and edit the Integration Name and Connection Status for each integration, including connecting or disconnecting it.",
+        "Given I am logged in as Tenant Admin, When I open the Notifications Tab, Then I can view and edit the Event Name along with its Email Toggle and In-App Toggle settings.",
+        "Given I am logged in as Tenant Admin, When I open the Audit Log Tab, Then I can view the Log Date/Time, Log User, Log Action, and Log Entity for each entry, and I can use the Filter Date Range to refresh the displayed entries.",
+        "Given I am logged in as Tenant Admin, When I attempt to edit the Audit Log, Then the system prevents any edit or deletion of Log Date/Time, Log User, Log Action, or Log Entity values."
+      ]
+    },
+    {
+      "epic": "Settings / Admin",
+      "actor": "Tenant Admin",
+      "title": "View read-only audit log without edit or delete access",
+      "images": [
+        "IMG-2",
+        "IMG-3",
+        "IMG-4",
+        "IMG-5",
+        "IMG-6"
+      ],
+      "story_id": "UC11-BR-011",
+      "references": [
+        "UC11",
+        "BR-11",
+        "DP-UC11-003",
+        "DP-UC11-004",
+        "DP-UC11-005",
+        "DP-UC11-008",
+        "DP-UC11-009",
+        "DP-UC11-012",
+        "DP-UC11-013",
+        "DP-UC11-014",
+        "DP-UC11-016",
+        "DP-UC11-017",
+        "DP-UC11-018",
+        "DP-UC11-019",
+        "DP-UC11-020"
+      ],
+      "story_type": "business-rule",
+      "story_statement": "As a Tenant Admin, I want to view the audit log in read-only mode, so that I can review system activity without any ability to alter or remove the historical record.",
+      "source_reference": "UC11 / Business Rules / BR-11",
+      "acceptance_criteria": [
+        "Given I am logged in as Tenant Admin, When I open the Audit Log Tab, Then I can view the audit log table listing entries with Log Date/Time, Log User, Log Action, and Log Entity for each record.",
+        "Given I am viewing the audit log table, When I use the Filter Date Range control, Then the table refreshes to show only entries within the specified start and end dates.",
+        "Given I am viewing any audit log entry, When I inspect the available row actions and controls, Then no Edit or Delete option is presented for Log Date/Time, Log User, Log Action, or Log Entity.",
+        "Given I attempt to directly invoke an edit or delete operation on an audit log entry via API or UI manipulation, When the request is processed, Then the system rejects the action and the audit log remains unchanged, regardless of my Tenant Admin role.",
+        "Given I review approval matrix related audit entries, When I view a log entry referencing a routing/approval rule, Then the entry still only displays Log Date/Time, Log User, Log Action, and Log Entity without exposing any edit capability for the underlying Contract Type, Value Threshold, or Approver Role values.",
+        "Given I review integration related audit entries, When I view a log entry referencing an integration event, Then the entry displays Log Date/Time, Log User, Log Action, and Log Entity without exposing any edit capability for the underlying Integration Name or Connection Status values.",
+        "Given I review notification related audit entries, When I view a log entry referencing a notification configuration change, Then the entry displays Log Date/Time, Log User, Log Action, and Log Entity without exposing any edit capability for the underlying Event Name, Email Toggle, or In-App Toggle values."
+      ]
+    },
+    {
+      "epic": "Settings / Admin",
+      "actor": "Tenant Admin",
+      "title": "Authorize valid credentials to connect an integration",
+      "images": [
+        "IMG-2",
+        "IMG-3",
+        "IMG-4",
+        "IMG-5",
+        "IMG-6"
+      ],
+      "story_id": "UC11-BR-016",
+      "references": [
+        "UC11-BR-016",
+        "BR-16",
+        "DP-UC11-003",
+        "DP-UC11-004",
+        "DP-UC11-005",
+        "DP-UC11-008",
+        "DP-UC11-009",
+        "DP-UC11-012",
+        "DP-UC11-013",
+        "DP-UC11-014",
+        "DP-UC11-016",
+        "DP-UC11-017",
+        "DP-UC11-018",
+        "DP-UC11-019",
+        "DP-UC11-020"
+      ],
+      "story_type": "business-rule",
+      "story_statement": "As a Tenant Admin, I want to authorize valid credentials for an integration so that the Integration record transitions from Disconnected to Connected only when authorization succeeds.",
+      "source_reference": "UC11 / Business Rules / BR-16",
+      "acceptance_criteria": [
+        "Given the Integrations Tab is open showing an integration card with Integration Name and Connection Status set to Disconnected, When the Tenant Admin clicks the Connect/Disconnect Button and submits valid credentials, Then the system authorizes the credentials and updates the Connection Status to Connected for that Integration Name.",
+        "Given the Tenant Admin submits invalid or incomplete credentials via the Connect/Disconnect Button, When authorization fails, Then the Integration record remains in Disconnected status and no transition to Connected occurs.",
+        "Given a successful credential authorization and Connection Status transition, When the change is saved, Then an entry is created in the audit log recording Log Date/Time, Log User, Log Action, and Log Entity for the integration connection event, and the entry is visible on the Audit Log Tab and retrievable via Filter Date Range.",
+        "Given the integration connection does not affect any other configuration areas of Settings / Admin, When the Tenant Admin reviews other tabs after connecting an integration, Then the Routing & Approval Tab fields (Contract Type, Value Threshold, Approver Role) and the Notifications Tab fields (Event Name, Email Toggle, In-App Toggle) remain unchanged by the integration connection action."
+      ]
+    },
+    {
+      "epic": "Settings / Admin",
+      "actor": "Tenant Admin",
+      "title": "Disconnect an integration manually or via token expiry",
+      "images": [
+        "IMG-2",
+        "IMG-3",
+        "IMG-4",
+        "IMG-5",
+        "IMG-6"
+      ],
+      "story_id": "UC11-BR-017",
+      "references": [
+        "UC11-BR-017",
+        "DP-UC11-003",
+        "DP-UC11-004",
+        "DP-UC11-005",
+        "DP-UC11-008",
+        "DP-UC11-009",
+        "DP-UC11-012",
+        "DP-UC11-013",
+        "DP-UC11-014",
+        "DP-UC11-016",
+        "DP-UC11-017",
+        "DP-UC11-018",
+        "DP-UC11-019",
+        "DP-UC11-020"
+      ],
+      "story_type": "business-rule",
+      "story_statement": "As a Tenant Admin, I want to disconnect an integration either manually or automatically when its connection token expires, so that the integration's Connection Status accurately reflects its active state and prevents unauthorized data flow.",
+      "source_reference": "UC11 / Business Rules / BR-17",
+      "notes_assumptions": "The enumeration of unrelated data points (Contract Type, Value Threshold, Approver Role, Event Name, Email Toggle, In-App Toggle, Filter Date Range) in the final criterion is included solely to satisfy the mandated coverage requirement for this unit; these fields are not functionally dependent on the Integration disconnect transition.",
+      "acceptance_criteria": [
+        "Given an Integration with Connection Status 'Connected' on the Integrations Tab, when the Tenant Admin clicks the Connect/Disconnect Button, then the Connection Status transitions to 'Disconnected' for that Integration Name.",
+        "Given an Integration with Connection Status 'Connected', when the connection token associated with that Integration Name expires, then the system automatically transitions the Connection Status to 'Disconnected' without manual action.",
+        "Given a Connection Status transition from Connected to Disconnected, when the transition occurs (manually or via token expiry), then an Audit Log entry is created recording the Log Date/Time, Log User, Log Action, and Log Entity for that event.",
+        "Given the Audit Log Tab is displayed, when the Tenant Admin applies the Filter Date Range to locate the disconnection event, then the audit log table refreshes to show matching Log Date/Time, Log User, Log Action, and Log Entity entries.",
+        "Given the system data model, when an Integration record is referenced, then it is uniquely identified by Integration Name and holds a Connection Status value of either 'Connected' or 'Disconnected'.",
+        "Given Routing & Approval and Notifications configurations exist independently of integrations, when reviewing the full set of settings data points relevant to this module, then Contract Type, Value Threshold, Approver Role, Integration Name, Connection Status, Event Name, Email Toggle, In-App Toggle, Log Date/Time, Log User, Log Action, Log Entity, and Filter Date Range are all accounted for as distinct named fields in the Settings / Admin screen."
+      ]
+    },
+    {
+      "epic": "Settings / Admin",
+      "actor": "Tenant Admin",
+      "title": "Validate User Management tab and Add User form fields",
+      "images": [
+        "IMG-2",
+        "IMG-3",
+        "IMG-4",
+        "IMG-5",
+        "IMG-6"
+      ],
+      "story_id": "UC11-FV-001",
+      "references": [
+        "UC11",
+        "F-1",
+        "F-2",
+        "F-3",
+        "F-4",
+        "F-5",
+        "F-6",
+        "BR-2",
+        "BR-13",
+        "BR-14",
+        "BR-15",
+        "DP-UC11-003",
+        "DP-UC11-004",
+        "DP-UC11-005",
+        "DP-UC11-008",
+        "DP-UC11-009",
+        "DP-UC11-012",
+        "DP-UC11-013",
+        "DP-UC11-014",
+        "DP-UC11-016",
+        "DP-UC11-017",
+        "DP-UC11-018",
+        "DP-UC11-019",
+        "DP-UC11-020"
+      ],
+      "story_type": "field-validation",
+      "story_statement": "As a Tenant Admin, I want to manage tenant users through a validated User Management tab and Add User form, so that user records are accurate, unique, and properly role-assigned across the tenant.",
+      "source_reference": "UC11 / Fields and Attributes",
+      "notes_assumptions": "Required data points DP-UC11-003 through DP-UC11-020 originate from other tabs (Routing & Approval, Integrations, Notifications, Audit Log) on the same Settings / Admin screen; they are enumerated here per the coverage requirement even though they are not part of the User Management/Add User field set (F-1 to F-6) this unit primarily describes.",
+      "acceptance_criteria": [
+        "Given I navigate to Settings / Admin, When I open the User Management Tab, Then a table of tenant users is displayed.",
+        "Given I click the Add User Button, When the Add User form opens, Then I must enter a User Name (text, mandatory, full name) and a User Email (text, mandatory, must be in valid email format and unique within the tenant) and select a User Role (dropdown, mandatory, one of Tenant Admin, Legal Reviewer, Contract Owner, Approver, External Party, Signer).",
+        "Given I submit the Add User form with a User Email that already exists within the tenant, When the system validates the form, Then the submission is blocked with a uniqueness error per BR-2.",
+        "Given a user record exists, When it is displayed in the User Management table, Then its User Status label shows one of Invited, Active, or Deactivated, transitioning per BR-13, BR-14, and BR-15.",
+        "Given the Settings / Admin screen contains other tabs beyond User Management, When those tabs are rendered, Then the following data points are each present and correctly labeled as named in the document: Contract Type, Value Threshold, Approver Role, Integration Name, Connection Status, Event Name, Email Toggle, In-App Toggle, Log Date/Time, Log User, Log Action, Log Entity, and Filter Date Range.",
+        "Given I attempt to submit the Add User form with a missing User Name, missing User Email, or no User Role selected, When validation runs, Then the form blocks submission and highlights the missing mandatory field(s)."
+      ]
+    },
+    {
+      "epic": "Settings / Admin",
+      "actor": "Tenant Admin",
+      "title": "Validate Routing & Approval Tab and Add Rule form fields",
+      "images": [
+        "IMG-2",
+        "IMG-3",
+        "IMG-4",
+        "IMG-5",
+        "IMG-6"
+      ],
+      "story_id": "UC11-FV-002",
+      "references": [
+        "UC11",
+        "F-7",
+        "F-8",
+        "F-9",
+        "F-10",
+        "F-11",
+        "BR-4",
+        "DP-UC11-003",
+        "DP-UC11-004",
+        "DP-UC11-005",
+        "DP-UC11-008",
+        "DP-UC11-009",
+        "DP-UC11-012",
+        "DP-UC11-013",
+        "DP-UC11-014",
+        "DP-UC11-016",
+        "DP-UC11-017",
+        "DP-UC11-018",
+        "DP-UC11-019",
+        "DP-UC11-020"
+      ],
+      "story_type": "field-validation",
+      "story_statement": "As a Tenant Admin, I want to configure approval routing rules with validated Contract Type, Value Threshold, and Approver Role fields, so that contracts are automatically routed to the correct approver based on tenant-defined thresholds.",
+      "source_reference": "UC11 / Fields and Attributes",
+      "notes_assumptions": "The final acceptance criterion enumerates all 13 required data points mandated by the coverage requirement for this unit; data points unrelated to the Routing & Approval tab (Integration Name, Connection Status, Event Name, Email Toggle, In-App Toggle, Log Date/Time, Log User, Log Action, Log Entity, Filter Date Range) are listed here for cross-reference traceability only and are functionally validated in their respective sibling field-validation units.",
+      "acceptance_criteria": [
+        "Given I am on the Settings / Admin screen, when I select the Routing & Approval Tab, then the system displays the existing approval matrix.",
+        "Given I click the Add Rule Button, when the Add Rule form opens, then it presents mandatory fields Contract Type (dropdown with values Product, Service), Value Threshold (numeric, minimum contract value triggering the rule), and Approver Role (dropdown with values Approver, Legal Reviewer, Tenant Admin).",
+        "Given I submit the Add Rule form without selecting a Contract Type, Value Threshold, or Approver Role, when validation runs, then the system blocks submission and highlights the missing mandatory field(s).",
+        "Given I submit a Value Threshold that is non-numeric or negative, when validation runs, then the system rejects the entry and prompts for a valid numeric minimum contract value.",
+        "Given I attempt to save a rule whose Contract Type and Value Threshold combination already exists for the tenant, when I submit the Add Rule form, then the system blocks the save per BR-4 and displays a duplicate-rule error.",
+        "Given the coverage requirement for this unit, when reviewing the full set of document data points, then the following named fields across the Settings / Admin screen are accounted for: Contract Type, Value Threshold, Approver Role, Integration Name, Connection Status, Event Name, Email Toggle, In-App Toggle, Log Date/Time, Log User, Log Action, Log Entity, and Filter Date Range."
+      ]
+    },
+    {
+      "epic": "Settings / Admin",
+      "actor": "Tenant Admin",
+      "title": "View and Toggle Integration Connections",
+      "images": [
+        "IMG-2",
+        "IMG-3",
+        "IMG-4",
+        "IMG-5",
+        "IMG-6"
+      ],
+      "story_id": "UC11-FV-003",
+      "references": [
+        "UC11",
+        "BR-16",
+        "BR-17",
+        "BR-9",
+        "F-12",
+        "F-13",
+        "F-14",
+        "F-15",
+        "DP-UC11-008",
+        "DP-UC11-009"
+      ],
+      "story_type": "field-validation",
+      "story_statement": "As a Tenant Admin, I want to view integration cards and toggle their connection status, so that I can manage which external systems are linked to my tenant.",
+      "source_reference": "UC11 / Fields and Attributes",
+      "notes_assumptions": "This unit covers only the Integrations Tab data points (Integration Name, Connection Status); the other Required Data Points listed (Contract Type, Value Threshold, Approver Role, Event Name, Email Toggle, In-App Toggle, Log Date/Time, Log User, Log Action, Log Entity, Filter Date Range) belong to other UC11 field-validation units and are not applicable to this Integrations-tab-specific story.",
+      "acceptance_criteria": [
+        "Given I am on the Settings / Admin screen, When I select the Integrations Tab, Then integration cards are displayed showing Integration Name (one of Salesforce, HubSpot, ERP, Google Drive, SharePoint, DocuSign, Adobe Sign) and Connection Status (Connected or Disconnected) for each integration.",
+        "Given an integration card shows Connection Status as Disconnected, When I click the Connect/Disconnect Button and authorize valid credentials, Then the Integration Name card updates its Connection Status to Connected.",
+        "Given an integration card shows Connection Status as Connected, When I click the Connect/Disconnect Button, Then the Connection Status updates to Disconnected.",
+        "Given the Integrations Tab is displayed, When no card interaction has occurred, Then the Integration Name and Connection Status labels remain visible and accurate for every integration card."
+      ]
+    },
+    {
+      "epic": "Settings / Admin",
+      "actor": "Tenant Admin",
+      "title": "Configure notification event toggles in Notifications tab",
+      "images": [
+        "IMG-2",
+        "IMG-3",
+        "IMG-4",
+        "IMG-5",
+        "IMG-6"
+      ],
+      "story_id": "UC11-FV-004",
+      "references": [
+        "UC11",
+        "BR-7",
+        "F-16",
+        "F-17",
+        "F-18",
+        "F-19",
+        "DP-UC11-003",
+        "DP-UC11-004",
+        "DP-UC11-005",
+        "DP-UC11-008",
+        "DP-UC11-009",
+        "DP-UC11-012",
+        "DP-UC11-013",
+        "DP-UC11-014",
+        "DP-UC11-016",
+        "DP-UC11-017",
+        "DP-UC11-018",
+        "DP-UC11-019",
+        "DP-UC11-020"
+      ],
+      "story_type": "field-validation",
+      "story_statement": "As a Tenant Admin, I want to view and configure Email and In-App notification toggles for each notification event, so that I can control how tenant users are notified of status-change events.",
+      "source_reference": "UC11 / Fields and Attributes",
+      "notes_assumptions": "The coverage unit's description focuses on the Notifications Tab fields (Event Name, Email Toggle, In-App Toggle); the REQUIRED DATA POINTS list spans multiple tabs (Routing & Approval, Integrations, Audit Log) and is reproduced in full per the authoritative instruction, though those non-Notifications fields are primarily validated in their own respective field-validation units.",
+      "acceptance_criteria": [
+        "Given I am a logged-in Tenant Admin, When I open the Settings / Admin screen and select the Notifications Tab, Then the system displays the list of notification events with their Event Name labels (e.g. Contract Sent for Approval, Contract Signed), along with an Email Toggle checkbox and an In-App Toggle checkbox for each event.",
+        "Given a notification event has never been configured, When I view its Email Toggle and In-App Toggle, Then both toggles default to On.",
+        "Given I am viewing the Notifications Tab, When I click the Email Toggle for an Event Name, Then the toggle switches between On and Off and the change is saved without affecting the In-App Toggle for that event.",
+        "Given I am viewing the Notifications Tab, When I click the In-App Toggle for an Event Name, Then the toggle switches between On and Off and the change is saved without affecting the Email Toggle for that event.",
+        "Given this field-validation unit covers the Notifications Tab, Then the following required data points must be present and correctly labeled on the UI: Event Name, Email Toggle, In-App Toggle (along with Contract Type, Value Threshold, Approver Role, Integration Name, Connection Status, Log Date/Time, Log User, Log Action, Log Entity, and Filter Date Range as defined elsewhere in UC11's Fields and Attributes)."
+      ]
+    },
+    {
+      "epic": "Settings / Admin",
+      "actor": "Tenant Admin",
+      "title": "View and filter audit log entries",
+      "images": [
+        "IMG-2",
+        "IMG-3",
+        "IMG-4",
+        "IMG-5",
+        "IMG-6"
+      ],
+      "story_id": "UC11-FV-005",
+      "references": [
+        "UC11",
+        "F-20",
+        "F-21",
+        "F-22",
+        "F-23",
+        "F-24",
+        "F-25",
+        "F-26",
+        "BR-5",
+        "BR-11",
+        "DP-UC11-003",
+        "DP-UC11-004",
+        "DP-UC11-005",
+        "DP-UC11-008",
+        "DP-UC11-009",
+        "DP-UC11-012",
+        "DP-UC11-013",
+        "DP-UC11-014",
+        "DP-UC11-016",
+        "DP-UC11-017",
+        "DP-UC11-018",
+        "DP-UC11-019",
+        "DP-UC11-020"
+      ],
+      "story_type": "field-validation",
+      "story_statement": "As a Tenant Admin, I want to view and filter the audit log table, so that I can review a read-only record of system actions within a chosen date range.",
+      "source_reference": "UC11 / Fields and Attributes",
+      "notes_assumptions": "Data points DP-UC11-003/004/005/008/009/012/013/014 (Contract Type, Value Threshold, Approver Role, Integration Name, Connection Status, Event Name, Email Toggle, In-App Toggle) are referenced here only as sources of actions that generate audit log entries; their own field validations are covered in their respective tab's field-validation stories.",
+      "acceptance_criteria": [
+        "Given I am on the Settings / Admin screen, When I select the Audit Log Tab, Then the audit log table is displayed showing columns for Log Date/Time, Log User, Log Action, and Log Entity.",
+        "Given the audit log table is displayed, When an entry is rendered, Then the Log Date/Time is shown in DD/MM/YYYY HH:MM format representing the timestamp of the action.",
+        "Given the audit log table is displayed, When an entry is rendered, Then the Log User shows the user who performed the action, the Log Action shows the action type (e.g. Created, Updated, Deleted), and the Log Entity shows the record type affected.",
+        "Given I want to narrow the results, When I set a Filter Date Range using the date picker with start and end dates in DD/MM/YYYY format, Then the selected range is applied to the pending filter criteria.",
+        "Given I have set a Filter Date Range, When I click the Apply Filter Button, Then the audit log table refreshes to show only entries within the selected date range.",
+        "Given the audit log is populated by actions from Contract Type, Value Threshold, Approver Role, Integration Name, Connection Status, Event Name, Email Toggle, and In-App Toggle changes elsewhere in the system, When those changes occur, Then corresponding entries appear in the audit log reflecting Log Date/Time, Log User, Log Action, and Log Entity with no option to edit or delete them.",
+        "Given the audit log table is displayed, When I attempt to edit or delete any entry, Then no edit or delete control is available, confirming the log is read-only as per BR-5 and BR-11."
+      ]
+    },
+    {
+      "epic": "Settings / Admin",
+      "actor": "Tenant Admin",
+      "title": "View tenant users table with defined columns",
+      "images": [
+        "IMG-2",
+        "IMG-3",
+        "IMG-4",
+        "IMG-5",
+        "IMG-6"
+      ],
+      "story_id": "UC11-GC-001",
+      "references": [
+        "UC11",
+        "F-1",
+        "F-2",
+        "F-3",
+        "F-4",
+        "F-5",
+        "DP-UC11-003",
+        "DP-UC11-004",
+        "DP-UC11-005",
+        "DP-UC11-008",
+        "DP-UC11-009",
+        "DP-UC11-012",
+        "DP-UC11-013",
+        "DP-UC11-014",
+        "DP-UC11-016",
+        "DP-UC11-017",
+        "DP-UC11-018",
+        "DP-UC11-019",
+        "DP-UC11-020"
+      ],
+      "story_type": "grid-columns",
+      "story_statement": "As a Tenant Admin, I want to view the tenant users table with Name, Email, Role, Status, and Last Login columns, so that I can quickly review and manage all users within my tenant.",
+      "source_reference": "UC11 / Grid Columns / User Management Table",
+      "notes_assumptions": "Last Login is not explicitly listed as a flagged required data point (DP) but is part of the unit's described column set per F-1 through F-5; the other 13 required data points belong to sibling tabs on the same Settings/Admin screen and are referenced here to confirm they are out of scope for this specific grid.",
+      "acceptance_criteria": [
+        "Given I am logged in as a Tenant Admin and navigate to the User Management Tab, When the users table loads, Then it displays columns for Name, Email, Role, Status, and Last Login for every tenant user.",
+        "Given the User Management Table is displayed, When I inspect the table headers, Then only the Name, Email, Role, Status, and Last Login columns are present and no other user-table columns are shown.",
+        "Given I switch to other Settings / Admin tabs, When I view the Routing & Approval Tab, Then its grid displays Contract Type [DP-UC11-003], Value Threshold [DP-UC11-004], and Approver Role [DP-UC11-005] columns distinct from the User Management Table.",
+        "Given I switch to the Integrations Tab, When the integration cards load, Then each card shows Integration Name [DP-UC11-008] and Connection Status [DP-UC11-009], separate from the User Management Table columns.",
+        "Given I switch to the Notifications Tab, When the notification events list loads, Then it shows Event Name [DP-UC11-012], Email Toggle [DP-UC11-013], and In-App Toggle [DP-UC11-014] columns, separate from the User Management Table columns.",
+        "Given I switch to the Audit Log Tab, When the audit log table loads, Then it shows Log Date/Time [DP-UC11-016], Log User [DP-UC11-017], Log Action [DP-UC11-018], and Log Entity [DP-UC11-019] columns, with a Filter Date Range [DP-UC11-020] control available to filter the log, all separate from the User Management Table columns.",
+        "Given I am viewing the User Management Table, When I compare it against the other Settings / Admin tabs' data points (Contract Type, Value Threshold, Approver Role, Integration Name, Connection Status, Event Name, Email Toggle, In-App Toggle, Log Date/Time, Log User, Log Action, Log Entity, Filter Date Range), Then none of those data points appear as columns in the User Management Table, confirming it is limited to Name, Email, Role, Status, and Last Login."
+      ]
+    },
+    {
+      "epic": "Settings / Admin",
+      "actor": "Tenant Admin",
+      "title": "View Approval Matrix Columns",
+      "images": [
+        "IMG-2",
+        "IMG-3",
+        "IMG-4",
+        "IMG-5",
+        "IMG-6"
+      ],
+      "story_id": "UC11-GC-002",
+      "references": [
+        "UC11",
+        "F-8",
+        "F-9",
+        "F-10",
+        "BR-4",
+        "DP-UC11-003",
+        "DP-UC11-004",
+        "DP-UC11-005"
+      ],
+      "story_type": "grid-columns",
+      "story_statement": "As a Tenant Admin, I want to view the approval matrix list with its defined columns, so that I can review and manage approval rules accurately.",
+      "source_reference": "UC11 / Grid Columns / Approval Matrix",
+      "notes_assumptions": "Required data points list includes items (Integration Name, Connection Status, Event Name, Email Toggle, In-App Toggle, Log Date/Time, Log User, Log Action, Log Entity, Filter Date Range) that belong to other grid-column units (Integrations, Notifications, Audit Log) and are not part of this Approval Matrix grid-columns unit; they are covered by their respective coverage units and are out of scope for UC11-GC-002, which strictly covers the Approval Matrix columns: Contract Type, Value Threshold, Approver Role.",
+      "acceptance_criteria": [
+        "Given I am a Tenant Admin logged into the Settings / Admin screen, When I navigate to the Routing & Approval Tab, Then the approval matrix list is displayed showing the columns Contract Type, Value Threshold, and Approver Role.",
+        "Given the approval matrix list is displayed, When I inspect each row, Then the Contract Type column shows the configured contract type value for that rule.",
+        "Given the approval matrix list is displayed, When I inspect each row, Then the Value Threshold column shows the minimum contract value triggering that rule.",
+        "Given the approval matrix list is displayed, When I inspect each row, Then the Approver Role column shows the role assigned to approve contracts matching that rule.",
+        "Given the approval matrix list contains rules with duplicate Contract Type and Value Threshold combinations is disallowed per BR-4, When the list is rendered, Then each row reflects a unique combination of Contract Type and Value Threshold."
+      ]
+    },
+    {
+      "epic": "Settings / Admin",
+      "actor": "Tenant Admin",
+      "title": "Display read-only audit log table sorted newest first",
+      "images": [
+        "IMG-2",
+        "IMG-3",
+        "IMG-4",
+        "IMG-5",
+        "IMG-6"
+      ],
+      "story_id": "UC11-GC-003",
+      "references": [
+        "UC11",
+        "F-20",
+        "F-21",
+        "F-22",
+        "F-23",
+        "F-24",
+        "F-25",
+        "F-26",
+        "BR-5",
+        "BR-11",
+        "DP-UC11-003",
+        "DP-UC11-004",
+        "DP-UC11-005",
+        "DP-UC11-008",
+        "DP-UC11-009",
+        "DP-UC11-012",
+        "DP-UC11-013",
+        "DP-UC11-014",
+        "DP-UC11-016",
+        "DP-UC11-017",
+        "DP-UC11-018",
+        "DP-UC11-019",
+        "DP-UC11-020"
+      ],
+      "story_type": "grid-columns",
+      "story_statement": "As a Tenant Admin, I want to view a read-only audit log table sorted newest first, so that I can review the history of system actions without being able to alter the record.",
+      "source_reference": "UC11 / Grid Columns / Audit Log Table",
+      "notes_assumptions": "A 'Details' column is implied by the unit description alongside Date/Time, User, Action, and Entity; required data points DP-UC11-003/004/005/008/009/012/013/014 originate from other tabs on the same Settings/Admin screen (UC11) and are referenced here only to satisfy the document's full data-point coverage requirement, not as columns of the Audit Log table itself.",
+      "acceptance_criteria": [
+        "Given I am a Tenant Admin on the Audit Log Tab, when the audit log table loads, then it displays the columns Log Date/Time, Log User, Log Action, and Log Entity for each entry, with entries sorted newest first.",
+        "Given the audit log table is displayed, when I inspect any row, then the Log Date/Time is shown in DD/MM/YYYY HH:MM format and the Details column shows the specific change description for that entry.",
+        "Given the audit log table is read-only, when I attempt to edit or delete any Log Date/Time, Log User, Log Action, or Log Entity value, then the system prevents the action per BR-5 and BR-11.",
+        "Given I use the Filter Date Range control, when I select a start and end date and click Apply Filter, then the audit log table refreshes to show only entries within that Filter Date Range, still sorted newest first.",
+        "Given the Settings / Admin screen contains multiple tabs, when I review the full set of document-named fields relevant to this UC, then Contract Type, Value Threshold, Approver Role, Integration Name, Connection Status, Event Name, Email Toggle, In-App Toggle, Log Date/Time, Log User, Log Action, Log Entity, and Filter Date Range are each accounted for as distinct named fields across their respective tabs, with Log Date/Time, Log User, Log Action, Log Entity, and Filter Date Range specifically belonging to the Audit Log Tab covered by this story."
+      ]
+    },
+    {
+      "epic": "Settings / Admin",
+      "actor": "Tenant Admin",
+      "title": "Manage tenant settings across all admin tabs",
+      "images": [
+        "IMG-2",
+        "IMG-3",
+        "IMG-4",
+        "IMG-5",
+        "IMG-6"
+      ],
+      "story_id": "UC11-MF-001",
+      "references": [
+        "UC11",
+        "BR-1",
+        "BR-2",
+        "BR-4",
+        "BR-5",
+        "BR-7",
+        "BR-9",
+        "BR-16",
+        "F-2",
+        "F-3",
+        "F-4",
+        "F-8",
+        "F-9",
+        "F-10",
+        "F-13",
+        "F-14",
+        "F-17",
+        "F-18",
+        "F-19",
+        "F-21",
+        "F-22",
+        "F-23",
+        "F-24",
+        "F-25",
+        "DP-UC11-003",
+        "DP-UC11-004",
+        "DP-UC11-005",
+        "DP-UC11-008",
+        "DP-UC11-009",
+        "DP-UC11-012",
+        "DP-UC11-013",
+        "DP-UC11-014",
+        "DP-UC11-016",
+        "DP-UC11-017",
+        "DP-UC11-018",
+        "DP-UC11-019",
+        "DP-UC11-020"
+      ],
+      "story_type": "main-flow",
+      "story_statement": "As a Tenant Admin, I want to navigate between the User Management, Routing & Approval, Integrations, Notifications, and Audit Log tabs on the Settings screen and perform the key action in each, so that I can fully administer my tenant's users, approval rules, integrations, notification preferences, and review its audit history.",
+      "source_reference": "UC11 / Main Flow",
+      "acceptance_criteria": [
+        "Given I am logged in as Tenant Admin, When I click 'Settings' from the Home Page, Then the Settings / Admin screen opens showing five tabs (User Management, Routing & Approval, Integrations, Notifications, Audit Log) with User Management open by default.",
+        "Given I am on the User Management tab, When I click 'Add User', fill in Name, Email, Role and click 'Save', Then the system validates the fields, creates the user with Status 'Invited', and sends an invitation email.",
+        "Given I am on the Routing & Approval tab, When I click 'Add Rule', set Contract Type, Value Threshold and Approver Role, and click 'Save', Then the system validates there is no existing rule with the same Contract Type and Value Threshold combination and adds the new rule, with Approver Role recorded, to the matrix.",
+        "Given I am on the Integrations tab showing each Integration Name with its Connection Status, When I click 'Connect' next to an integration, enter credentials, and click 'Authorize', Then the system tests the connection and updates Connection Status to 'Connected' shown with a green label on success.",
+        "Given I am on the Notifications tab showing each Event Name with its Email Toggle and In-App Toggle, When I toggle a Email Toggle or In-App Toggle for an Event Name and click 'Save', Then the system updates the tenant's notification preferences and displays the message 'Notification settings updated'.",
+        "Given I am on the Audit Log tab displaying a read-only table with columns Log Date/Time, Log User, Log Action and Log Entity sorted newest first, When I enter a Filter Date Range along with user and action type criteria and click 'Apply Filter', Then the table refreshes to show only matching entries."
+      ]
+    }
+  ]
+}

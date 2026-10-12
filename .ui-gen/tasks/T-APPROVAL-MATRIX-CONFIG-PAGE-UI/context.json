@@ -1,0 +1,753 @@
+{
+  "group_id": "approval-matrix-config-page",
+  "task_id": "T-APPROVAL-MATRIX-CONFIG-PAGE-UI",
+  "primary_story_id": "UC6-BR-002",
+  "story_ids": [
+    "UC6-BR-002",
+    "UC6-BR-016"
+  ],
+  "page_component": {
+    "name": "ApprovalMatrixConfigPage",
+    "type": "PAGE",
+    "props": [],
+    "story_refs": [
+      "UC6-BR-002",
+      "UC6-BR-016"
+    ],
+    "description": "Tenant Admin settings screen to configure approval matrix rules by contract type, value, and risk band"
+  },
+  "components": [],
+  "hooks": [
+    {
+      "name": "useApprovalsList",
+      "returns": "{ data: ApprovalListResponse; isLoading: boolean }",
+      "story_refs": [
+        "UC6-AF-006",
+        "UC6-BR-016",
+        "UC6-BR-017",
+        "UC6-BR-018"
+      ],
+      "description": "Fetches the paged list of approvals for the current user/delegate/tenant scope"
+    },
+    {
+      "name": "useApprovalDetail",
+      "returns": "{ data: ApprovalResponse; isLoading: boolean }",
+      "story_refs": [
+        "UC6-MF-001",
+        "UC6-AF-001",
+        "UC6-AF-002",
+        "UC6-AF-003",
+        "UC6-AF-004",
+        "UC6-AF-005",
+        "UC6-BR-001",
+        "UC6-BR-002",
+        "UC6-BR-003",
+        "UC6-BR-004",
+        "UC6-BR-007",
+        "UC6-BR-009",
+        "UC6-BR-011",
+        "UC6-BR-014",
+        "UC6-BR-015",
+        "UC6-BR-016",
+        "UC6-BR-017",
+        "UC6-BR-018",
+        "UC6-BR-019",
+        "UC6-BR-020",
+        "UC6-FV-001"
+      ],
+      "description": "Fetches full approval detail for the Approval Review screen"
+    },
+    {
+      "name": "useSubmitApprovalAction",
+      "returns": "{ mutate: (req: ApprovalActionRequest) => Promise<ApprovalActionResponse>; isLoading: boolean }",
+      "story_refs": [
+        "UC6-MF-001",
+        "UC6-AF-001",
+        "UC6-AF-002",
+        "UC6-AF-004",
+        "UC6-BR-001",
+        "UC6-BR-003",
+        "UC6-BR-004",
+        "UC6-BR-005",
+        "UC6-BR-006",
+        "UC6-BR-007",
+        "UC6-BR-010",
+        "UC6-BR-011",
+        "UC6-BR-012",
+        "UC6-BR-015",
+        "UC6-BR-016",
+        "UC6-BR-017",
+        "UC6-BR-018",
+        "UC6-BR-019",
+        "UC6-BR-020",
+        "UC6-BR-021",
+        "UC6-BR-022",
+        "UC6-BR-023",
+        "UC6-BR-024"
+      ],
+      "description": "Submits Approve/Reject/SendBack actions against POST /approvals/{id}/actions"
+    },
+    {
+      "name": "useApprovalMatrixConfig",
+      "returns": "{ data: ApprovalMatrixConfigListResponse; isLoading: boolean }",
+      "story_refs": [
+        "UC6-BR-002",
+        "UC6-BR-016"
+      ],
+      "description": "Fetches tenant approval matrix configuration"
+    },
+    {
+      "name": "useUpdateApprovalMatrixConfig",
+      "returns": "{ mutate: (req: UpdateApprovalMatrixConfigRequest) => Promise<ApprovalMatrixConfigListResponse>; isLoading: boolean }",
+      "story_refs": [
+        "UC6-BR-002",
+        "UC6-BR-016"
+      ],
+      "description": "Updates tenant approval matrix configuration"
+    }
+  ],
+  "store_slices": [
+    {
+      "name": "approvalSlice",
+      "actions": [
+        "setCurrentApproval",
+        "setList",
+        "setHistory",
+        "clear"
+      ],
+      "state_shape": "{ currentApproval: ApprovalResponse | null; list: ApprovalListItemResponse[]; history: ApprovalHistoryEntryResponse[] }"
+    }
+  ],
+  "relevant_endpoints": [
+    {
+      "id": "GET_approvals_list",
+      "path": "/api/v1/approvals",
+      "roles": [
+        "APPROVER",
+        "TENANT_ADMIN",
+        "CONTRACT_OWNER",
+        "LEGAL_REVIEWER"
+      ],
+      "method": "GET",
+      "summary": "List approvals visible to the current user (pending, delegated, or tenant-wide for Tenant Admin), with empty-state when none pending",
+      "is_paged": true,
+      "story_refs": [
+        "UC6-AF-006",
+        "UC6-BR-016",
+        "UC6-BR-017",
+        "UC6-BR-018"
+      ],
+      "response_dto": "ApprovalListResponse",
+      "auth_required": true
+    },
+    {
+      "id": "GET_approval_detail",
+      "path": "/api/v1/approvals/{approvalId}",
+      "roles": [
+        "APPROVER",
+        "TENANT_ADMIN",
+        "CONTRACT_OWNER",
+        "LEGAL_REVIEWER"
+      ],
+      "method": "GET",
+      "summary": "Get full approval review detail for a contract's current step including all read-only fields and action eligibility flags",
+      "is_paged": false,
+      "story_refs": [
+        "UC6-MF-001",
+        "UC6-AF-001",
+        "UC6-AF-002",
+        "UC6-AF-003",
+        "UC6-AF-004",
+        "UC6-AF-005",
+        "UC6-BR-001",
+        "UC6-BR-002",
+        "UC6-BR-003",
+        "UC6-BR-004",
+        "UC6-BR-007",
+        "UC6-BR-009",
+        "UC6-BR-011",
+        "UC6-BR-014",
+        "UC6-BR-015",
+        "UC6-BR-016",
+        "UC6-BR-017",
+        "UC6-BR-018",
+        "UC6-BR-019",
+        "UC6-BR-020",
+        "UC6-FV-001"
+      ],
+      "response_dto": "ApprovalResponse",
+      "auth_required": true
+    },
+    {
+      "id": "POST_approval_action",
+      "path": "/api/v1/approvals/{approvalId}/actions",
+      "roles": [
+        "APPROVER"
+      ],
+      "method": "POST",
+      "summary": "Submit an Approve, Reject, or Send Back action for the current approval step, enforcing sequence, mandatory-comments and ownership rules",
+      "is_paged": false,
+      "story_refs": [
+        "UC6-MF-001",
+        "UC6-AF-001",
+        "UC6-AF-002",
+        "UC6-AF-004",
+        "UC6-BR-001",
+        "UC6-BR-003",
+        "UC6-BR-004",
+        "UC6-BR-005",
+        "UC6-BR-006",
+        "UC6-BR-007",
+        "UC6-BR-010",
+        "UC6-BR-011",
+        "UC6-BR-012",
+        "UC6-BR-015",
+        "UC6-BR-016",
+        "UC6-BR-017",
+        "UC6-BR-018",
+        "UC6-BR-019",
+        "UC6-BR-020",
+        "UC6-BR-021",
+        "UC6-BR-022",
+        "UC6-BR-023",
+        "UC6-BR-024"
+      ],
+      "request_dto": "ApprovalActionRequest",
+      "response_dto": "ApprovalActionResponse",
+      "auth_required": true
+    },
+    {
+      "id": "GET_approval_matrix_config",
+      "path": "/api/v1/approval-matrix-config",
+      "roles": [
+        "TENANT_ADMIN"
+      ],
+      "method": "GET",
+      "summary": "Retrieve tenant-configured approval matrix rules by contract type, value, and risk band",
+      "is_paged": false,
+      "story_refs": [
+        "UC6-BR-002",
+        "UC6-BR-016"
+      ],
+      "response_dto": "ApprovalMatrixConfigListResponse",
+      "auth_required": true
+    },
+    {
+      "id": "PUT_approval_matrix_config",
+      "path": "/api/v1/approval-matrix-config",
+      "roles": [
+        "TENANT_ADMIN"
+      ],
+      "method": "PUT",
+      "summary": "Update tenant-configured approval matrix rules and step sequences",
+      "is_paged": false,
+      "story_refs": [
+        "UC6-BR-002",
+        "UC6-BR-016"
+      ],
+      "request_dto": "UpdateApprovalMatrixConfigRequest",
+      "response_dto": "ApprovalMatrixConfigListResponse",
+      "auth_required": true
+    }
+  ],
+  "relevant_dtos": [
+    {
+      "name": "ApprovalResponse",
+      "type": "RESPONSE",
+      "fields": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": false
+        },
+        {
+          "name": "contractId",
+          "type": "uuid",
+          "nullable": false
+        },
+        {
+          "name": "contractTitle",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "name": "contractType",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "name": "contractValue",
+          "type": "number",
+          "nullable": false
+        },
+        {
+          "name": "counterpartyName",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "name": "keyTermsSummary",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "deviationsFromStandard",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "aiRiskScore",
+          "type": "integer",
+          "nullable": true
+        },
+        {
+          "name": "approvalMatrixStepLabel",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "name": "approvalMatrixStepNumber",
+          "type": "integer",
+          "nullable": false
+        },
+        {
+          "name": "approvalMatrixTotalSteps",
+          "type": "integer",
+          "nullable": false
+        },
+        {
+          "enum": [
+            "PendingApproval",
+            "Approved",
+            "Rejected",
+            "ReadyForSignature"
+          ],
+          "name": "status",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "name": "comments",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "delegateToUserId",
+          "type": "uuid",
+          "nullable": true
+        },
+        {
+          "name": "delegateToName",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "delegationStartDate",
+          "type": "date",
+          "nullable": true
+        },
+        {
+          "name": "delegationEndDate",
+          "type": "date",
+          "nullable": true
+        },
+        {
+          "name": "currentApproverId",
+          "type": "uuid",
+          "nullable": false
+        },
+        {
+          "name": "currentApproverName",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "name": "isCurrentUserApprover",
+          "type": "boolean",
+          "nullable": false
+        },
+        {
+          "name": "isCurrentUserActiveDelegate",
+          "type": "boolean",
+          "nullable": false
+        },
+        {
+          "name": "isStepActionable",
+          "type": "boolean",
+          "nullable": false
+        },
+        {
+          "name": "canApprove",
+          "type": "boolean",
+          "nullable": false
+        },
+        {
+          "name": "canReject",
+          "type": "boolean",
+          "nullable": false
+        },
+        {
+          "name": "canSendBack",
+          "type": "boolean",
+          "nullable": false
+        },
+        {
+          "name": "canDelegate",
+          "type": "boolean",
+          "nullable": false
+        },
+        {
+          "name": "createdAt",
+          "type": "datetime",
+          "nullable": false
+        },
+        {
+          "name": "updatedAt",
+          "type": "datetime",
+          "nullable": false
+        }
+      ]
+    },
+    {
+      "name": "ApprovalListItemResponse",
+      "type": "RESPONSE",
+      "fields": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": false
+        },
+        {
+          "name": "contractId",
+          "type": "uuid",
+          "nullable": false
+        },
+        {
+          "name": "contractTitle",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "name": "contractType",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "name": "contractValue",
+          "type": "number",
+          "nullable": false
+        },
+        {
+          "name": "counterpartyName",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "name": "keyTermsSummary",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "deviationsFromStandard",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "aiRiskScore",
+          "type": "integer",
+          "nullable": true
+        },
+        {
+          "name": "approvalMatrixStepLabel",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "enum": [
+            "PendingApproval",
+            "Approved",
+            "Rejected",
+            "ReadyForSignature"
+          ],
+          "name": "status",
+          "type": "string",
+          "nullable": false
+        }
+      ]
+    },
+    {
+      "name": "ApprovalListResponse",
+      "type": "RESPONSE",
+      "fields": [
+        {
+          "name": "items",
+          "type": "array",
+          "items": {
+            "type": "ApprovalListItemResponse"
+          },
+          "nullable": false
+        },
+        {
+          "name": "page",
+          "type": "integer",
+          "nullable": false
+        },
+        {
+          "name": "pageSize",
+          "type": "integer",
+          "nullable": false
+        },
+        {
+          "name": "totalCount",
+          "type": "integer",
+          "nullable": false
+        },
+        {
+          "name": "isEmpty",
+          "type": "boolean",
+          "nullable": false
+        },
+        {
+          "name": "emptyMessage",
+          "type": "string",
+          "nullable": true
+        }
+      ]
+    },
+    {
+      "name": "ApprovalActionRequest",
+      "type": "REQUEST",
+      "fields": [
+        {
+          "enum": [
+            "Approve",
+            "Reject",
+            "SendBack"
+          ],
+          "name": "actionType",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "name": "comments",
+          "type": "string",
+          "nullable": true
+        }
+      ]
+    },
+    {
+      "name": "ApprovalActionResponse",
+      "type": "RESPONSE",
+      "fields": [
+        {
+          "name": "approvalId",
+          "type": "uuid",
+          "nullable": false
+        },
+        {
+          "enum": [
+            "PendingApproval",
+            "Approved",
+            "Rejected",
+            "ReadyForSignature"
+          ],
+          "name": "status",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "name": "approvalMatrixStepLabel",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "name": "approvalMatrixStepNumber",
+          "type": "integer",
+          "nullable": false
+        },
+        {
+          "enum": [
+            "InNegotiation",
+            "PendingApproval",
+            "Approved",
+            "Rejected",
+            "ReadyForSignature"
+          ],
+          "name": "contractStatus",
+          "type": "string",
+          "nullable": false
+        }
+      ]
+    },
+    {
+      "name": "ApprovalMatrixStepConfig",
+      "type": "RESPONSE",
+      "fields": [
+        {
+          "name": "stepNumber",
+          "type": "integer",
+          "nullable": false
+        },
+        {
+          "name": "approverRole",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "approverUserId",
+          "type": "uuid",
+          "nullable": true
+        },
+        {
+          "name": "stepName",
+          "type": "string",
+          "nullable": false
+        }
+      ]
+    },
+    {
+      "name": "ApprovalMatrixConfigResponse",
+      "type": "RESPONSE",
+      "fields": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": false
+        },
+        {
+          "name": "contractType",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "name": "valueMin",
+          "type": "number",
+          "nullable": true
+        },
+        {
+          "name": "valueMax",
+          "type": "number",
+          "nullable": true
+        },
+        {
+          "name": "riskBandMin",
+          "type": "integer",
+          "nullable": true
+        },
+        {
+          "name": "riskBandMax",
+          "type": "integer",
+          "nullable": true
+        },
+        {
+          "name": "steps",
+          "type": "array",
+          "items": {
+            "type": "ApprovalMatrixStepConfig"
+          },
+          "nullable": false
+        }
+      ]
+    },
+    {
+      "name": "ApprovalMatrixConfigListResponse",
+      "type": "RESPONSE",
+      "fields": [
+        {
+          "name": "items",
+          "type": "array",
+          "items": {
+            "type": "ApprovalMatrixConfigResponse"
+          },
+          "nullable": false
+        }
+      ]
+    },
+    {
+      "name": "UpdateApprovalMatrixConfigRequest",
+      "type": "REQUEST",
+      "fields": [
+        {
+          "name": "items",
+          "type": "array",
+          "items": {
+            "type": "ApprovalMatrixConfigResponse"
+          },
+          "nullable": false
+        }
+      ]
+    }
+  ],
+  "stories": [
+    {
+      "epic": "Approval",
+      "actor": "Tenant Admin",
+      "title": "Configure tenant-based approval matrix rules",
+      "images": [
+        "IMG-1",
+        "IMG-2",
+        "IMG-3"
+      ],
+      "story_id": "UC6-BR-002",
+      "references": [
+        "UC6-BR-002",
+        "UC11",
+        "DP-UC6-001",
+        "DP-UC6-002",
+        "DP-UC6-003",
+        "DP-UC6-004",
+        "DP-UC6-005",
+        "DP-UC6-006",
+        "DP-UC6-007",
+        "DP-UC6-008",
+        "DP-UC6-009",
+        "DP-UC6-013"
+      ],
+      "story_type": "business-rule",
+      "story_statement": "As a Tenant Admin, I want to configure approval matrix rules based on contract type, contract value and AI risk score band, so that the correct roles/users approve a contract in the correct sequence.",
+      "source_reference": "UC6 / Business Rules / BR-2",
+      "acceptance_criteria": [
+        "Given a contract has completed Negotiation & Routing (UC5), When it is submitted into the approval matrix, Then the sequence of required approval roles/users is determined by tenant-configured rules based on Contract Type and Contract Value.",
+        "Given a contract has an AI Risk Score, When the approval matrix is evaluated, Then the AI risk score band is used alongside Contract Type and Contract Value to determine the required approval steps and sequence.",
+        "Given an Approver is viewing a contract pending approval, When the Approval screen is displayed, Then it shows the Contract Title, Contract Type, Contract Value, Counterparty Name, Key Terms Summary, Deviations from Standard, AI Risk Score, and Approval Matrix Step as determined by the configured matrix.",
+        "Given a contract is at a given step in the configured matrix, When an action is taken, Then the Comments field is captured per the matrix-defined step and recorded against that Approval Matrix Step.",
+        "Given a Tenant Admin wants to delegate approval configuration review, When the matrix is set up, Then the Delegate To field and assignments respect the roles/users defined in the tenant-configured approval matrix rules.",
+        "Given the approval matrix rules are configured in Settings (UC11), When a Tenant Admin updates contract type, value or risk band thresholds, Then subsequently routed contracts use the updated rules to determine approvers and sequence."
+      ]
+    },
+    {
+      "epic": "Approval",
+      "actor": "Tenant Admin",
+      "title": "Configure approval matrix and view tenant-wide approvals without acting unless named Approver",
+      "images": [
+        "IMG-1",
+        "IMG-2",
+        "IMG-3"
+      ],
+      "story_id": "UC6-BR-016",
+      "references": [
+        "UC6-BR-016",
+        "DP-UC6-001",
+        "DP-UC6-002",
+        "DP-UC6-003",
+        "DP-UC6-004",
+        "DP-UC6-005",
+        "DP-UC6-006",
+        "DP-UC6-007",
+        "DP-UC6-008",
+        "DP-UC6-009",
+        "DP-UC6-013"
+      ],
+      "story_type": "business-rule",
+      "story_statement": "As a Tenant Admin, I want to configure the approval matrix rules in Settings and view all pending/completed approvals across the tenant, so that approval routing is correctly governed while I remain restricted from approving, rejecting or sending back contracts unless I am also a named Approver.",
+      "source_reference": "UC6 / Business Rules / BR-16",
+      "acceptance_criteria": [
+        "Given I am a Tenant Admin in Settings, When I configure the approval matrix, Then I can define rules based on Contract Type, Contract Value and risk thresholds for routing contracts.",
+        "Given I am a Tenant Admin viewing the tenant-wide approvals list, When I open a pending or completed approval record, Then I can view its Contract Title, Contract Type, Contract Value, Counterparty Name, Key Terms Summary, Deviations from Standard, AI Risk Score, Approval Matrix Step, Comments, and any Delegate To assignment.",
+        "Given I am a Tenant Admin who is not assigned as a named Approver on a contract, When I view that contract's approval screen, Then the Approve, Reject and Send Back actions are disabled or unavailable to me.",
+        "Given I am a Tenant Admin who is also assigned as a named Approver for a specific contract, When I act on that contract's pending approval step, Then I am permitted to Approve, Reject or Send Back using the Comments field as required by the action type.",
+        "Given I am a Tenant Admin viewing a contract I am not assigned to approve, When I review the Approval Matrix Step and Delegate To fields, Then they are presented as read-only information without any action controls enabled."
+      ]
+    }
+  ]
+}

@@ -1,0 +1,335 @@
+{
+  "group_id": "indexing-in-progress-banner",
+  "task_id": "T-INDEXING-IN-PROGRESS-BANNER-UI",
+  "primary_story_id": "UC8-AF-004",
+  "story_ids": [
+    "UC8-AF-004"
+  ],
+  "page_component": null,
+  "components": [
+    {
+      "name": "IndexingInProgressBanner",
+      "type": "MOLECULE",
+      "props": [],
+      "story_refs": [
+        "UC8-AF-004"
+      ],
+      "description": "Displays indexing-in-progress exclusion notice for full text search"
+    }
+  ],
+  "hooks": [
+    {
+      "name": "useContractSearch",
+      "returns": "{ data: ContractListItemResponse[]; isLoading: boolean; totalCount: number }",
+      "story_refs": [
+        "UC8-MF-001",
+        "UC8-AF-001",
+        "UC8-AF-002",
+        "UC8-AF-004",
+        "UC8-BR-001",
+        "UC8-BR-002",
+        "UC8-BR-004",
+        "UC8-FV-001",
+        "UC8-FV-002",
+        "UC8-FV-003",
+        "UC8-GC-001"
+      ],
+      "description": "Fetches paginated/filterable contract list"
+    }
+  ],
+  "store_slices": [
+    {
+      "name": "contractRepositorySlice",
+      "actions": [
+        "setFilters",
+        "setResults",
+        "clearFilters",
+        "setEmptyState"
+      ],
+      "state_shape": "{ filters: ContractSearchRequest; results: ContractListItemResponse[]; totalCount: number; isEmptyState: boolean }"
+    },
+    {
+      "name": "contractDetailSlice",
+      "actions": [
+        "setContract",
+        "setActiveTab",
+        "clear"
+      ],
+      "state_shape": "{ contract: ContractDetailResponse | null; activeTab: string }"
+    },
+    {
+      "name": "obligationsSlice",
+      "actions": [
+        "setObligations",
+        "updateObligation",
+        "setRenewal",
+        "clear"
+      ],
+      "state_shape": "{ obligations: ObligationResponse[]; renewal: RenewalPanelResponse | null }"
+    }
+  ],
+  "relevant_endpoints": [
+    {
+      "id": "GET_contracts",
+      "path": "/api/v1/contracts",
+      "roles": [
+        "TENANT_ADMIN",
+        "CONTRACT_OWNER",
+        "LEGAL_REVIEWER",
+        "APPROVER"
+      ],
+      "method": "GET",
+      "summary": "Search, filter, sort and paginate contracts visible to the current user",
+      "is_paged": true,
+      "story_refs": [
+        "UC8-MF-001",
+        "UC8-AF-001",
+        "UC8-AF-002",
+        "UC8-AF-003",
+        "UC8-AF-004",
+        "UC8-BR-001",
+        "UC8-BR-002",
+        "UC8-BR-004",
+        "UC8-BR-005",
+        "UC8-BR-007",
+        "UC8-BR-008",
+        "UC8-BR-009",
+        "UC8-BR-010",
+        "UC8-BR-011",
+        "UC8-FV-001",
+        "UC8-FV-002",
+        "UC8-FV-003",
+        "UC8-FV-004",
+        "UC8-GC-001"
+      ],
+      "request_dto": "ContractSearchRequest",
+      "response_dto": "ContractListItemResponse",
+      "auth_required": true
+    }
+  ],
+  "relevant_dtos": [
+    {
+      "name": "ContractSearchRequest",
+      "type": "REQUEST",
+      "fields": [
+        {
+          "name": "searchText",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "enum": [
+            "Draft",
+            "In Negotiation",
+            "In Approval",
+            "In Signature",
+            "Executed",
+            "Expired",
+            "Terminated",
+            "Renewed",
+            "Amended"
+          ],
+          "name": "status",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "startDateFrom",
+          "type": "date",
+          "nullable": true
+        },
+        {
+          "name": "startDateTo",
+          "type": "date",
+          "nullable": true
+        },
+        {
+          "name": "endDateFrom",
+          "type": "date",
+          "nullable": true
+        },
+        {
+          "name": "endDateTo",
+          "type": "date",
+          "nullable": true
+        },
+        {
+          "name": "valueMin",
+          "type": "number",
+          "nullable": true
+        },
+        {
+          "name": "valueMax",
+          "type": "number",
+          "nullable": true
+        },
+        {
+          "name": "folderTagIds",
+          "type": "array",
+          "items": {
+            "type": "uuid"
+          },
+          "nullable": true
+        },
+        {
+          "name": "sortBy",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "enum": [
+            "ASC",
+            "DESC"
+          ],
+          "name": "sortDirection",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "page",
+          "type": "integer",
+          "nullable": true
+        },
+        {
+          "name": "pageSize",
+          "type": "integer",
+          "nullable": true
+        }
+      ]
+    },
+    {
+      "name": "ContractListItemResponse",
+      "type": "RESPONSE",
+      "fields": [
+        {
+          "name": "contractId",
+          "type": "uuid",
+          "nullable": false
+        },
+        {
+          "name": "contractName",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "name": "counterparty",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "enum": [
+            "Draft",
+            "In Negotiation",
+            "In Approval",
+            "In Signature",
+            "Executed",
+            "Expired",
+            "Terminated",
+            "Renewed",
+            "Amended"
+          ],
+          "name": "status",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "name": "value",
+          "type": "number",
+          "nullable": true
+        },
+        {
+          "name": "startDate",
+          "type": "date",
+          "nullable": true
+        },
+        {
+          "name": "endDate",
+          "type": "date",
+          "nullable": true
+        },
+        {
+          "name": "owner",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "name": "lastModified",
+          "type": "datetime",
+          "nullable": false
+        },
+        {
+          "name": "folderTags",
+          "type": "array",
+          "items": {
+            "type": "FolderTagOptionResponse"
+          },
+          "nullable": true
+        },
+        {
+          "name": "indexingInProgress",
+          "type": "boolean",
+          "nullable": false
+        }
+      ]
+    },
+    {
+      "name": "FolderTagOptionResponse",
+      "type": "RESPONSE",
+      "fields": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": false
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "enum": [
+            "Folder",
+            "Tag"
+          ],
+          "name": "kind",
+          "type": "string",
+          "nullable": false
+        }
+      ]
+    }
+  ],
+  "stories": [
+    {
+      "epic": "Contract Repository",
+      "actor": "Contract Owner",
+      "title": "Exclude unindexed documents from full text search results",
+      "images": [
+        "IMG-1",
+        "IMG-2",
+        "IMG-3",
+        "IMG-4"
+      ],
+      "story_id": "UC8-AF-004",
+      "references": [
+        "UC8-AF-004",
+        "BR-2",
+        "DP-UC8-001",
+        "DP-UC8-002",
+        "DP-UC8-003",
+        "DP-UC8-004",
+        "DP-UC8-005",
+        "DP-UC8-007"
+      ],
+      "story_type": "alternate-flow",
+      "story_statement": "As a Contract Owner, I want to be notified when some contracts are excluded from full text search results due to in-progress indexing, so that I understand why certain contracts may not appear and can retry the search later.",
+      "source_reference": "UC8 / Alternate Flow / AF-4",
+      "acceptance_criteria": [
+        "Given the Contract Repository screen with the Search Box, Status Filter, Date Range Filter, Value Filter, and Folder/Tag Filter available, when a user enters free text into the Search Box and triggers a search, then the system matches text against contract name, counterparty, and clause text for contracts whose document index has finished processing.",
+        "Given a contract's document index is still processing at the time a full text search is executed, when the search is run, then that contract is excluded from the text-match results shown in the Contract List Table.",
+        "Given one or more contracts were excluded from text-match results due to in-progress indexing, when the search results are displayed, then the system shows the message 'Some documents are still being indexed and may not appear in search results.'",
+        "Given a search combines the Search Box with the Status Filter, Date Range Filter, Value Filter, and/or Folder/Tag Filter, when a contract with a processing document index would otherwise match the filters, then it is still excluded only from the text-match portion of the results and the indexing message is displayed.",
+        "Given the document index for a previously excluded contract has finished processing, when the user re-runs the same search, then that contract appears in the Contract List Table if it matches the search criteria and the indexing message is no longer shown for it."
+      ]
+    }
+  ]
+}

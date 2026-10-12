@@ -1,0 +1,261 @@
+{
+  "group_id": "download-button",
+  "task_id": "T-DOWNLOAD-BUTTON-UI",
+  "primary_story_id": "UC8-AF-005",
+  "story_ids": [
+    "UC8-AF-005",
+    "UC8-BR-006"
+  ],
+  "page_component": null,
+  "components": [
+    {
+      "name": "DownloadButton",
+      "type": "ATOM",
+      "props": [
+        {
+          "name": "enabled",
+          "type": "boolean"
+        },
+        {
+          "name": "comment",
+          "type": "string"
+        }
+      ],
+      "story_refs": [
+        "UC8-AF-005",
+        "UC8-BR-006"
+      ],
+      "description": "Download button with disabled 'File unavailable' state for oversized/corrupted/missing docs"
+    }
+  ],
+  "hooks": [
+    {
+      "name": "useContractDocument",
+      "returns": "{ data: ContractDocumentResponse; isLoading: boolean }",
+      "story_refs": [
+        "UC8-MF-001",
+        "UC8-BR-006"
+      ],
+      "description": "Fetches document viewer metadata"
+    },
+    {
+      "name": "useDocumentDownload",
+      "returns": "{ download: () => void; error: string }",
+      "story_refs": [
+        "UC8-AF-005",
+        "UC8-BR-006"
+      ],
+      "description": "Triggers document download and surfaces retrieval errors"
+    }
+  ],
+  "store_slices": [
+    {
+      "name": "contractRepositorySlice",
+      "actions": [
+        "setFilters",
+        "setResults",
+        "clearFilters",
+        "setEmptyState"
+      ],
+      "state_shape": "{ filters: ContractSearchRequest; results: ContractListItemResponse[]; totalCount: number; isEmptyState: boolean }"
+    },
+    {
+      "name": "contractDetailSlice",
+      "actions": [
+        "setContract",
+        "setActiveTab",
+        "clear"
+      ],
+      "state_shape": "{ contract: ContractDetailResponse | null; activeTab: string }"
+    },
+    {
+      "name": "obligationsSlice",
+      "actions": [
+        "setObligations",
+        "updateObligation",
+        "setRenewal",
+        "clear"
+      ],
+      "state_shape": "{ obligations: ObligationResponse[]; renewal: RenewalPanelResponse | null }"
+    }
+  ],
+  "relevant_endpoints": [
+    {
+      "id": "GET_contract_document",
+      "path": "/api/v1/contracts/{contractId}/document",
+      "roles": [
+        "TENANT_ADMIN",
+        "CONTRACT_OWNER",
+        "LEGAL_REVIEWER",
+        "APPROVER"
+      ],
+      "method": "GET",
+      "summary": "Get document viewer metadata for the Document tab",
+      "is_paged": false,
+      "story_refs": [
+        "UC8-MF-001",
+        "UC8-BR-006"
+      ],
+      "response_dto": "ContractDocumentResponse",
+      "auth_required": true
+    },
+    {
+      "id": "GET_contract_document_download",
+      "path": "/api/v1/contracts/{contractId}/document/download",
+      "roles": [
+        "TENANT_ADMIN",
+        "CONTRACT_OWNER",
+        "LEGAL_REVIEWER",
+        "APPROVER"
+      ],
+      "method": "GET",
+      "summary": "Download the current document file; returns error for corrupted/missing/oversized files",
+      "is_paged": false,
+      "story_refs": [
+        "UC8-AF-005",
+        "UC8-BR-006"
+      ],
+      "response_dto": "DocumentDownloadResponse",
+      "auth_required": true
+    }
+  ],
+  "relevant_dtos": [
+    {
+      "name": "ContractDocumentResponse",
+      "type": "RESPONSE",
+      "fields": [
+        {
+          "name": "contractId",
+          "type": "uuid",
+          "nullable": false
+        },
+        {
+          "name": "documentUrl",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "fileName",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "enum": [
+            "PDF",
+            "DOCX"
+          ],
+          "name": "fileType",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "name": "fileSizeBytes",
+          "type": "integer",
+          "nullable": false
+        },
+        {
+          "name": "isOversized",
+          "type": "boolean",
+          "nullable": false
+        },
+        {
+          "name": "isCorruptedOrMissing",
+          "type": "boolean",
+          "nullable": false
+        },
+        {
+          "name": "downloadEnabled",
+          "type": "boolean",
+          "nullable": false
+        },
+        {
+          "name": "unavailableComment",
+          "type": "string",
+          "nullable": true
+        }
+      ]
+    },
+    {
+      "name": "DocumentDownloadResponse",
+      "type": "RESPONSE",
+      "fields": [
+        {
+          "name": "success",
+          "type": "boolean",
+          "nullable": false
+        },
+        {
+          "name": "fileUrl",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "errorMessage",
+          "type": "string",
+          "nullable": true
+        }
+      ]
+    }
+  ],
+  "stories": [
+    {
+      "epic": "Contract Repository",
+      "actor": "Contract Owner",
+      "title": "Display error message when downloading a corrupted or missing document",
+      "images": [
+        "IMG-1",
+        "IMG-2",
+        "IMG-3",
+        "IMG-4"
+      ],
+      "story_id": "UC8-AF-005",
+      "references": [
+        "UC8-AF-005",
+        "AF-5",
+        "F-17",
+        "DP-UC8-001",
+        "DP-UC8-002",
+        "DP-UC8-003",
+        "DP-UC8-004",
+        "DP-UC8-005",
+        "DP-UC8-007"
+      ],
+      "story_type": "alternate-flow",
+      "story_statement": "As a Contract Owner, I want to see a clear error message when I click Download on a corrupted or missing document file, so that I understand the document cannot be retrieved and know to contact my administrator.",
+      "source_reference": "UC8 / Alternate Flow / AF-5",
+      "notes_assumptions": "Distinct from BR-6 (oversized document shows a disabled Download button with 'File unavailable'); this flow applies when the document is corrupted or missing rather than oversized, and the Download Button remains enabled but yields an error upon click.",
+      "acceptance_criteria": [
+        "Given a Contract Owner has used the Search Box, Status Filter, Date Range Filter, Value Filter, and Folder/Tag Filter to locate a contract, and the resulting Contract List Table shows the contract with its document file corrupted or missing, When the Contract Owner clicks the Download Button for that contract, Then the system displays the message 'This document could not be retrieved. Please contact your administrator.'",
+        "Given the document file associated with a contract shown in the Contract List Table is missing from storage, When any of Tenant Admin, Contract Owner, Legal Reviewer, or Approver clicks Download on that contract's document, Then the system displays 'This document could not be retrieved. Please contact your administrator.' instead of attempting the download",
+        "Given the document file associated with a contract is corrupted, When the user clicks Download, Then no file is transferred to the user's device and the error message is shown without altering the contract's Status or other fields in the Contract List Table",
+        "Given the error message has been displayed for a corrupted or missing document, When the user navigates away and returns to the repository using the Search Box, Status Filter, Date Range Filter, Value Filter, or Folder/Tag Filter, Then the contract still appears in the Contract List Table and the Download Button remains available for retry"
+      ]
+    },
+    {
+      "epic": "Contract Repository",
+      "actor": "Contract Owner",
+      "title": "Disable Download for Oversized Documents",
+      "images": [
+        "IMG-1",
+        "IMG-2",
+        "IMG-3",
+        "IMG-4"
+      ],
+      "story_id": "UC8-BR-006",
+      "references": [
+        "UC8-BR-006",
+        "F-17"
+      ],
+      "story_type": "business-rule",
+      "story_statement": "As a Contract Owner, I want to see a disabled Download button with the comment 'File unavailable' for documents larger than the system's supported upload size, so that I understand the file cannot be retrieved rather than assuming a system error.",
+      "source_reference": "UC8 / Business Rules / BR-6",
+      "notes_assumptions": "Assumes the supported upload size threshold is defined in UC2 and enforced at upload time; this rule governs display behavior only in the repository's Document tab.",
+      "acceptance_criteria": [
+        "Given a contract's document exceeds the system's supported upload size from UC2, When the user searches for it using the Search Box, filters it using the Status Filter, Date Range Filter, Value Filter or Folder/Tag Filter, and locates it in the Contract List Table, Then the Download Button is shown as disabled on that contract's Document tab.",
+        "Given a document exceeds the supported upload size, When the user views the Download button, Then the comment 'File unavailable' is displayed alongside the disabled Download Button.",
+        "Given a document is within the supported upload size, When the user views the Document tab, Then the Download Button is enabled and functions normally.",
+        "Given the Contract List Table is displayed, When a contract with an oversized document is included in the results returned via the Search Box, Status Filter, Date Range Filter, Value Filter, or Folder/Tag Filter, Then that contract still appears in the table but its associated Download Button remains disabled with the 'File unavailable' comment when its Document tab is opened."
+      ]
+    }
+  ]
+}

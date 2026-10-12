@@ -12,6 +12,9 @@ import ExternalReviewPage from '@/pages/ExternalReviewPage';
 import NegotiationTrackerPage from '@/pages/NegotiationTrackerPage';
 import SignerListPage from '@/pages/SignerListPage';
 import SigningPortalPage from '@/pages/SigningPortalPage';
+import ContractDetailPage from '@/pages/ContractDetailPage';
+import ContractRepositoryPage from '@/pages/ContractRepositoryPage';
+import ObligationsRenewalPage from '@/pages/ObligationsRenewalPage';
 import NewContractAccessGuard from '@/features/contracts/components/NewContractAccessGuard';
 
 const NEW_CONTRACT_ALLOWED_ROLES = ['TENANT_ADMIN', 'CONTRACT_OWNER'];
@@ -40,6 +43,9 @@ export default function App() {
       <Route path="/contracts/:contractId/negotiation" element={<NegotiationTrackerPage />} />
       <Route path="/contracts/:contractId/signers" element={<SignerListPage />} />
       <Route path="/sign/:sessionId" element={<SigningPortalPage />} />
+      <Route path="/contracts/:contractId" element={<ContractDetailPage />} />
+      <Route path="/contracts/:contractId/obligations" element={<ObligationsRenewalPage />} />
+      <Route path="/contract-repository" element={<ContractRepositoryPage />} />
     </Routes>
   );
 }

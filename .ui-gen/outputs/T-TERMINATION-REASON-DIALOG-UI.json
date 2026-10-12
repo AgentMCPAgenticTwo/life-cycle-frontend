@@ -1,0 +1,42 @@
+{
+  "status": "SUCCESS",
+  "summary": "Verified and hardened the existing TerminationReasonDialog MOLECULE (props contractId/onConfirm per context.json, plus an onClose callback it needs to be dismissible) which was already present in src/features/contract-repository/components/ from this task group's earlier generation and already wired into ObligationsRenewalPage's Terminate action. It renders empty Termination Reason (textarea) and Effective Termination Date (date picker) fields on open (UC9-AF-006), blocks Confirm with 'Termination Reason is required.' when the reason is blank while preserving any entered date (UC9-AF-006, UC9-FV-001/003), blocks Confirm with an 'on or after today' error for a past Effective Termination Date (UC9-BR-018, UC9-FV-003), and on a valid submit calls POST /api/v1/contracts/{contractId}/terminate via useTerminateContract/terminateContract and invokes onConfirm with the LinkedContractActionResponse so the page can refetch the renewal panel (UC9-BR-018). No TARGET DESIGN screenshot shows the dialog's own contents (IMG-5 shows the host Obligations & Renewal page behind it, IMG-6 shows the unrelated Edit Obligation panel), so its layout follows this repo's established dark-bordered-card dialog language (same pattern as AddFolderTagDialog/DeclineToSignModal). Added a colocated TerminationReasonDialog.test.jsx (5 tests) covering the empty-open state, both validation errors, the happy-path submit call shape, and Cancel. Verified with lint (0 warnings), the full vitest suite (21 files / 108 tests passing), and a production build. Visually verified by starting the dev server, intercepting the three GET endpoints ObligationsRenewalPage depends on with an in-browser Playwright route mock (no committed backend exists in this sandbox), opening the dialog from the real Terminate button, and triggering its validation state — screenshot matches the app's existing modal styling (dark card, bordered inputs, red destructive confirm button) with the exact field labels and buttons the stories require.",
+  "task_id": "T-TERMINATION-REASON-DIALOG-UI",
+  "story_id": "UC9-AF-006",
+  "code_files": [
+    {
+      "file_path": "src/features/contract-repository/components/TerminationReasonDialog.jsx",
+      "file_name": "TerminationReasonDialog.jsx",
+      "language": "javascript",
+      "file_type": "component",
+      "description": "MOLECULE: termination dialog with Termination Reason textarea and Effective Termination Date picker, client-side validation, and Cancel/Confirm actions calling useTerminateContract."
+    },
+    {
+      "file_path": "src/features/contract-repository/components/TerminationReasonDialog.test.jsx",
+      "file_name": "TerminationReasonDialog.test.jsx",
+      "language": "javascript",
+      "file_type": "component",
+      "description": "New colocated test covering empty-open state, missing-reason validation (date preserved), past-date validation, successful submit payload, and Cancel."
+    }
+  ],
+  "pr": {
+    "branch_name": "ui-gen/effb4f716f44",
+    "title": "test(ui-gen): verify and cover TerminationReasonDialog",
+    "body": "Verifies the TerminationReasonDialog MOLECULE (UC9-AF-006, UC9-BR-018, UC9-FV-001/002/003) already built alongside the rest of the life-cycle-uc8-uc9 module: empty Termination Reason/Effective Termination Date fields on open, blocked confirm with 'Termination Reason is required.' preserving any entered date, blocked confirm for a past Effective Termination Date, and a valid submit calling POST /api/v1/contracts/{contractId}/terminate. Adds a colocated test file (5 cases) since none previously existed for this component, and confirms lint/test/build all pass.",
+    "draft": true,
+    "linked_story": "UC9-AF-006",
+    "linked_task": "T-TERMINATION-REASON-DIALOG-UI"
+  },
+  "critic_hints": {
+    "files_to_lint": [
+      "src/features/contract-repository/components/TerminationReasonDialog.jsx",
+      "src/features/contract-repository/components/TerminationReasonDialog.test.jsx"
+    ],
+    "openapi_endpoint": null
+  },
+  "blockers": [
+    "Neither TARGET DESIGN image (IMG-5, IMG-6) actually depicts the termination reason dialog's own contents: IMG-5 shows the Obligations & Renewal page behind where a dialog would open (with the Terminate button visible), and IMG-6 shows the unrelated Edit Obligation / Contract Timeline panels. With no reference for the dialog's internal layout, its visual design (dark bordered card, textarea + date input, Cancel/Confirm button pair, red destructive Confirm styling) was built to match this repo's existing dialog components (AddFolderTagDialog, DeclineToSignModal) rather than copied from a screenshot.",
+    "Added an `onClose` prop beyond context.json's literal contractId/onConfirm contract — the component is otherwise not dismissible, and the host page (ObligationsRenewalPage, built by an earlier task in this same group) already calls it with `onClose={() => setIsTerminateOpen(false)}`. Inferred from the existing call site, not invented independently.",
+    "Visual verification required mocking the three GET endpoints (contract detail, obligations, renewal) that the host ObligationsRenewalPage depends on, via an in-browser Playwright network-route stub, because this sandbox has no backend running at VITE_API_BASE_URL. No application code or env files were changed for this; the stub lived only in a disposable script, and the temporarily `npm install --no-save`'d playwright package (not added to package.json/lock) was uninstalled afterward."
+  ]
+}

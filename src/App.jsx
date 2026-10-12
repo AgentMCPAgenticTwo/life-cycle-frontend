@@ -3,9 +3,15 @@ import DashboardPage from '@/pages/DashboardPage';
 import ContractRepositoryListPage from '@/pages/ContractRepositoryListPage';
 import NewContractPage from '@/pages/NewContractPage';
 import TemplateClauseLibraryPage from '@/pages/TemplateClauseLibraryPage';
+import ApprovalMatrixConfigPage from '@/pages/ApprovalMatrixConfigPage';
+import EsignatureSettingsPage from '@/pages/EsignatureSettingsPage';
+import ApprovalsListPage from '@/pages/ApprovalsListPage';
+import ApprovalReviewPage from '@/pages/ApprovalReviewPage';
 import ClauseAnalysisPage from '@/pages/ClauseAnalysisPage';
 import ExternalReviewPage from '@/pages/ExternalReviewPage';
 import NegotiationTrackerPage from '@/pages/NegotiationTrackerPage';
+import SignerListPage from '@/pages/SignerListPage';
+import SigningPortalPage from '@/pages/SigningPortalPage';
 import NewContractAccessGuard from '@/features/contracts/components/NewContractAccessGuard';
 
 const NEW_CONTRACT_ALLOWED_ROLES = ['TENANT_ADMIN', 'CONTRACT_OWNER'];
@@ -25,9 +31,15 @@ export default function App() {
         }
       />
       <Route path="/settings/template-clause-library" element={<TemplateClauseLibraryPage />} />
+      <Route path="/settings/approval-matrix-config" element={<ApprovalMatrixConfigPage />} />
+      <Route path="/settings/esignature-settings" element={<EsignatureSettingsPage />} />
+      <Route path="/approvals" element={<ApprovalsListPage />} />
+      <Route path="/approvals/:approvalId" element={<ApprovalReviewPage />} />
       <Route path="/contracts/:contractId/clause-analysis" element={<ClauseAnalysisPage />} />
       <Route path="/negotiation/external/:linkToken" element={<ExternalReviewPage />} />
       <Route path="/contracts/:contractId/negotiation" element={<NegotiationTrackerPage />} />
+      <Route path="/contracts/:contractId/signers" element={<SignerListPage />} />
+      <Route path="/sign/:sessionId" element={<SigningPortalPage />} />
     </Routes>
   );
 }

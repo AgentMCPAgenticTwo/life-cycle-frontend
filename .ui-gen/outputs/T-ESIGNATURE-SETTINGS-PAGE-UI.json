@@ -1,0 +1,74 @@
+{
+  "status": "PARTIAL",
+  "summary": "Built EsignatureSettingsPage, a Tenant Admin-only settings screen to configure the tenant-wide Reminder Frequency (days, optional whole number, default 3) and Default Signature Provider (In-built E-signature / DocuSign / Adobe Sign / Aadhaar eSign). Wired to GET/PUT /api/v1/esignature-settings via a new esignatureSettingsService and useEsignatureSettings/useUpdateEsignatureSettings hooks, with loading, error (with retry) and populated states, client-side validation (reminder frequency must be a whole number when provided, blank is allowed), and a route at /settings/esignature-settings. Styling follows this repo's existing dark-theme Settings-page pattern (see ApprovalMatrixConfigPage) since none of the five TARGET DESIGN images depict this screen's content (see blockers). Verified with lint, unit tests, production build, and a Playwright screenshot of the route rendering the page chrome and error state (no local mock backend was stood up for this run).",
+  "task_id": "T-ESIGNATURE-SETTINGS-PAGE-UI",
+  "story_id": "UC7-AF-006",
+  "code_files": [
+    {
+      "file_path": "src/services/esignatureSettingsService.js",
+      "file_name": "esignatureSettingsService.js",
+      "language": "javascript",
+      "file_type": "service",
+      "description": "Typed client for GET/PUT /api/v1/esignature-settings, calling exactly the two endpoints owned by this task."
+    },
+    {
+      "file_path": "src/features/esignature/hooks/useEsignatureSettings.js",
+      "file_name": "useEsignatureSettings.js",
+      "language": "javascript",
+      "file_type": "hook",
+      "description": "Fetches EsignatureSettingsResponse for the settings screen with loading/error/refetch state, per the module contract's hook signature."
+    },
+    {
+      "file_path": "src/features/esignature/hooks/useUpdateEsignatureSettings.js",
+      "file_name": "useUpdateEsignatureSettings.js",
+      "language": "javascript",
+      "file_type": "hook",
+      "description": "Submits UpdateEsignatureSettingsRequest to PUT /esignature-settings, per the module contract's hook signature."
+    },
+    {
+      "file_path": "src/pages/EsignatureSettingsPage.jsx",
+      "file_name": "EsignatureSettingsPage.jsx",
+      "language": "javascript",
+      "file_type": "component",
+      "description": "Route-level PAGE for Tenant Admin to view and save tenant-wide Reminder Frequency and Default Signature Provider; gates access to TENANT_ADMIN and implements loading/error/populated states per CLAUDE.md (no empty state applies — settings always have a value once loaded)."
+    },
+    {
+      "file_path": "src/__tests__/EsignatureSettingsPage.test.jsx",
+      "file_name": "EsignatureSettingsPage.test.jsx",
+      "language": "javascript",
+      "file_type": "component",
+      "description": "Screen-level tests: populated render, access-denied for non-Tenant-Admin roles, error state with retry, successful save via PUT, whole-number validation rejection, and save-with-blank-reminder-frequency success."
+    },
+    {
+      "file_path": "src/App.jsx",
+      "file_name": "App.jsx",
+      "language": "javascript",
+      "file_type": "component",
+      "description": "Added the /settings/esignature-settings route for the new page, alongside the existing routes (no existing route changed)."
+    }
+  ],
+  "pr": {
+    "branch_name": "ui-gen/d1a751c9fae4",
+    "title": "feat(ui-gen): EsignatureSettingsPage for tenant e-signature settings",
+    "body": "Implements EsignatureSettingsPage (UC7-AF-006, UC7-BR-006, UC7-BR-013, UC7-FV-004): a Tenant Admin settings screen to configure the tenant-wide Reminder Frequency (days) and Default Signature Provider used across all contracts' signer lists and reminder cycles. Calls GET/PUT /api/v1/esignature-settings only, matching the DTOs in the module contract exactly. See blockers for the design-image mismatch and inferred validation behavior.",
+    "draft": true,
+    "linked_story": "UC7-AF-006",
+    "linked_task": "T-ESIGNATURE-SETTINGS-PAGE-UI"
+  },
+  "critic_hints": {
+    "files_to_lint": [
+      "src/pages/EsignatureSettingsPage.jsx",
+      "src/features/esignature/hooks/useEsignatureSettings.js",
+      "src/features/esignature/hooks/useUpdateEsignatureSettings.js",
+      "src/services/esignatureSettingsService.js",
+      "src/__tests__/EsignatureSettingsPage.test.jsx",
+      "src/App.jsx"
+    ],
+    "openapi_endpoint": null
+  },
+  "blockers": [
+    "None of the five TARGET DESIGN images (IMG-4..IMG-8) depict EsignatureSettingsPage: IMG-4 is the per-contract 'Add Signers' screen, IMG-5 is the per-contract 'Signing Tracker' screen, IMG-6/IMG-7 are the external Signer-facing 'Sign Document' OTP/signature-pad screen, and IMG-8 is a fragment of a signer detail card with Sign/Decline buttons — all belonging to other tasks (SignerListPage / SigningPortalPage), not this tenant-wide settings page. Per the task's own note that images may depict different screens, I built this page by extending this repo's existing dark-theme Settings-page visual language (header/breadcrumb/title/Save button layout, palette, spacing, card styling) established by ApprovalMatrixConfigPage rather than inventing a new visual style, and could not verify 80% similarity against a design image for this specific screen's content.",
+    "Inferred fields/behavior not spelled out in context.json, derived only from the given DTOs and acceptance criteria: (1) Default Signature Provider is rendered as a <select> populated from the enum values listed on EsignatureSettingsResponse.defaultSignatureProvider/SignerResponse.signatureMethod in the DTO contract (In-built E-signature, DocuSign, Adobe Sign, Aadhaar eSign), since no lookup endpoint exists and CLAUDE.md forbids inline dropdown constants for data that should come from an endpoint — this is a hard-coded enum taken directly from the contract's documented values, not invented. (2) Reminder Frequency (days) is implemented as an optional whole-number text/number input per UC7-FV-004 AC2/AC3 (rejects non-whole numbers, blank is allowed and omits the field from the PUT body so the backend's own default of 3 applies).",
+    "This task's hook list (per context.json / SKILL.md) also names useSignerList, scoped to GET /api/v1/contracts/{contractId}/signers. That hook is per-contract and this page is tenant-wide with no contractId in its route, so it has no meaningful use on this screen and was intentionally not called here — it belongs to SignerListPage/SigningPortalPage which own the per-contract signer list and are separate tasks."
+  ]
+}

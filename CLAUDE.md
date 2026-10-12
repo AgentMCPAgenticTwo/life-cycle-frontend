@@ -211,284 +211,17 @@ DIGEST -->
 <!-- MODULE:uc6-uc7-combined END -->
 
 <!-- MODULE:life-cycle-uc8-uc9 START -->
-## life cycle uc8 uc9 (life-cycle-uc8-uc9)
+## life cycle uc8 uc9 (life-cycle-uc8-uc9) — previously generated
 
-From this module's contract: 24 component(s), 16 endpoint(s), 16 DTO(s), 51 story/stories.
-Base path for this module: `/api/v1/contracts`.
-
-### Screens and components
-
-| Name | Type | Purpose |
-|---|---|---|
-| `ContractRepositoryPage` | PAGE | Main repository page showing Search/Filter panel and Contract List Table |
-| `ContractDetailPage` | PAGE | Contract detail view with tab navigation: Details, Document, Versions, Clauses, Approvals, Signatures, Obligations, Activity Log |
-| `ObligationsRenewalPage` | PAGE | Obligations & Renewal tab page combining obligations table and renewal alert panel |
-| `SearchFilterPanel` | ORGANISM | Search Box, Status Filter, Date Range Filter, Value Filter, Folder/Tag Filter, Search Button |
-| `ContractListTable` | ORGANISM | Sortable, navigable table of contracts with Contract Name, Counterparty, Status, Value, Start Date, End Date, Owner, Last Modified |
-| `NoResultsMessage` | MOLECULE | Displays 'No contracts found matching your search.' |
-| `EmptyRepositoryState` | MOLECULE | Displays 'You have no contracts to display.' with disabled filters |
-| `IndexingInProgressBanner` | MOLECULE | Displays indexing-in-progress exclusion notice for full text search |
-| `AccessDeniedView` | MOLECULE | Displays 'You do not have permission to view this contract.' |
-| `AddFolderTagDialog` | MOLECULE | Dialog to assign folder/tag to a contract |
-| `ContractDetailsTab` | ORGANISM | Shows core contract metadata |
-| `ContractDocumentTab` | ORGANISM | PDF/DOCX viewer with Download Button, handles corrupted/missing/oversized document states |
-| `ContractVersionsTab` | ORGANISM | Version history list |
-| `ContractActivityLogTab` | ORGANISM | Read-only immutable Activity Log display |
-| `DownloadButton` | ATOM | Download button with disabled 'File unavailable' state for oversized/corrupted/missing docs |
-| `ObligationsTable` | ORGANISM | Grid of obligations with columns Obligation Description, Obligation Type, Owner, Due Date, Status, Source |
-| `ObligationRowForm` | MOLECULE | Form/row for editing an obligation including Accept Suggestion Button |
-| `ManualObligationForm` | MOLECULE | Form to manually add an obligation when empty state is shown |
-| `ObligationsEmptyState` | MOLECULE | Displays 'No obligations detected for this contract' |
-| `ObligationsTabBlockedMessage` | MOLECULE | Displays 'Obligations are available only after a contract is fully executed' |
-| `ObligationsAccessDeniedView` | MOLECULE | Displays 'You do not have permission to view this page' |
-| `RenewalAlertPanel` | ORGANISM | Renewal Alert Banner, Contract End Date, Notice Period, and Renew/Amend/Terminate buttons |
-| `RenewAmendTerminateButtons` | MOLECULE | Renew, Amend, Terminate action buttons with enablement rules and duplicate-action blocking |
-| `TerminationReasonDialog` | MOLECULE | Dialog capturing Termination Reason and Effective Termination Date with validation |
-
-Create one route-level screen per PAGE above, in whichever folder this stack uses for routed screens (see Layout).
-
-### Hooks
-
-- `useContractSearch` — Fetches paginated/filterable contract list
-- `useContractDetail` — Fetches contract detail with access-control enforcement
-- `useContractDocument` — Fetches document viewer metadata
-- `useDocumentDownload` — Triggers document download and surfaces retrieval errors
-- `useContractVersions` — Fetches version history
-- `useActivityLog` — Fetches immutable activity log entries
-- `useFolderTagOptions` — Fetches folder/tag options for filter and dialog
-- `useAssignFolderTag` — Assigns folder/tag to a contract
-- `useObligations` — Fetches obligations list for a contract
-- `useCreateObligation` — Creates a manual obligation
-- `useUpdateObligation` — Updates an obligation's fields and status
-- `useAcceptObligation` — Accepts AI-suggested obligation values
-- `useRenewalPanel` — Fetches renewal alert, dates, and action button enablement
-- `useRenewContract` — Triggers Renew action
-- `useAmendContract` — Triggers Amend action
-- `useTerminateContract` — Triggers Terminate action with validation
-
-### State slices
-
-- `contractRepositorySlice`
-- `contractDetailSlice`
-- `obligationsSlice`
-
-### Endpoints this module calls
-
-Call exactly these paths and methods. Do not invent variants.
-
-| Method | Path | Roles | Request DTO | Response DTO | Purpose |
-|---|---|---|---|---|---|
-| GET | `/api/v1/contracts` | TENANT_ADMIN, CONTRACT_OWNER, LEGAL_REVIEWER, APPROVER | `ContractSearchRequest` | `ContractListItemResponse` *(paged)* | Search, filter, sort and paginate contracts visible to the current user |
-| GET | `/api/v1/contracts/{contractId}` | TENANT_ADMIN, CONTRACT_OWNER, LEGAL_REVIEWER, APPROVER | `—` | `ContractDetailResponse` | Get contract core metadata (Details tab) for an authorized contract, enforcing direct-link access control |
-| GET | `/api/v1/contracts/{contractId}/document` | TENANT_ADMIN, CONTRACT_OWNER, LEGAL_REVIEWER, APPROVER | `—` | `ContractDocumentResponse` | Get document viewer metadata for the Document tab |
-| GET | `/api/v1/contracts/{contractId}/document/download` | TENANT_ADMIN, CONTRACT_OWNER, LEGAL_REVIEWER, APPROVER | `—` | `DocumentDownloadResponse` | Download the current document file; returns error for corrupted/missing/oversized files |
-| GET | `/api/v1/contracts/{contractId}/versions` | TENANT_ADMIN, CONTRACT_OWNER, LEGAL_REVIEWER, APPROVER | `—` | `ContractVersionResponse` *(paged)* | Get version history list (Versions tab) |
-| GET | `/api/v1/contracts/{contractId}/activity-log` | TENANT_ADMIN, CONTRACT_OWNER, LEGAL_REVIEWER, APPROVER | `—` | `ActivityLogEntryResponse` *(paged)* | Get immutable, read-only Activity Log entries for the contract |
-| POST | `/api/v1/contracts/{contractId}/folder-tags` | TENANT_ADMIN, CONTRACT_OWNER | `AssignFolderTagRequest` | `ContractFolderTagResponse` | Assign one or more folders/tags to a contract via the Add Folder/Tag dialog |
-| GET | `/api/v1/folder-tags` | TENANT_ADMIN, CONTRACT_OWNER, LEGAL_REVIEWER, APPROVER | `—` | `FolderTagOptionResponse` | List available folders/tags for the Folder/Tag Filter and Add Folder/Tag dialog |
-| GET | `/api/v1/contracts/{contractId}/obligations` | TENANT_ADMIN, CONTRACT_OWNER, LEGAL_REVIEWER | `—` | `ObligationResponse` *(paged)* | List obligations for an Executed contract (Obligations & Renewal screen) |
-| POST | `/api/v1/contracts/{contractId}/obligations` | TENANT_ADMIN, CONTRACT_OWNER | `CreateObligationRequest` | `ObligationResponse` | Manually add an obligation when none were AI-extracted |
-| PATCH | `/api/v1/contracts/{contractId}/obligations/{obligationId}` | TENANT_ADMIN, CONTRACT_OWNER | `UpdateObligationRequest` | `ObligationResponse` | Edit obligation fields (Description, Type, Owner, Due Date, Status), transitioning Source label to Confirmed |
-| POST | `/api/v1/contracts/{contractId}/obligations/{obligationId}/accept` | TENANT_ADMIN, CONTRACT_OWNER | `—` | `ObligationResponse` | Accept an AI-suggested obligation, changing label from AI Suggested to Confirmed |
-| GET | `/api/v1/contracts/{contractId}/renewal` | TENANT_ADMIN, CONTRACT_OWNER, LEGAL_REVIEWER | `—` | `RenewalPanelResponse` | Get renewal panel data (alert banner, end date, notice period, action button states) |
-| POST | `/api/v1/contracts/{contractId}/renew` | TENANT_ADMIN, CONTRACT_OWNER | `—` | `LinkedContractActionResponse` | Create a linked renewal contract and transition original to Renewed |
-| POST | `/api/v1/contracts/{contractId}/amend` | TENANT_ADMIN, CONTRACT_OWNER | `—` | `LinkedContractActionResponse` | Create a linked amendment contract and transition original to Amended |
-| POST | `/api/v1/contracts/{contractId}/terminate` | TENANT_ADMIN, CONTRACT_OWNER | `TerminateContractRequest` | `LinkedContractActionResponse` | Terminate the contract with a required Termination Reason and Effective Termination Date on or after today |
-
-### DTOs (your types must match these names and fields exactly)
-
-**`ContractSearchRequest`** *(request)*
+Already built in an earlier run. Import and extend what exists; do not
+rebuild it and do not rename its fields or paths.
 
 ```
-  searchText?: string
-  status?: string
-  startDateFrom?: date
-  startDateTo?: date
-  endDateFrom?: date
-  endDateTo?: date
-  valueMin?: number
-  valueMax?: number
-  folderTagIds?: array
-  sortBy?: string
-  sortDirection?: string
-  page?: integer
-  pageSize?: integer
+Title: life cycle uc8 uc9 (life-cycle-uc8-uc9)
+Components: ContractRepositoryPage, SearchFilterPanel, ContractListTable, NoResultsMessage, EmptyRepositoryState, IndexingInProgressBanner, AccessDeniedView, AddFolderTagDialog, ContractDetailPage, ContractDetailsTab, ContractDocumentTab, ContractVersionsTab, ContractActivityLogTab, DownloadButton, ObligationsRenewalPage, ObligationsTable, ObligationRowForm, ManualObligationForm, ObligationsEmptyState, ObligationsTabBlockedMessage, ObligationsAccessDeniedView, RenewalAlertPanel, RenewAmendTerminateButtons, TerminationReasonDialog
+Endpoints: GET /api/v1/contracts, GET /api/v1/contracts/{contractId}, GET /api/v1/contracts/{contractId}/document, GET /api/v1/contracts/{contractId}/document/download, GET /api/v1/contracts/{contractId}/versions, GET /api/v1/contracts/{contractId}/activity-log, POST /api/v1/contracts/{contractId}/folder-tags, GET /api/v1/folder-tags, GET /api/v1/contracts/{contractId}/obligations, POST /api/v1/contracts/{contractId}/obligations, PATCH /api/v1/contracts/{contractId}/obligations/{obligationId}, POST /api/v1/contracts/{contractId}/obligations/{obligationId}/accept, GET /api/v1/contracts/{contractId}/renewal, POST /api/v1/contracts/{contractId}/renew, POST /api/v1/contracts/{contractId}/amend, POST /api/v1/contracts/{contractId}/terminate
+DTOs: ContractSearchRequest, ContractListItemResponse, ContractDetailResponse, ContractDocumentResponse, DocumentDownloadResponse, ContractVersionResponse, ActivityLogEntryResponse, AssignFolderTagRequest, ContractFolderTagResponse, FolderTagOptionResponse, ObligationResponse, CreateObligationRequest, UpdateObligationRequest, RenewalPanelResponse, TerminateContractRequest, LinkedContractActionResponse
 ```
-
-**`ContractListItemResponse`** *(response)*
-
-```
-  contractId: uuid
-  contractName: string
-  counterparty: string
-  status: string
-  value?: number
-  startDate?: date
-  endDate?: date
-  owner: string
-  lastModified: datetime
-  folderTags?: array
-  indexingInProgress: boolean
-```
-
-**`ContractDetailResponse`** *(response)*
-
-```
-  contractId: uuid
-  contractName: string
-  counterparty: string
-  status: string
-  value?: number
-  startDate?: date
-  endDate?: date
-  owner: string
-  lastModified: datetime
-  folderTags?: array
-  availableTabs: array
-```
-
-**`ContractDocumentResponse`** *(response)*
-
-```
-  contractId: uuid
-  documentUrl?: string
-  fileName: string
-  fileType: string
-  fileSizeBytes: integer
-  isOversized: boolean
-  isCorruptedOrMissing: boolean
-  downloadEnabled: boolean
-  unavailableComment?: string
-```
-
-**`DocumentDownloadResponse`** *(response)*
-
-```
-  success: boolean
-  fileUrl?: string
-  errorMessage?: string
-```
-
-**`ContractVersionResponse`** *(response)*
-
-```
-  versionId: uuid
-  versionNumber: integer
-  createdAt: datetime
-  createdBy: string
-  changeSummary?: string
-```
-
-**`ActivityLogEntryResponse`** *(response)*
-
-```
-  entryId: uuid
-  contractId: uuid
-  actionType: string
-  performedBy: string
-  performedAt: datetime
-  details?: string
-```
-
-**`AssignFolderTagRequest`** *(request)*
-
-```
-  folderTagIds: array
-```
-
-**`ContractFolderTagResponse`** *(response)*
-
-```
-  contractId: uuid
-  folderTags: array
-```
-
-**`FolderTagOptionResponse`** *(response)*
-
-```
-  id: uuid
-  name: string
-  kind: string
-```
-
-**`ObligationResponse`** *(response)*
-
-```
-  obligationId: uuid
-  contractId: uuid
-  obligationDescription: string
-  obligationType: string
-  owner?: string
-  dueDate?: date
-  status: string
-  source: string
-  confirmationLabel: string
-  evidenceReference?: string
-  readOnly: boolean
-```
-
-**`CreateObligationRequest`** *(request)*
-
-```
-  obligationDescription: string
-  obligationType: string
-  owner: string
-  dueDate: date
-  status: string
-```
-
-**`UpdateObligationRequest`** *(request)*
-
-```
-  obligationDescription?: string
-  obligationType?: string
-  owner?: string
-  dueDate?: date
-  status?: string
-  evidenceReference?: string
-```
-
-**`RenewalPanelResponse`** *(response)*
-
-```
-  contractId: uuid
-  renewalAlertBanner?: string
-  contractEndDate?: date
-  noticePeriod?: string
-  alertThresholdDays?: integer
-  renewEnabled: boolean
-  amendEnabled: boolean
-  terminateEnabled: boolean
-  actionInProgress: boolean
-  linkedContractId?: uuid
-  linkedContractRelation?: string
-  obligations?: array
-  terminationReason?: string
-  effectiveTerminationDate?: date
-```
-
-**`TerminateContractRequest`** *(request)*
-
-```
-  terminationReason: string
-  effectiveTerminationDate: date
-```
-
-**`LinkedContractActionResponse`** *(response)*
-
-```
-  originalContractId: uuid
-  originalContractStatus: string
-  linkedContractId: uuid
-  linkedContractReference: uuid
-  terminationReason?: string
-  effectiveTerminationDate?: date
-  contractEndDate?: date
-  noticePeriod?: string
-  renewalAlertBanner?: string
-  obligations?: array
-```
-
 <!-- DIGEST
 Title: life cycle uc8 uc9 (life-cycle-uc8-uc9)
 Components: ContractRepositoryPage, SearchFilterPanel, ContractListTable, NoResultsMessage, EmptyRepositoryState, IndexingInProgressBanner, AccessDeniedView, AddFolderTagDialog, ContractDetailPage, ContractDetailsTab, ContractDocumentTab, ContractVersionsTab, ContractActivityLogTab, DownloadButton, ObligationsRenewalPage, ObligationsTable, ObligationRowForm, ManualObligationForm, ObligationsEmptyState, ObligationsTabBlockedMessage, ObligationsAccessDeniedView, RenewalAlertPanel, RenewAmendTerminateButtons, TerminationReasonDialog
@@ -496,3 +229,332 @@ Endpoints: GET /api/v1/contracts, GET /api/v1/contracts/{contractId}, GET /api/v
 DTOs: ContractSearchRequest, ContractListItemResponse, ContractDetailResponse, ContractDocumentResponse, DocumentDownloadResponse, ContractVersionResponse, ActivityLogEntryResponse, AssignFolderTagRequest, ContractFolderTagResponse, FolderTagOptionResponse, ObligationResponse, CreateObligationRequest, UpdateObligationRequest, RenewalPanelResponse, TerminateContractRequest, LinkedContractActionResponse
 DIGEST -->
 <!-- MODULE:life-cycle-uc8-uc9 END -->
+
+<!-- MODULE:lifecycle-uc10-uc11 START -->
+## lifecycle uc10 uc11 (lifecycle-uc10-uc11)
+
+From this module's contract: 20 component(s), 18 endpoint(s), 24 DTO(s), 57 story/stories.
+Base path for this module: `/api/v1`.
+
+### Screens and components
+
+| Name | Type | Purpose |
+|---|---|---|
+| `TrackerPage` | PAGE | Top-level Tracker screen with Period/filter controls and tab navigation |
+| `AccessDeniedPage` | PAGE | Permission-denied page redirecting to Dashboard |
+| `SettingsAdminPage` | PAGE | Top-level Settings/Admin screen with five tabs |
+| `TrackerReportControlsPanel` | COMPONENT | Period dropdown, Contract Type Filter, Owner Filter, Date Range From/To, Export Button |
+| `OwnershipTab` | COMPONENT | Contracts by Owner table with status counts |
+| `CycleTimeTab` | COMPONENT | Average Cycle Time per stage table and bar chart |
+| `BottleneckTab` | COMPONENT | Current Stage, Days in Current Stage, Stuck Flag table |
+| `TurnaroundTab` | COMPONENT | Contract Name/Type, Estimated/Actual Turnaround, Variance table with color coding |
+| `TrackerEmptyState` | COMPONENT | Shows empty-state/no-records/conflicting-filter messages |
+| `TrackerExportButton` | COMPONENT | Triggers export, shows failure message on error |
+| `UserManagementTab` | COMPONENT | Users table with Add User action |
+| `AddUserForm` | COMPONENT | Form for Name/Email/Role with validation |
+| `UserStatusActionControl` | COMPONENT | Deactivate/Reactivate controls guarding last Tenant Admin |
+| `RoutingApprovalTab` | COMPONENT | Approval matrix table with Add Rule action |
+| `AddRuleForm` | COMPONENT | Form for Contract Type/Value Threshold/Approver Role with validation |
+| `IntegrationsTab` | COMPONENT | Integration cards with Connect/Disconnect actions |
+| `IntegrationConnectForm` | COMPONENT | Credential entry form, masks input and shows failure message |
+| `NotificationsTab` | COMPONENT | Event list with Email/In-App toggles |
+| `AuditLogTab` | COMPONENT | Read-only audit log table sorted newest first with Filter Date Range |
+| `AuditLogFilterPanel` | COMPONENT | Filter Date Range and Apply Filter Button |
+
+Create one route-level screen per PAGE above, in whichever folder this stack uses for routed screens (see Layout).
+
+### Hooks
+
+- `useOwnershipTab` — Fetches Ownership tab data
+- `useCycleTimeTab` — Fetches Cycle Time tab data
+- `useBottleneckTab` — Fetches Bottleneck tab data
+- `useTurnaroundTab` — Fetches Turnaround tab data
+- `useTrackerExport` — Triggers tracker export and handles failure
+- `useEstimatedTurnaroundOverride` — Submits an override of AI-suggested estimated turnaround
+- `useTenantUsers` — Fetches tenant users list
+- `useCreateUser` — Creates a new tenant user
+- `useUpdateUserStatus` — Updates user status (deactivate/reactivate)
+- `useApprovalRules` — Fetches approval matrix rules
+- `useCreateApprovalRule` — Creates a new approval rule
+- `useIntegrations` — Fetches integration cards
+- `useConnectIntegration` — Authorizes integration connection
+- `useDisconnectIntegration` — Disconnects an integration
+- `useNotificationEvents` — Fetches notification event toggles
+- `useUpdateNotificationEvent` — Updates an event's toggles
+- `useAuditLog` — Fetches filtered audit log entries
+
+### State slices
+
+- `trackerFiltersSlice`
+- `settingsAdminSlice`
+- `auditLogSlice`
+
+### Endpoints this module calls
+
+Call exactly these paths and methods. Do not invent variants.
+
+| Method | Path | Roles | Request DTO | Response DTO | Purpose |
+|---|---|---|---|---|---|
+| GET | `/api/v1/tracker/ownership` | TENANT_ADMIN, CONTRACT_OWNER, LEGAL_REVIEWER, APPROVER | `TrackerQueryParams` | `OwnershipTabResponse` *(paged)* | Get Ownership tab data (Contracts by Owner) with period/filters |
+| GET | `/api/v1/tracker/cycle-time` | TENANT_ADMIN, CONTRACT_OWNER, LEGAL_REVIEWER, APPROVER | `TrackerQueryParams` | `CycleTimeTabResponse` *(paged)* | Get Cycle Time tab data (avg cycle time per stage grouped by user/contract type) |
+| GET | `/api/v1/tracker/bottleneck` | TENANT_ADMIN, CONTRACT_OWNER, LEGAL_REVIEWER, APPROVER | `TrackerQueryParams` | `BottleneckTabResponse` *(paged)* | Get Bottleneck tab data (current stage, days in stage, stuck flag) |
+| GET | `/api/v1/tracker/turnaround` | TENANT_ADMIN, CONTRACT_OWNER, LEGAL_REVIEWER, APPROVER | `TrackerQueryParams` | `TurnaroundTabResponse` *(paged)* | Get Turnaround tab data (estimated vs actual turnaround, variance) |
+| POST | `/api/v1/tracker/export` | TENANT_ADMIN, CONTRACT_OWNER, LEGAL_REVIEWER, APPROVER | `TrackerExportRequest` | `TrackerExportResponse` | Export currently selected tab data for selected period/filters to Excel or PDF |
+| PUT | `/api/v1/tracker/turnaround/{contractId}/estimated-override` | TENANT_ADMIN, CONTRACT_OWNER, LEGAL_REVIEWER, APPROVER | `EstimatedTurnaroundOverrideRequest` | `TurnaroundRowResponse` | Override AI-suggested Estimated Turnaround value and log audit entry |
+| GET | `/api/v1/tracker/bottleneck-thresholds` | TENANT_ADMIN | `—` | `BottleneckThresholdResponse` | Get tenant-configured stuck-flag thresholds per stage |
+| GET | `/api/v1/settings/users` | TENANT_ADMIN | `—` | `UserListItemResponse` *(paged)* | List tenant users table (Name/Email/Role/Status/Last Login) |
+| POST | `/api/v1/settings/users` | TENANT_ADMIN | `CreateUserRequest` | `UserListItemResponse` | Add a new user with Name/Email/Role, validate uniqueness |
+| PATCH | `/api/v1/settings/users/{userId}/status` | TENANT_ADMIN | `UpdateUserStatusRequest` | `UserListItemResponse` | Deactivate, reactivate, or auto-activate a user; blocks removing last active Tenant Admin |
+| GET | `/api/v1/settings/approval-rules` | TENANT_ADMIN | `—` | `ApprovalRuleResponse` *(paged)* | List approval matrix rules (Contract Type/Value Threshold/Approver Role) |
+| POST | `/api/v1/settings/approval-rules` | TENANT_ADMIN | `CreateApprovalRuleRequest` | `ApprovalRuleResponse` | Add approval rule, validate required fields and duplicate combination |
+| GET | `/api/v1/settings/integrations` | TENANT_ADMIN | `—` | `IntegrationResponse` | List integration cards (Integration Name/Connection Status) |
+| POST | `/api/v1/settings/integrations/{integrationName}/connect` | TENANT_ADMIN | `ConnectIntegrationRequest` | `IntegrationResponse` | Submit credentials and authorize integration connection, masks credentials on success |
+| POST | `/api/v1/settings/integrations/{integrationName}/disconnect` | TENANT_ADMIN | `—` | `IntegrationResponse` | Manually disconnect an integration |
+| GET | `/api/v1/settings/notifications` | TENANT_ADMIN | `—` | `NotificationEventResponse` | List notification events with Email/In-App toggles |
+| PUT | `/api/v1/settings/notifications/{eventName}` | TENANT_ADMIN | `UpdateNotificationEventRequest` | `NotificationEventResponse` | Update Email Toggle and/or In-App Toggle for a notification event |
+| GET | `/api/v1/settings/audit-log` | TENANT_ADMIN | `AuditLogQueryParams` | `AuditLogEntryResponse` *(paged)* | Get read-only audit log entries sorted newest first with Filter Date Range |
+
+### DTOs (your types must match these names and fields exactly)
+
+**`TrackerQueryParams`** *(request)*
+
+```
+  period?: string
+  contractTypeFilter?: string
+  ownerFilter?: string
+  dateRangeFrom?: date
+  dateRangeTo?: date
+  page?: integer
+  pageSize?: integer
+```
+
+**`OwnershipRowResponse`** *(response)*
+
+```
+  ownerName: string
+  contractsOwned: integer
+  inDraftCount: integer
+  inNegotiationCount: integer
+  inApprovalCount: integer
+  inSignatureCount: integer
+  completedCount: integer
+  averageCycleTime?: number
+```
+
+**`OwnershipTabResponse`** *(response)*
+
+```
+  rows: array
+  isEmpty: boolean
+  emptyStateMessage?: string
+  totalCount: integer
+  page: integer
+  pageSize: integer
+```
+
+**`CycleTimeRowResponse`** *(response)*
+
+```
+  stage: string
+  ownerName?: string
+  contractType?: string
+  contractsOwned?: integer
+  averageCycleTime?: number
+```
+
+**`CycleTimeTabResponse`** *(response)*
+
+```
+  rows: array
+  isEmpty: boolean
+  emptyStateMessage?: string
+  totalCount: integer
+  page: integer
+  pageSize: integer
+```
+
+**`BottleneckRowResponse`** *(response)*
+
+```
+  contractId: uuid
+  contractName: string
+  ownerName?: string
+  currentStage: string
+  daysInCurrentStage: integer
+  stuckFlag: string
+```
+
+**`BottleneckTabResponse`** *(response)*
+
+```
+  rows: array
+  isEmpty: boolean
+  emptyStateMessage?: string
+  totalCount: integer
+  page: integer
+  pageSize: integer
+```
+
+**`TurnaroundRowResponse`** *(response)*
+
+```
+  contractId: uuid
+  contractName: string
+  contractType: string
+  estimatedTurnaround?: number
+  estimatedTurnaroundNotSet: boolean
+  estimatedTurnaroundSource?: string
+  actualTurnaround?: number
+  variance?: number
+  varianceColor?: string
+  excludedFromAverages: boolean
+```
+
+**`TurnaroundTabResponse`** *(response)*
+
+```
+  rows: array
+  isEmpty: boolean
+  emptyStateMessage?: string
+  totalCount: integer
+  page: integer
+  pageSize: integer
+```
+
+**`TrackerExportRequest`** *(request)*
+
+```
+  tab: string
+  format: string
+  period?: string
+  contractTypeFilter?: string
+  ownerFilter?: string
+  dateRangeFrom?: date
+  dateRangeTo?: date
+```
+
+**`TrackerExportResponse`** *(response)*
+
+```
+  success: boolean
+  fileUrl?: string
+  failureMessage?: string
+```
+
+**`EstimatedTurnaroundOverrideRequest`** *(request)*
+
+```
+  newEstimatedTurnaround: number
+  overrideReason?: string
+  originalAiSuggestedValue?: number
+  overriddenBy: uuid
+  overrideTimestamp: datetime
+```
+
+**`BottleneckThresholdResponse`** *(response)*
+
+```
+  stage: string
+  thresholdDays: integer
+```
+
+**`UserListItemResponse`** *(response)*
+
+```
+  id: uuid
+  name: string
+  email: string
+  role: string
+  status: string
+  lastLogin?: datetime
+```
+
+**`CreateUserRequest`** *(request)*
+
+```
+  name: string
+  email: string
+  role: string
+```
+
+**`UpdateUserStatusRequest`** *(request)*
+
+```
+  status: string
+```
+
+**`ApprovalRuleResponse`** *(response)*
+
+```
+  id: uuid
+  contractType: string
+  valueThreshold: number
+  approverRole: string
+```
+
+**`CreateApprovalRuleRequest`** *(request)*
+
+```
+  contractType: string
+  valueThreshold: number
+  approverRole: string
+```
+
+**`IntegrationResponse`** *(response)*
+
+```
+  integrationName: string
+  connectionStatus: string
+  maskedCredential?: string
+```
+
+**`ConnectIntegrationRequest`** *(request)*
+
+```
+  credentials: object
+```
+
+**`NotificationEventResponse`** *(response)*
+
+```
+  eventName: string
+  emailToggle: boolean
+  inAppToggle: boolean
+```
+
+**`UpdateNotificationEventRequest`** *(request)*
+
+```
+  emailToggle?: boolean
+  inAppToggle?: boolean
+```
+
+**`AuditLogQueryParams`** *(request)*
+
+```
+  filterDateRangeFrom?: date
+  filterDateRangeTo?: date
+  userFilter?: string
+  actionTypeFilter?: string
+  page?: integer
+  pageSize?: integer
+```
+
+**`AuditLogEntryResponse`** *(response)*
+
+```
+  id: uuid
+  logDateTime: datetime
+  logUser: string
+  logAction: string
+  logEntity: string
+  details?: string
+```
+
+<!-- DIGEST
+Title: lifecycle uc10 uc11 (lifecycle-uc10-uc11)
+Components: TrackerPage, TrackerReportControlsPanel, OwnershipTab, CycleTimeTab, BottleneckTab, TurnaroundTab, TrackerEmptyState, TrackerExportButton, AccessDeniedPage, SettingsAdminPage, UserManagementTab, AddUserForm, UserStatusActionControl, RoutingApprovalTab, AddRuleForm, IntegrationsTab, IntegrationConnectForm, NotificationsTab, AuditLogTab, AuditLogFilterPanel
+Endpoints: GET /api/v1/tracker/ownership, GET /api/v1/tracker/cycle-time, GET /api/v1/tracker/bottleneck, GET /api/v1/tracker/turnaround, POST /api/v1/tracker/export, PUT /api/v1/tracker/turnaround/{contractId}/estimated-override, GET /api/v1/tracker/bottleneck-thresholds, GET /api/v1/settings/users, POST /api/v1/settings/users, PATCH /api/v1/settings/users/{userId}/status, GET /api/v1/settings/approval-rules, POST /api/v1/settings/approval-rules, GET /api/v1/settings/integrations, POST /api/v1/settings/integrations/{integrationName}/connect, POST /api/v1/settings/integrations/{integrationName}/disconnect, GET /api/v1/settings/notifications, PUT /api/v1/settings/notifications/{eventName}, GET /api/v1/settings/audit-log
+DTOs: TrackerQueryParams, OwnershipRowResponse, OwnershipTabResponse, CycleTimeRowResponse, CycleTimeTabResponse, BottleneckRowResponse, BottleneckTabResponse, TurnaroundRowResponse, TurnaroundTabResponse, TrackerExportRequest, TrackerExportResponse, EstimatedTurnaroundOverrideRequest, BottleneckThresholdResponse, UserListItemResponse, CreateUserRequest, UpdateUserStatusRequest, ApprovalRuleResponse, CreateApprovalRuleRequest, IntegrationResponse, ConnectIntegrationRequest, NotificationEventResponse, UpdateNotificationEventRequest, AuditLogQueryParams, AuditLogEntryResponse
+DIGEST -->
+<!-- MODULE:lifecycle-uc10-uc11 END -->

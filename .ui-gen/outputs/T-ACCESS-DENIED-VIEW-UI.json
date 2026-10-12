@@ -1,0 +1,42 @@
+{
+  "status": "SUCCESS",
+  "summary": "Implemented AccessDeniedView, a standalone presentational molecule that displays 'You do not have permission to view this contract.' per UC8-AF-003. It is a no-props component (matching context.json's component contract) meant to be rendered by the Contract Detail screen in place of contract data when a direct-link access check fails, with a link back to the Contract Repository list (/contracts) so the repository screen remains reachable per the story's second acceptance criterion. Styled to match this repo's existing dark theme and the established access-denied pattern (src/features/clause-analysis/components/AccessDeniedBanner.jsx): dark card, red alert icon, centered message. Verified with lint, full test suite (79 tests passing, including 3 new tests for this component), and production build, all green. Visually verified by temporarily mounting the component via a throwaway route, screenshotting it, and confirming it renders the exact message, an alert role, and a working link to /contracts; the throwaway route was reverted before finishing (git status shows only new files).",
+  "task_id": "T-ACCESS-DENIED-VIEW-UI",
+  "story_id": "UC8-AF-003",
+  "code_files": [
+    {
+      "file_path": "src/features/contract-repository/components/AccessDeniedView.jsx",
+      "file_name": "AccessDeniedView.jsx",
+      "language": "javascript",
+      "file_type": "component",
+      "description": "MOLECULE that renders the permission-denied message and icon in place of contract detail content, with a link back to the Contract Repository list."
+    },
+    {
+      "file_path": "src/features/contract-repository/components/AccessDeniedView.test.jsx",
+      "file_name": "AccessDeniedView.test.jsx",
+      "language": "javascript",
+      "file_type": "component",
+      "description": "Colocated test asserting the exact message text, the back-link target, and that the message renders as role=alert with no contract data alongside it."
+    }
+  ],
+  "pr": {
+    "branch_name": "ui-gen/effb4f716f44",
+    "title": "feat(ui-gen): add AccessDeniedView for blocked direct-link contract access",
+    "body": "Implements AccessDeniedView (UC8-AF-003): a presentational molecule shown instead of contract detail content when a user opens a direct link to a contract they do not own or are not assigned to. Displays the exact required message and a link back to the Contract Repository list so the repository screen remains reachable. No props, no data fetching — the owning page (ContractDetailPage, built by a separate task) is responsible for performing the GET /api/v1/contracts/{contractId} access check and rendering this view on a 401/403/denied response.",
+    "draft": true,
+    "linked_story": "UC8-AF-003",
+    "linked_task": "T-ACCESS-DENIED-VIEW-UI"
+  },
+  "critic_hints": {
+    "files_to_lint": [
+      "src/features/contract-repository/components/AccessDeniedView.jsx",
+      "src/features/contract-repository/components/AccessDeniedView.test.jsx"
+    ],
+    "openapi_endpoint": null
+  },
+  "blockers": [
+    "None of the four TARGET DESIGN screenshots (IMG-1..IMG-4) actually depict the AccessDeniedView state — they show the populated Contract Repository list, the Contract Detail header/tabs, the Document/Versions tabs, and the Activity Log. There is no design reference for this exact message/empty state. I built it to match this repo's established dark theme and the pre-existing access-denied pattern in src/features/clause-analysis/components/AccessDeniedBanner.jsx (dark card, red alert icon, centered message, back-link) rather than inventing a new visual language. Flagging this since visual-fidelity verification against a TARGET DESIGN was not possible for this specific component.",
+    "This task owns only the AccessDeniedView molecule, which per context.json takes no props and performs no data fetching. The actual direct-link access check (calling GET /api/v1/contracts/{contractId} and deciding to render this view on a 401/403) belongs to ContractDetailPage/useContractDetail, which are owned by other, not-yet-built tasks in this module (e.g. a future contract-detail task). This component is therefore unwired/unrouted until that page imports and renders it on an access-denied response — consistent with 'What you own' in TASK.md, but noting it so the gap isn't missed.",
+    "Inferred the 'Back to Contract Repository' link (href to /contracts, the existing route from the uc123 module) and the visual treatment (icon, card, colors) since context.json's component entry had no props and the design images gave no direct guidance for this state. These are the only inferred elements beyond the literal required message text."
+  ]
+}

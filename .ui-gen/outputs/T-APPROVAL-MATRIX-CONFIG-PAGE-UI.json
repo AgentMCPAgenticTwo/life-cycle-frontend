@@ -1,0 +1,82 @@
+{
+  "status": "PARTIAL",
+  "summary": "Built ApprovalMatrixConfigPage, a Tenant Admin-only settings screen for configuring approval matrix rules (Contract Type, Value Min/Max, Risk Band Min/Max) and their ordered approval steps (role + step name). Wired to GET/PUT /api/v1/approval-matrix-config via a new approvalMatrixConfigService and useApprovalMatrixConfig/useUpdateApprovalMatrixConfig hooks, with loading, empty, error (with retry) and populated states, client-side validation (Contract Type and Step Name required before save), and a route at /settings/approval-matrix-config. Styling follows this repo's existing dark-theme Settings-page pattern (see TemplateClauseLibraryPage) since none of the three TARGET DESIGN images actually depict this screen's content (see blockers). Verified with lint, unit tests, production build, and a Playwright screenshot against a temporary local mock of the two owned endpoints.",
+  "task_id": "T-APPROVAL-MATRIX-CONFIG-PAGE-UI",
+  "story_id": "UC6-BR-002",
+  "code_files": [
+    {
+      "file_path": "src/services/approvalMatrixConfigService.js",
+      "file_name": "approvalMatrixConfigService.js",
+      "language": "javascript",
+      "file_type": "service",
+      "description": "Typed client for GET/PUT /api/v1/approval-matrix-config, calling exactly the two endpoints owned by this task."
+    },
+    {
+      "file_path": "src/features/approvals/hooks/useApprovalMatrixConfig.js",
+      "file_name": "useApprovalMatrixConfig.js",
+      "language": "javascript",
+      "file_type": "hook",
+      "description": "Fetches ApprovalMatrixConfigListResponse for the config screen with loading/error/refetch state, per the module contract's hook signature."
+    },
+    {
+      "file_path": "src/features/approvals/hooks/useUpdateApprovalMatrixConfig.js",
+      "file_name": "useUpdateApprovalMatrixConfig.js",
+      "language": "javascript",
+      "file_type": "hook",
+      "description": "Submits UpdateApprovalMatrixConfigRequest to PUT /approval-matrix-config, per the module contract's hook signature."
+    },
+    {
+      "file_path": "src/features/approvals/components/ApprovalMatrixRuleCard.jsx",
+      "file_name": "ApprovalMatrixRuleCard.jsx",
+      "language": "javascript",
+      "file_type": "component",
+      "description": "Editable card for one ApprovalMatrixConfigResponse rule: Contract Type / Value Min-Max / Risk Band Min-Max fields plus an ordered, add/remove-able list of ApprovalMatrixStepConfig steps (role + step name)."
+    },
+    {
+      "file_path": "src/pages/ApprovalMatrixConfigPage.jsx",
+      "file_name": "ApprovalMatrixConfigPage.jsx",
+      "language": "javascript",
+      "file_type": "component",
+      "description": "Route-level PAGE for Tenant Admin to view, add, edit, remove and save approval matrix rules; gates access to TENANT_ADMIN and implements loading/empty/error/populated states per CLAUDE.md."
+    },
+    {
+      "file_path": "src/__tests__/ApprovalMatrixConfigPage.test.jsx",
+      "file_name": "ApprovalMatrixConfigPage.test.jsx",
+      "language": "javascript",
+      "file_type": "component",
+      "description": "Screen-level tests: populated render, access-denied for non-Tenant-Admin roles, empty state, error state with retry, successful save via PUT, and client-side required-field validation."
+    },
+    {
+      "file_path": "src/App.jsx",
+      "file_name": "App.jsx",
+      "language": "javascript",
+      "file_type": "component",
+      "description": "Added the /settings/approval-matrix-config route for the new page, alongside the existing routes (no existing route changed)."
+    }
+  ],
+  "pr": {
+    "branch_name": "ui-gen/d1a751c9fae4",
+    "title": "feat(ui-gen): ApprovalMatrixConfigPage for tenant approval matrix rules",
+    "body": "Implements ApprovalMatrixConfigPage (UC6-BR-002, UC6-BR-016): a Tenant Admin settings screen to configure approval matrix routing rules by Contract Type, Contract Value and AI Risk Score band, each with an ordered list of approval steps. Calls GET/PUT /api/v1/approval-matrix-config only, matching the DTOs in the module contract exactly. See blockers for inferred fields and the design-image mismatch.",
+    "draft": true,
+    "linked_story": "UC6-BR-002",
+    "linked_task": "T-APPROVAL-MATRIX-CONFIG-PAGE-UI"
+  },
+  "critic_hints": {
+    "files_to_lint": [
+      "src/pages/ApprovalMatrixConfigPage.jsx",
+      "src/features/approvals/components/ApprovalMatrixRuleCard.jsx",
+      "src/features/approvals/hooks/useApprovalMatrixConfig.js",
+      "src/features/approvals/hooks/useUpdateApprovalMatrixConfig.js",
+      "src/services/approvalMatrixConfigService.js",
+      "src/__tests__/ApprovalMatrixConfigPage.test.jsx",
+      "src/App.jsx"
+    ],
+    "openapi_endpoint": null
+  },
+  "blockers": [
+    "No TARGET DESIGN image actually depicts ApprovalMatrixConfigPage: IMG-1 shows the Approvals list screen, IMG-2 shows the Approval Review screen's top section, and IMG-3 shows the Approval Review screen's Decision/Approval History section — all owned by other tasks (ApprovalsListPage / ApprovalReviewPage), not this one. Since the task explicitly notes images may depict different screens and none shows the Tenant Admin matrix-config content, I built this page by extending this repo's existing dark-theme Settings-page visual language (header/breadcrumb/title/button layout, palette, spacing) from TemplateClauseLibraryPage rather than inventing a new visual style, and could not verify 80% similarity against a design image for this specific screen's content.",
+    "Inferred fields/behavior not spelled out in context.json, derived only from the given DTOs: (1) Contract Type is rendered as a free-text input rather than a dropdown, because no lookup endpoint for contract-type options is listed among this task's endpoints and CLAUDE.md forbids inventing dropdown data sources. (2) ApprovalMatrixStepConfig.approverUserId (optional/nullable) is not exposed as an editable field, since no user-lookup endpoint is in this module's contract for this page; only approverRole (a fixed enum of the four roles this contract defines minus SIGNER, since SIGNER cannot be an approver) and stepName are editable. (3) For newly added rules/steps, there is no separate create-one-rule endpoint — PUT replaces the full `items` list — so a new rule's `id` is generated client-side with crypto.randomUUID() purely to satisfy the non-nullable `id` field in UpdateApprovalMatrixConfigRequest's reused ApprovalMatrixConfigResponse shape; this is an inference about how the full-replace PUT is meant to accept new rows, not a confirmed backend behavior.",
+    "Endpoints GET /api/v1/approvals, GET /api/v1/approvals/{approvalId} and POST /api/v1/approvals/{approvalId}/actions, though listed in this task's 'API endpoints you must call' section (because they share story IDs UC6-BR-002/UC6-BR-016), belong to ApprovalsListPage and ApprovalReviewPage per the 'What you own' section and the module contract's component-to-endpoint mapping — they are intentionally not called from this page to avoid rebuilding another task's screen."
+  ]
+}

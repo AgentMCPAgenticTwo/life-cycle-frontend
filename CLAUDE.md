@@ -191,438 +191,17 @@ DIGEST -->
 <!-- MODULE:lifecycle-uc4-uc5 END -->
 
 <!-- MODULE:uc6-uc7-combined START -->
-## UC6-UC7-combined (uc6-uc7-combined)
+## UC6-UC7-combined (uc6-uc7-combined) — previously generated
 
-From this module's contract: 18 component(s), 20 endpoint(s), 31 DTO(s), 66 story/stories.
-Base path for this module: `/api/v1`.
-
-### Screens and components
-
-| Name | Type | Purpose |
-|---|---|---|
-| `ApprovalsListPage` | PAGE | Lists pending/completed approvals for the current user, delegate, or tenant-wide (Tenant Admin), with empty-state messaging |
-| `ApprovalReviewPage` | PAGE | Main approval review screen showing all contract/approval fields, read-only AI reference fields, and action controls |
-| `ApprovalMatrixConfigPage` | PAGE | Tenant Admin settings screen to configure approval matrix rules by contract type, value, and risk band |
-| `SignerListPage` | PAGE | Add Signers / Signer List screen for a contract, including Add Signer and Send for Signature controls |
-| `SigningPortalPage` | PAGE | External/internal Signer-facing signing portal gating access via OTP, enforcing sequential order and link expiry/decline/lockout rules |
-| `EsignatureSettingsPage` | PAGE | Tenant Admin settings page to configure Reminder Frequency (days) and default signature provider |
-| `ApprovalsListTable` | COMPONENT | Grid of approvals showing Contract Title, Type, Value, Counterparty, AI Risk Score, and Approval Matrix Step |
-| `ApprovalDetailsCard` | COMPONENT | Displays read-only Contract Title, Contract Type, Contract Value, Counterparty Name, Key Terms Summary, Deviations from Standard, AI Risk Score (labelled AI Suggestion), and Approval Matrix Step |
-| `ApprovalActionsPanel` | COMPONENT | Approve/Reject/Send Back buttons with Comments field enforcing mandatory comments for Reject/Send Back and sequential-step enablement |
-| `DelegateModal` | COMPONENT | Delegate To dropdown with start/end date range, validating delegate eligibility and exclusion of the Contract Owner |
-| `ApprovalHistoryTab` | COMPONENT | Immutable list of prior approval decisions, timestamps, actors, and comments, retained for 7 years |
-| `SignerListTable` | COMPONENT | Grid showing Signer Name, Signer Email, Signer Type, Signing Order, Signature Method, Reminder Frequency, and Signer Status for each signer |
-| `AddSignerModal` | COMPONENT | Form to add a signer with mandatory Signer Name, Signer Email, Signer Type, Signing Order, and Signature Method |
-| `SendForSignatureButton` | COMPONENT | Triggers Send for Signature; disabled until at least one signer exists, shows connection-failure messaging for integrated providers |
-| `OtpVerificationModal` | COMPONENT | 6-digit OTP entry popup gating document viewer and Signature Pad; locks after 3 invalid attempts for 15 minutes |
-| `SignaturePadModal` | COMPONENT | Mandatory Signature Pad supporting Draw/Type/Upload, enabled only when it is the signer's turn |
-| `DeclineToSignModal` | COMPONENT | Decline to Sign popup requiring a mandatory reason, available only to the active Signer |
-| `AuditCertificateDownloadButton` | COMPONENT | Download Audit Certificate button, enabled only once the contract is Executed |
-
-Create one route-level screen per PAGE above, in whichever folder this stack uses for routed screens (see Layout).
-
-### Hooks
-
-- `useApprovalsList` — Fetches the paged list of approvals for the current user/delegate/tenant scope
-- `useApprovalDetail` — Fetches full approval detail for the Approval Review screen
-- `useSubmitApprovalAction` — Submits Approve/Reject/SendBack actions against POST /approvals/{id}/actions
-- `useDelegateApproval` — Submits a Delegate assignment against POST /approvals/{id}/delegate
-- `useApprovalHistory` — Fetches the Approval History tab entries
-- `useApprovalMatrixConfig` — Fetches tenant approval matrix configuration
-- `useUpdateApprovalMatrixConfig` — Updates tenant approval matrix configuration
-- `useSignerList` — Fetches the Signer List for a contract
-- `useAddSigner` — Adds a signer to the Signer List
-- `useUpdateSigner` — Updates or reorders a signer, blocked once signing has started
-- `useRemoveSigner` — Removes a signer from the Signer List, blocked once signing has started
-- `useSendForSignature` — Sends the contract for signature, emailing the first signer(s) in order
-- `useSigningSession` — Fetches the current signer's session state including gating and eligibility
-- `useVerifyOtp` — Verifies the signer's OTP
-- `useResendOtp` — Requests a new signing link/OTP after lockout or expiry
-- `useApplySignature` — Applies the signer's signature via the Signature Pad
-- `useDeclineSignature` — Submits a Decline to Sign action with a mandatory reason
-- `useAuditCertificate` — Fetches/downloads the audit certificate for an executed contract
-- `useEsignatureSettings` — Fetches tenant-wide e-signature settings
-- `useUpdateEsignatureSettings` — Updates tenant-wide reminder frequency and default signature provider
-
-### State slices
-
-- `approvalSlice`
-- `signerSlice`
-
-### Endpoints this module calls
-
-Call exactly these paths and methods. Do not invent variants.
-
-| Method | Path | Roles | Request DTO | Response DTO | Purpose |
-|---|---|---|---|---|---|
-| GET | `/api/v1/approvals` | APPROVER, TENANT_ADMIN, CONTRACT_OWNER, LEGAL_REVIEWER | `—` | `ApprovalListResponse` *(paged)* | List approvals visible to the current user (pending, delegated, or tenant-wide for Tenant Admin), with empty-state when none pending |
-| GET | `/api/v1/approvals/{approvalId}` | APPROVER, TENANT_ADMIN, CONTRACT_OWNER, LEGAL_REVIEWER | `—` | `ApprovalResponse` | Get full approval review detail for a contract's current step including all read-only fields and action eligibility flags |
-| POST | `/api/v1/approvals/{approvalId}/actions` | APPROVER | `ApprovalActionRequest` | `ApprovalActionResponse` | Submit an Approve, Reject, or Send Back action for the current approval step, enforcing sequence, mandatory-comments and ownership rules |
-| POST | `/api/v1/approvals/{approvalId}/delegate` | APPROVER | `DelegateRequest` | `DelegateResponse` | Assign a time-bound Delegate to act on the Approver's behalf for the current step, validating delegate eligibility, sequence, and ownership |
-| GET | `/api/v1/approvals/{approvalId}/history` | APPROVER, TENANT_ADMIN, CONTRACT_OWNER, LEGAL_REVIEWER | `—` | `ApprovalHistoryListResponse` *(paged)* | Retrieve the immutable Approval History tab entries for a contract's approval workflow, retained for 7 years |
-| GET | `/api/v1/approval-matrix-config` | TENANT_ADMIN | `—` | `ApprovalMatrixConfigListResponse` | Retrieve tenant-configured approval matrix rules by contract type, value, and risk band |
-| PUT | `/api/v1/approval-matrix-config` | TENANT_ADMIN | `UpdateApprovalMatrixConfigRequest` | `ApprovalMatrixConfigListResponse` | Update tenant-configured approval matrix rules and step sequences |
-| GET | `/api/v1/contracts/{contractId}/signers` | CONTRACT_OWNER, LEGAL_REVIEWER, TENANT_ADMIN | `—` | `SignerListResponse` | List all signers and their statuses for a contract's e-signature workflow (Signer List tab/grid) |
-| POST | `/api/v1/contracts/{contractId}/signers` | CONTRACT_OWNER | `AddSignerRequest` | `SignerResponse` | Add a new signer row to the Signer List with mandatory signer fields |
-| PUT | `/api/v1/contracts/{contractId}/signers/{signerId}` | CONTRACT_OWNER | `UpdateSignerRequest` | `SignerResponse` | Update or reorder a signer; blocked once the first signature has been collected |
-| DELETE | `/api/v1/contracts/{contractId}/signers/{signerId}` | CONTRACT_OWNER | `—` | `SignerResponse` | Remove a signer from the Signer List; blocked once the first signature has been collected |
-| POST | `/api/v1/contracts/{contractId}/signers/send` | CONTRACT_OWNER | `SendForSignatureRequest` | `SendForSignatureResponse` | Send for Signature: transition contract to Sent and email the secure link to the first signer(s) in Signing Order |
-| GET | `/api/v1/signing-sessions/{sessionId}` | SIGNER | `—` | `SigningSessionResponse` | Get the current signer's session state (document, status, eligibility) gated by sequential order and precondition checks |
-| POST | `/api/v1/signing-sessions/{sessionId}/otp/verify` | SIGNER | `VerifyOtpRequest` | `VerifyOtpResponse` | Verify the signer's 6-digit OTP, revealing the document viewer and Signature Pad on success; locks link after 3 invalid attempts |
-| POST | `/api/v1/signing-sessions/{sessionId}/otp/resend` | SIGNER, CONTRACT_OWNER | `—` | `SigningSessionResponse` | Re-send a new OTP/signing link after lockout expiry or link expiry |
-| POST | `/api/v1/signing-sessions/{sessionId}/sign` | SIGNER | `ApplySignatureRequest` | `ApplySignatureResponse` | Apply the signer's signature via the Signature Pad; advances sequence and auto-transitions contract to Executed on the final signature |
-| POST | `/api/v1/signing-sessions/{sessionId}/decline` | SIGNER | `DeclineSignatureRequest` | `DeclineSignatureResponse` | Decline to sign with a mandatory reason; halts routing and sets contract status to Signature Declined |
-| GET | `/api/v1/contracts/{contractId}/audit-certificate` | CONTRACT_OWNER, LEGAL_REVIEWER | `—` | `AuditCertificateResponse` | Download the signed audit certificate listing every signer's identity, IP, timestamp, and signing details; available only once Executed |
-| GET | `/api/v1/esignature-settings` | TENANT_ADMIN | `—` | `EsignatureSettingsResponse` | Get tenant-wide reminder frequency and default signature provider configuration |
-| PUT | `/api/v1/esignature-settings` | TENANT_ADMIN | `UpdateEsignatureSettingsRequest` | `EsignatureSettingsResponse` | Update tenant-wide reminder frequency (default 3 days) and default signature provider |
-
-### DTOs (your types must match these names and fields exactly)
-
-**`ApprovalResponse`** *(response)*
+Already built in an earlier run. Import and extend what exists; do not
+rebuild it and do not rename its fields or paths.
 
 ```
-  id: uuid
-  contractId: uuid
-  contractTitle: string
-  contractType: string
-  contractValue: number
-  counterpartyName: string
-  keyTermsSummary?: string
-  deviationsFromStandard?: string
-  aiRiskScore?: integer
-  approvalMatrixStepLabel: string
-  approvalMatrixStepNumber: integer
-  approvalMatrixTotalSteps: integer
-  status: string
-  comments?: string
-  delegateToUserId?: uuid
-  delegateToName?: string
-  delegationStartDate?: date
-  delegationEndDate?: date
-  currentApproverId: uuid
-  currentApproverName: string
-  isCurrentUserApprover: boolean
-  isCurrentUserActiveDelegate: boolean
-  isStepActionable: boolean
-  canApprove: boolean
-  canReject: boolean
-  canSendBack: boolean
-  canDelegate: boolean
-  createdAt: datetime
-  updatedAt: datetime
+Title: UC6-UC7-combined (uc6-uc7-combined)
+Components: ApprovalsListPage, ApprovalsListTable, ApprovalReviewPage, ApprovalDetailsCard, ApprovalActionsPanel, DelegateModal, ApprovalHistoryTab, ApprovalMatrixConfigPage, SignerListPage, SignerListTable, AddSignerModal, SendForSignatureButton, SigningPortalPage, OtpVerificationModal, SignaturePadModal, DeclineToSignModal, AuditCertificateDownloadButton, EsignatureSettingsPage
+Endpoints: GET /api/v1/approvals, GET /api/v1/approvals/{approvalId}, POST /api/v1/approvals/{approvalId}/actions, POST /api/v1/approvals/{approvalId}/delegate, GET /api/v1/approvals/{approvalId}/history, GET /api/v1/approval-matrix-config, PUT /api/v1/approval-matrix-config, GET /api/v1/contracts/{contractId}/signers, POST /api/v1/contracts/{contractId}/signers, PUT /api/v1/contracts/{contractId}/signers/{signerId}, DELETE /api/v1/contracts/{contractId}/signers/{signerId}, POST /api/v1/contracts/{contractId}/signers/send, GET /api/v1/signing-sessions/{sessionId}, POST /api/v1/signing-sessions/{sessionId}/otp/verify, POST /api/v1/signing-sessions/{sessionId}/otp/resend, POST /api/v1/signing-sessions/{sessionId}/sign, POST /api/v1/signing-sessions/{sessionId}/decline, GET /api/v1/contracts/{contractId}/audit-certificate, GET /api/v1/esignature-settings, PUT /api/v1/esignature-settings
+DTOs: ApprovalResponse, ApprovalListItemResponse, ApprovalListResponse, ApprovalActionRequest, ApprovalActionResponse, DelegateRequest, DelegateResponse, ApprovalHistoryEntryResponse, ApprovalHistoryListResponse, ApprovalMatrixStepConfig, ApprovalMatrixConfigResponse, ApprovalMatrixConfigListResponse, UpdateApprovalMatrixConfigRequest, SignerResponse, SignerListResponse, AddSignerRequest, UpdateSignerRequest, SendForSignatureRequest, SendForSignatureResponse, SigningSessionResponse, VerifyOtpRequest, VerifyOtpResponse, ApplySignatureRequest, ApplySignatureResponse, DeclineSignatureRequest, DeclineSignatureResponse, AuditCertificateSignerEntry, AuditCertificateResponse, EsignatureSettingsResponse, UpdateEsignatureSettingsRequest, ErrorResponse
 ```
-
-**`ApprovalListItemResponse`** *(response)*
-
-```
-  id: uuid
-  contractId: uuid
-  contractTitle: string
-  contractType: string
-  contractValue: number
-  counterpartyName: string
-  keyTermsSummary?: string
-  deviationsFromStandard?: string
-  aiRiskScore?: integer
-  approvalMatrixStepLabel: string
-  status: string
-```
-
-**`ApprovalListResponse`** *(response)*
-
-```
-  items: array
-  page: integer
-  pageSize: integer
-  totalCount: integer
-  isEmpty: boolean
-  emptyMessage?: string
-```
-
-**`ApprovalActionRequest`** *(request)*
-
-```
-  actionType: string
-  comments?: string
-```
-
-**`ApprovalActionResponse`** *(response)*
-
-```
-  approvalId: uuid
-  status: string
-  approvalMatrixStepLabel: string
-  approvalMatrixStepNumber: integer
-  contractStatus: string
-```
-
-**`DelegateRequest`** *(request)*
-
-```
-  delegateToUserId: uuid
-  startDate: date
-  endDate: date
-```
-
-**`DelegateResponse`** *(response)*
-
-```
-  id: uuid
-  approvalId: uuid
-  delegateToUserId: uuid
-  delegateToName: string
-  startDate: date
-  endDate: date
-  createdBy: uuid
-  createdAt: datetime
-```
-
-**`ApprovalHistoryEntryResponse`** *(response)*
-
-```
-  id: uuid
-  approvalId: uuid
-  contractTitle: string
-  contractType: string
-  contractValue: number
-  counterpartyName: string
-  keyTermsSummary?: string
-  deviationsFromStandard?: string
-  aiRiskScore?: integer
-  approvalMatrixStepLabel: string
-  action: string
-  actorId: uuid
-  actorName: string
-  actorRole: string
-  actingAsDelegateForUserId?: uuid
-  delegateToUserId?: uuid
-  delegateToName?: string
-  priorState: string
-  newState: string
-  comments?: string
-  timestamp: datetime
-```
-
-**`ApprovalHistoryListResponse`** *(response)*
-
-```
-  items: array
-  page: integer
-  pageSize: integer
-  totalCount: integer
-```
-
-**`ApprovalMatrixStepConfig`** *(response)*
-
-```
-  stepNumber: integer
-  approverRole?: string
-  approverUserId?: uuid
-  stepName: string
-```
-
-**`ApprovalMatrixConfigResponse`** *(response)*
-
-```
-  id: uuid
-  contractType: string
-  valueMin?: number
-  valueMax?: number
-  riskBandMin?: integer
-  riskBandMax?: integer
-  steps: array
-```
-
-**`ApprovalMatrixConfigListResponse`** *(response)*
-
-```
-  items: array
-```
-
-**`UpdateApprovalMatrixConfigRequest`** *(request)*
-
-```
-  items: array
-```
-
-**`SignerResponse`** *(response)*
-
-```
-  id: uuid
-  contractId: uuid
-  signerName: string
-  signerEmail: string
-  signerType: string
-  signingOrder: integer
-  signatureMethod: string
-  reminderFrequencyDays?: integer
-  signerStatus: string
-  otpVerifiedAt?: datetime
-  signaturePadCompleted: boolean
-  ipAddress?: string
-  signedAt?: datetime
-  declineReason?: string
-  linkExpiresAt?: datetime
-```
-
-**`SignerListResponse`** *(response)*
-
-```
-  contractId: uuid
-  signers: array
-  sendForSignatureEnabled: boolean
-  signingOrderLocked: boolean
-```
-
-**`AddSignerRequest`** *(request)*
-
-```
-  signerName: string
-  signerEmail: string
-  signerType: string
-  signingOrder: integer
-  signatureMethod: string
-```
-
-**`UpdateSignerRequest`** *(request)*
-
-```
-  signerName?: string
-  signerEmail?: string
-  signerType?: string
-  signingOrder?: integer
-  signatureMethod?: string
-```
-
-**`SendForSignatureRequest`** *(request)*
-
-```
-  signatureMethod?: string
-```
-
-**`SendForSignatureResponse`** *(response)*
-
-```
-  contractId: uuid
-  contractStatus: string
-  signers: array
-  errorMessage?: string
-```
-
-**`SigningSessionResponse`** *(response)*
-
-```
-  sessionId: uuid
-  contractId: uuid
-  signerId: uuid
-  signerName: string
-  signerEmail: string
-  signerStatus: string
-  isCurrentTurn: boolean
-  otpVerified: boolean
-  documentUrl?: string
-  signaturePadAvailable: boolean
-  declineAvailable: boolean
-  reminderFrequencyDays?: integer
-  linkExpired: boolean
-  blockedMessage?: string
-```
-
-**`VerifyOtpRequest`** *(request)*
-
-```
-  otpCode: string
-```
-
-**`VerifyOtpResponse`** *(response)*
-
-```
-  signerStatus: string
-  documentUrl?: string
-  signaturePadAvailable: boolean
-  attemptsRemaining?: integer
-  lockedUntil?: datetime
-  errorMessage?: string
-```
-
-**`ApplySignatureRequest`** *(request)*
-
-```
-  signatureData: string
-  signatureType: string
-```
-
-**`ApplySignatureResponse`** *(response)*
-
-```
-  signerId: uuid
-  signerStatus: string
-  contractStatus: string
-  nextSignerId?: uuid
-```
-
-**`DeclineSignatureRequest`** *(request)*
-
-```
-  reason: string
-```
-
-**`DeclineSignatureResponse`** *(response)*
-
-```
-  signerId: uuid
-  signerStatus: string
-  contractStatus: string
-  reason: string
-```
-
-**`AuditCertificateSignerEntry`** *(response)*
-
-```
-  signerName: string
-  signerEmail: string
-  signerType: string
-  signingOrder: integer
-  signatureMethod: string
-  reminderFrequencyDays?: integer
-  signerStatus: string
-  ipAddress?: string
-  signedAt?: datetime
-  otpVerifiedAt?: datetime
-  signaturePadCompleted: boolean
-```
-
-**`AuditCertificateResponse`** *(response)*
-
-```
-  contractId: uuid
-  generatedAt: datetime
-  downloadUrl: string
-  signers: array
-```
-
-**`EsignatureSettingsResponse`** *(response)*
-
-```
-  reminderFrequencyDays: integer
-  defaultSignatureProvider: string
-```
-
-**`UpdateEsignatureSettingsRequest`** *(request)*
-
-```
-  reminderFrequencyDays?: integer
-  defaultSignatureProvider?: string
-```
-
-**`ErrorResponse`** *(response)*
-
-```
-  code: string
-  message: string
-  timestamp: datetime
-```
-
 <!-- DIGEST
 Title: UC6-UC7-combined (uc6-uc7-combined)
 Components: ApprovalsListPage, ApprovalsListTable, ApprovalReviewPage, ApprovalDetailsCard, ApprovalActionsPanel, DelegateModal, ApprovalHistoryTab, ApprovalMatrixConfigPage, SignerListPage, SignerListTable, AddSignerModal, SendForSignatureButton, SigningPortalPage, OtpVerificationModal, SignaturePadModal, DeclineToSignModal, AuditCertificateDownloadButton, EsignatureSettingsPage
@@ -630,3 +209,290 @@ Endpoints: GET /api/v1/approvals, GET /api/v1/approvals/{approvalId}, POST /api/
 DTOs: ApprovalResponse, ApprovalListItemResponse, ApprovalListResponse, ApprovalActionRequest, ApprovalActionResponse, DelegateRequest, DelegateResponse, ApprovalHistoryEntryResponse, ApprovalHistoryListResponse, ApprovalMatrixStepConfig, ApprovalMatrixConfigResponse, ApprovalMatrixConfigListResponse, UpdateApprovalMatrixConfigRequest, SignerResponse, SignerListResponse, AddSignerRequest, UpdateSignerRequest, SendForSignatureRequest, SendForSignatureResponse, SigningSessionResponse, VerifyOtpRequest, VerifyOtpResponse, ApplySignatureRequest, ApplySignatureResponse, DeclineSignatureRequest, DeclineSignatureResponse, AuditCertificateSignerEntry, AuditCertificateResponse, EsignatureSettingsResponse, UpdateEsignatureSettingsRequest, ErrorResponse
 DIGEST -->
 <!-- MODULE:uc6-uc7-combined END -->
+
+<!-- MODULE:life-cycle-uc8-uc9 START -->
+## life cycle uc8 uc9 (life-cycle-uc8-uc9)
+
+From this module's contract: 24 component(s), 16 endpoint(s), 16 DTO(s), 51 story/stories.
+Base path for this module: `/api/v1/contracts`.
+
+### Screens and components
+
+| Name | Type | Purpose |
+|---|---|---|
+| `ContractRepositoryPage` | PAGE | Main repository page showing Search/Filter panel and Contract List Table |
+| `ContractDetailPage` | PAGE | Contract detail view with tab navigation: Details, Document, Versions, Clauses, Approvals, Signatures, Obligations, Activity Log |
+| `ObligationsRenewalPage` | PAGE | Obligations & Renewal tab page combining obligations table and renewal alert panel |
+| `SearchFilterPanel` | ORGANISM | Search Box, Status Filter, Date Range Filter, Value Filter, Folder/Tag Filter, Search Button |
+| `ContractListTable` | ORGANISM | Sortable, navigable table of contracts with Contract Name, Counterparty, Status, Value, Start Date, End Date, Owner, Last Modified |
+| `NoResultsMessage` | MOLECULE | Displays 'No contracts found matching your search.' |
+| `EmptyRepositoryState` | MOLECULE | Displays 'You have no contracts to display.' with disabled filters |
+| `IndexingInProgressBanner` | MOLECULE | Displays indexing-in-progress exclusion notice for full text search |
+| `AccessDeniedView` | MOLECULE | Displays 'You do not have permission to view this contract.' |
+| `AddFolderTagDialog` | MOLECULE | Dialog to assign folder/tag to a contract |
+| `ContractDetailsTab` | ORGANISM | Shows core contract metadata |
+| `ContractDocumentTab` | ORGANISM | PDF/DOCX viewer with Download Button, handles corrupted/missing/oversized document states |
+| `ContractVersionsTab` | ORGANISM | Version history list |
+| `ContractActivityLogTab` | ORGANISM | Read-only immutable Activity Log display |
+| `DownloadButton` | ATOM | Download button with disabled 'File unavailable' state for oversized/corrupted/missing docs |
+| `ObligationsTable` | ORGANISM | Grid of obligations with columns Obligation Description, Obligation Type, Owner, Due Date, Status, Source |
+| `ObligationRowForm` | MOLECULE | Form/row for editing an obligation including Accept Suggestion Button |
+| `ManualObligationForm` | MOLECULE | Form to manually add an obligation when empty state is shown |
+| `ObligationsEmptyState` | MOLECULE | Displays 'No obligations detected for this contract' |
+| `ObligationsTabBlockedMessage` | MOLECULE | Displays 'Obligations are available only after a contract is fully executed' |
+| `ObligationsAccessDeniedView` | MOLECULE | Displays 'You do not have permission to view this page' |
+| `RenewalAlertPanel` | ORGANISM | Renewal Alert Banner, Contract End Date, Notice Period, and Renew/Amend/Terminate buttons |
+| `RenewAmendTerminateButtons` | MOLECULE | Renew, Amend, Terminate action buttons with enablement rules and duplicate-action blocking |
+| `TerminationReasonDialog` | MOLECULE | Dialog capturing Termination Reason and Effective Termination Date with validation |
+
+Create one route-level screen per PAGE above, in whichever folder this stack uses for routed screens (see Layout).
+
+### Hooks
+
+- `useContractSearch` — Fetches paginated/filterable contract list
+- `useContractDetail` — Fetches contract detail with access-control enforcement
+- `useContractDocument` — Fetches document viewer metadata
+- `useDocumentDownload` — Triggers document download and surfaces retrieval errors
+- `useContractVersions` — Fetches version history
+- `useActivityLog` — Fetches immutable activity log entries
+- `useFolderTagOptions` — Fetches folder/tag options for filter and dialog
+- `useAssignFolderTag` — Assigns folder/tag to a contract
+- `useObligations` — Fetches obligations list for a contract
+- `useCreateObligation` — Creates a manual obligation
+- `useUpdateObligation` — Updates an obligation's fields and status
+- `useAcceptObligation` — Accepts AI-suggested obligation values
+- `useRenewalPanel` — Fetches renewal alert, dates, and action button enablement
+- `useRenewContract` — Triggers Renew action
+- `useAmendContract` — Triggers Amend action
+- `useTerminateContract` — Triggers Terminate action with validation
+
+### State slices
+
+- `contractRepositorySlice`
+- `contractDetailSlice`
+- `obligationsSlice`
+
+### Endpoints this module calls
+
+Call exactly these paths and methods. Do not invent variants.
+
+| Method | Path | Roles | Request DTO | Response DTO | Purpose |
+|---|---|---|---|---|---|
+| GET | `/api/v1/contracts` | TENANT_ADMIN, CONTRACT_OWNER, LEGAL_REVIEWER, APPROVER | `ContractSearchRequest` | `ContractListItemResponse` *(paged)* | Search, filter, sort and paginate contracts visible to the current user |
+| GET | `/api/v1/contracts/{contractId}` | TENANT_ADMIN, CONTRACT_OWNER, LEGAL_REVIEWER, APPROVER | `—` | `ContractDetailResponse` | Get contract core metadata (Details tab) for an authorized contract, enforcing direct-link access control |
+| GET | `/api/v1/contracts/{contractId}/document` | TENANT_ADMIN, CONTRACT_OWNER, LEGAL_REVIEWER, APPROVER | `—` | `ContractDocumentResponse` | Get document viewer metadata for the Document tab |
+| GET | `/api/v1/contracts/{contractId}/document/download` | TENANT_ADMIN, CONTRACT_OWNER, LEGAL_REVIEWER, APPROVER | `—` | `DocumentDownloadResponse` | Download the current document file; returns error for corrupted/missing/oversized files |
+| GET | `/api/v1/contracts/{contractId}/versions` | TENANT_ADMIN, CONTRACT_OWNER, LEGAL_REVIEWER, APPROVER | `—` | `ContractVersionResponse` *(paged)* | Get version history list (Versions tab) |
+| GET | `/api/v1/contracts/{contractId}/activity-log` | TENANT_ADMIN, CONTRACT_OWNER, LEGAL_REVIEWER, APPROVER | `—` | `ActivityLogEntryResponse` *(paged)* | Get immutable, read-only Activity Log entries for the contract |
+| POST | `/api/v1/contracts/{contractId}/folder-tags` | TENANT_ADMIN, CONTRACT_OWNER | `AssignFolderTagRequest` | `ContractFolderTagResponse` | Assign one or more folders/tags to a contract via the Add Folder/Tag dialog |
+| GET | `/api/v1/folder-tags` | TENANT_ADMIN, CONTRACT_OWNER, LEGAL_REVIEWER, APPROVER | `—` | `FolderTagOptionResponse` | List available folders/tags for the Folder/Tag Filter and Add Folder/Tag dialog |
+| GET | `/api/v1/contracts/{contractId}/obligations` | TENANT_ADMIN, CONTRACT_OWNER, LEGAL_REVIEWER | `—` | `ObligationResponse` *(paged)* | List obligations for an Executed contract (Obligations & Renewal screen) |
+| POST | `/api/v1/contracts/{contractId}/obligations` | TENANT_ADMIN, CONTRACT_OWNER | `CreateObligationRequest` | `ObligationResponse` | Manually add an obligation when none were AI-extracted |
+| PATCH | `/api/v1/contracts/{contractId}/obligations/{obligationId}` | TENANT_ADMIN, CONTRACT_OWNER | `UpdateObligationRequest` | `ObligationResponse` | Edit obligation fields (Description, Type, Owner, Due Date, Status), transitioning Source label to Confirmed |
+| POST | `/api/v1/contracts/{contractId}/obligations/{obligationId}/accept` | TENANT_ADMIN, CONTRACT_OWNER | `—` | `ObligationResponse` | Accept an AI-suggested obligation, changing label from AI Suggested to Confirmed |
+| GET | `/api/v1/contracts/{contractId}/renewal` | TENANT_ADMIN, CONTRACT_OWNER, LEGAL_REVIEWER | `—` | `RenewalPanelResponse` | Get renewal panel data (alert banner, end date, notice period, action button states) |
+| POST | `/api/v1/contracts/{contractId}/renew` | TENANT_ADMIN, CONTRACT_OWNER | `—` | `LinkedContractActionResponse` | Create a linked renewal contract and transition original to Renewed |
+| POST | `/api/v1/contracts/{contractId}/amend` | TENANT_ADMIN, CONTRACT_OWNER | `—` | `LinkedContractActionResponse` | Create a linked amendment contract and transition original to Amended |
+| POST | `/api/v1/contracts/{contractId}/terminate` | TENANT_ADMIN, CONTRACT_OWNER | `TerminateContractRequest` | `LinkedContractActionResponse` | Terminate the contract with a required Termination Reason and Effective Termination Date on or after today |
+
+### DTOs (your types must match these names and fields exactly)
+
+**`ContractSearchRequest`** *(request)*
+
+```
+  searchText?: string
+  status?: string
+  startDateFrom?: date
+  startDateTo?: date
+  endDateFrom?: date
+  endDateTo?: date
+  valueMin?: number
+  valueMax?: number
+  folderTagIds?: array
+  sortBy?: string
+  sortDirection?: string
+  page?: integer
+  pageSize?: integer
+```
+
+**`ContractListItemResponse`** *(response)*
+
+```
+  contractId: uuid
+  contractName: string
+  counterparty: string
+  status: string
+  value?: number
+  startDate?: date
+  endDate?: date
+  owner: string
+  lastModified: datetime
+  folderTags?: array
+  indexingInProgress: boolean
+```
+
+**`ContractDetailResponse`** *(response)*
+
+```
+  contractId: uuid
+  contractName: string
+  counterparty: string
+  status: string
+  value?: number
+  startDate?: date
+  endDate?: date
+  owner: string
+  lastModified: datetime
+  folderTags?: array
+  availableTabs: array
+```
+
+**`ContractDocumentResponse`** *(response)*
+
+```
+  contractId: uuid
+  documentUrl?: string
+  fileName: string
+  fileType: string
+  fileSizeBytes: integer
+  isOversized: boolean
+  isCorruptedOrMissing: boolean
+  downloadEnabled: boolean
+  unavailableComment?: string
+```
+
+**`DocumentDownloadResponse`** *(response)*
+
+```
+  success: boolean
+  fileUrl?: string
+  errorMessage?: string
+```
+
+**`ContractVersionResponse`** *(response)*
+
+```
+  versionId: uuid
+  versionNumber: integer
+  createdAt: datetime
+  createdBy: string
+  changeSummary?: string
+```
+
+**`ActivityLogEntryResponse`** *(response)*
+
+```
+  entryId: uuid
+  contractId: uuid
+  actionType: string
+  performedBy: string
+  performedAt: datetime
+  details?: string
+```
+
+**`AssignFolderTagRequest`** *(request)*
+
+```
+  folderTagIds: array
+```
+
+**`ContractFolderTagResponse`** *(response)*
+
+```
+  contractId: uuid
+  folderTags: array
+```
+
+**`FolderTagOptionResponse`** *(response)*
+
+```
+  id: uuid
+  name: string
+  kind: string
+```
+
+**`ObligationResponse`** *(response)*
+
+```
+  obligationId: uuid
+  contractId: uuid
+  obligationDescription: string
+  obligationType: string
+  owner?: string
+  dueDate?: date
+  status: string
+  source: string
+  confirmationLabel: string
+  evidenceReference?: string
+  readOnly: boolean
+```
+
+**`CreateObligationRequest`** *(request)*
+
+```
+  obligationDescription: string
+  obligationType: string
+  owner: string
+  dueDate: date
+  status: string
+```
+
+**`UpdateObligationRequest`** *(request)*
+
+```
+  obligationDescription?: string
+  obligationType?: string
+  owner?: string
+  dueDate?: date
+  status?: string
+  evidenceReference?: string
+```
+
+**`RenewalPanelResponse`** *(response)*
+
+```
+  contractId: uuid
+  renewalAlertBanner?: string
+  contractEndDate?: date
+  noticePeriod?: string
+  alertThresholdDays?: integer
+  renewEnabled: boolean
+  amendEnabled: boolean
+  terminateEnabled: boolean
+  actionInProgress: boolean
+  linkedContractId?: uuid
+  linkedContractRelation?: string
+  obligations?: array
+  terminationReason?: string
+  effectiveTerminationDate?: date
+```
+
+**`TerminateContractRequest`** *(request)*
+
+```
+  terminationReason: string
+  effectiveTerminationDate: date
+```
+
+**`LinkedContractActionResponse`** *(response)*
+
+```
+  originalContractId: uuid
+  originalContractStatus: string
+  linkedContractId: uuid
+  linkedContractReference: uuid
+  terminationReason?: string
+  effectiveTerminationDate?: date
+  contractEndDate?: date
+  noticePeriod?: string
+  renewalAlertBanner?: string
+  obligations?: array
+```
+
+<!-- DIGEST
+Title: life cycle uc8 uc9 (life-cycle-uc8-uc9)
+Components: ContractRepositoryPage, SearchFilterPanel, ContractListTable, NoResultsMessage, EmptyRepositoryState, IndexingInProgressBanner, AccessDeniedView, AddFolderTagDialog, ContractDetailPage, ContractDetailsTab, ContractDocumentTab, ContractVersionsTab, ContractActivityLogTab, DownloadButton, ObligationsRenewalPage, ObligationsTable, ObligationRowForm, ManualObligationForm, ObligationsEmptyState, ObligationsTabBlockedMessage, ObligationsAccessDeniedView, RenewalAlertPanel, RenewAmendTerminateButtons, TerminationReasonDialog
+Endpoints: GET /api/v1/contracts, GET /api/v1/contracts/{contractId}, GET /api/v1/contracts/{contractId}/document, GET /api/v1/contracts/{contractId}/document/download, GET /api/v1/contracts/{contractId}/versions, GET /api/v1/contracts/{contractId}/activity-log, POST /api/v1/contracts/{contractId}/folder-tags, GET /api/v1/folder-tags, GET /api/v1/contracts/{contractId}/obligations, POST /api/v1/contracts/{contractId}/obligations, PATCH /api/v1/contracts/{contractId}/obligations/{obligationId}, POST /api/v1/contracts/{contractId}/obligations/{obligationId}/accept, GET /api/v1/contracts/{contractId}/renewal, POST /api/v1/contracts/{contractId}/renew, POST /api/v1/contracts/{contractId}/amend, POST /api/v1/contracts/{contractId}/terminate
+DTOs: ContractSearchRequest, ContractListItemResponse, ContractDetailResponse, ContractDocumentResponse, DocumentDownloadResponse, ContractVersionResponse, ActivityLogEntryResponse, AssignFolderTagRequest, ContractFolderTagResponse, FolderTagOptionResponse, ObligationResponse, CreateObligationRequest, UpdateObligationRequest, RenewalPanelResponse, TerminateContractRequest, LinkedContractActionResponse
+DIGEST -->
+<!-- MODULE:life-cycle-uc8-uc9 END -->

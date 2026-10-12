@@ -1,0 +1,43 @@
+{
+  "status": "PARTIAL",
+  "summary": "Implemented IntegrationConnectForm, a self-contained credential-entry modal for authorizing an integration connection (Settings / Admin > Integrations tab). Credential fields are rendered as masked password inputs, client-side validation requires an API Key before submit, and a failure banner renders the caller-supplied error message (defaulting to the UC11-AF-004 copy: 'Connection failed. Please check your credentials and try again'). The component is presentational/controlled — it takes onSubmit/onClose/isSubmitting/error props and does not itself call the connect endpoint, matching the DelegateModal/TerminationReasonDialog pattern already used elsewhere in this repo (parent owns the API call, hook, and list refresh, since IntegrationsTab/useConnectIntegration/the settings service module belong to a different task's scope). Visually modeled on this repo's existing 'Add User' / 'Add Approval Matrix Rule' modal pattern (bold title + gray subtitle header, labeled inputs with helper text, outlined Cancel + green primary action) since none of the 5 target design images depict the connect-credentials modal itself. Verified via a temporary, since-removed route+harness page with Playwright screenshots of both the empty and failure states; lint, unit tests (6 new, 117 total passing), and build all pass.",
+  "task_id": "T-INTEGRATION-CONNECT-FORM-UI",
+  "story_id": "UC11-AF-004",
+  "code_files": [
+    {
+      "file_path": "src/features/settings-admin/IntegrationConnectForm.jsx",
+      "file_name": "IntegrationConnectForm.jsx",
+      "language": "javascript",
+      "file_type": "component",
+      "description": "Credential-entry modal for connecting an integration: masked API Key/API Secret inputs, required-field validation, and an inline failure message. Controlled via onSubmit/onClose/isSubmitting/error props; does not call the API itself."
+    },
+    {
+      "file_path": "src/features/settings-admin/IntegrationConnectForm.test.jsx",
+      "file_name": "IntegrationConnectForm.test.jsx",
+      "language": "javascript",
+      "file_type": "component",
+      "description": "Colocated component tests: required-field validation, password-masked inputs, submit payload shape, failure-message rendering, disabled/loading submit state, and cancel callback."
+    }
+  ],
+  "pr": {
+    "branch_name": "ui-gen/d5929e8d122e",
+    "title": "feat(settings-admin): add IntegrationConnectForm credential modal",
+    "body": "Adds `IntegrationConnectForm`, the credential-entry form for authorizing a Settings / Admin integration connection (UC11-AF-004, UC11-AF-007, UC11-BR-009, UC11-BR-016).\n\n- Masked (password-type) API Key / API Secret inputs; API Key is required.\n- Inline failure message slot, defaulting to the UC11-AF-004 copy on a generic failure.\n- Purely controlled (`onSubmit`, `onClose`, `isSubmitting`, `error` props) — the actual `/api/v1/settings/integrations/{integrationName}/connect` call, status refresh, and audit-log side effects are owned by the IntegrationsTab/host task per this task's scope ('What you own: IntegrationConnectForm only').\n- Styled to match this repo's existing Add User / Add Approval Matrix Rule modal pattern since no target design image shows the connect-credentials modal itself.\n\nVerified: lint, 117 unit tests (6 new), and production build all pass. Visually verified via a temporary local route + Playwright screenshot (removed before commit) for both the empty and failure states.",
+    "draft": true,
+    "linked_story": "UC11-AF-004",
+    "linked_task": "T-INTEGRATION-CONNECT-FORM-UI"
+  },
+  "critic_hints": {
+    "files_to_lint": [
+      "src/features/settings-admin/IntegrationConnectForm.jsx",
+      "src/features/settings-admin/IntegrationConnectForm.test.jsx"
+    ],
+    "openapi_endpoint": "/api/v1/settings/integrations/{integrationName}/connect"
+  },
+  "blockers": [
+    "No TARGET DESIGN image (IMG-2..IMG-6) depicts the actual Integration Connect credential modal — IMG-3/IMG-4 only show integration list rows with a 'Connect' button, never the opened form. I inferred the modal's visual structure from this repo's other Settings/Admin form modals shown in the designs (IMG-5 'Add User', IMG-6 'Add Approval Matrix Rule': bold title + gray subtitle card header, labeled input + helper text rows, outlined Cancel + green primary button) rather than inventing a new visual language.",
+    "ConnectIntegrationRequest.credentials is declared only as a generic 'object' with no field list in context.json. I inferred two credential fields — `apiKey` (required) and `apiSecret` (optional) — as the minimum needed to render a masked credential form; these field names are NOT confirmed against the backend contract and should be reconciled with whatever the real integration auth schema turns out to need (e.g. some integrations may need OAuth redirect flows instead of a static key/secret pair).",
+    "This component does not call the API directly: 'What you own' in TASK.md scopes this task to the IntegrationConnectForm component only, while `useConnectIntegration` and the settings/integrations service module are listed in context.json's hooks section without being listed under this task's ownership. I built the component as controlled/presentational (onSubmit/onClose/isSubmitting/error props, same pattern as the existing DelegateModal) so the task that owns IntegrationsTab/useConnectIntegration/the service module can wire in the real POST /api/v1/settings/integrations/{integrationName}/connect call, the GET /api/v1/settings/integrations list refresh, and the audit-log side effects without this component inventing those endpoints' integration.",
+    "Status is PARTIAL rather than SUCCESS because the end-to-end flow (host IntegrationsTab, the connect/list API wiring, and the resulting masked-credential and audit-log display) is out of this task's scope and does not exist yet in the repo — this component is correct and tested in isolation but is not yet reachable from any route."
+  ]
+}

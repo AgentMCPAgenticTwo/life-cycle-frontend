@@ -15,6 +15,9 @@ import SigningPortalPage from '@/pages/SigningPortalPage';
 import ContractDetailPage from '@/pages/ContractDetailPage';
 import ContractRepositoryPage from '@/pages/ContractRepositoryPage';
 import ObligationsRenewalPage from '@/pages/ObligationsRenewalPage';
+import AccessDeniedPage from '@/pages/AccessDeniedPage';
+import SettingsAdminPage from '@/pages/SettingsAdminPage';
+import TrackerPage from '@/pages/TrackerPage';
 import NewContractAccessGuard from '@/features/contracts/components/NewContractAccessGuard';
 
 const NEW_CONTRACT_ALLOWED_ROLES = ['TENANT_ADMIN', 'CONTRACT_OWNER'];
@@ -46,6 +49,9 @@ export default function App() {
       <Route path="/contracts/:contractId" element={<ContractDetailPage />} />
       <Route path="/contracts/:contractId/obligations" element={<ObligationsRenewalPage />} />
       <Route path="/contract-repository" element={<ContractRepositoryPage />} />
+      <Route path="/access-denied" element={<AccessDeniedPage />} />
+      <Route path="/settings/admin" element={<SettingsAdminPage />} />
+      <Route path="/tracker" element={<TrackerPage />} />
     </Routes>
   );
 }

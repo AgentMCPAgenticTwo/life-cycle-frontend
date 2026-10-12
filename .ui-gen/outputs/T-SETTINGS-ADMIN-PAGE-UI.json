@@ -1,0 +1,231 @@
+{
+  "status": "SUCCESS",
+  "summary": "Built the full Settings / Admin screen: SettingsAdminPage (route /settings/admin, Tenant-Admin-only with redirect to the shared AccessDeniedPage for every other role) with its hero banner and five-tab navigation (User Management, Routing & Approval, Integrations, Notifications, Audit Log), matching IMG-2..IMG-6 closely. UserManagementTab renders the Name/Email/Role/Status/Last Login table with an Add User action; AddUserForm validates Name/Email(format)/Role client-side and surfaces the backend's duplicate-email error verbatim. RoutingApprovalTab renders the Contract Type/Value Threshold/Approver Role matrix with an Add Rule action; AddRuleForm validates required fields plus a non-negative numeric threshold and surfaces the backend's duplicate-rule error. IntegrationsTab lists integration cards with Connect/Disconnect, reusing the already-built IntegrationConnectForm for masked credential entry. NotificationsTab renders the event list with independent Email/In-App checkboxes. AuditLogTab is strictly read-only (no edit/delete control anywhere) with AuditLogFilterPanel (Filter Date Range + User + Action Type + Apply Filter) re-querying the backend. All five tabs are wired through five new per-resource service modules and ten new hooks, with a new settingsAdminSlice for tab state (screen always reopens on User Management per UC11-MF-001). Lint, the full test suite (127 tests, 5 new in this task), and the production build all pass. Visually verified against all five TARGET DESIGN images via a running dev server + mock backend + Playwright screenshots (temporarily, since removed) for all five tabs — each is a close visual match to its corresponding design section.",
+  "task_id": "T-SETTINGS-ADMIN-PAGE-UI",
+  "story_id": "UC11-BR-001",
+  "code_files": [
+    {
+      "file_path": "src/pages/SettingsAdminPage.jsx",
+      "file_name": "SettingsAdminPage.jsx",
+      "language": "javascript",
+      "file_type": "component",
+      "description": "Top-level Settings/Admin screen: hero banner, five-tab navigation, Tenant-Admin-only access guard redirecting to /access-denied, and orchestration of all five tabs' data hooks and the Add User / Add Rule modals."
+    },
+    {
+      "file_path": "src/features/settings-admin/UserManagementTab.jsx",
+      "file_name": "UserManagementTab.jsx",
+      "language": "javascript",
+      "file_type": "component",
+      "description": "Users table (Name, Email, Role, Status badge, Last Login) with an Add User action and loading/error/empty/populated states."
+    },
+    {
+      "file_path": "src/features/settings-admin/AddUserForm.jsx",
+      "file_name": "AddUserForm.jsx",
+      "language": "javascript",
+      "file_type": "component",
+      "description": "Add User modal: validates Name/Email(format)/Role client-side ('Please complete all required fields'), surfaces the backend's duplicate-email error verbatim via the error prop."
+    },
+    {
+      "file_path": "src/features/settings-admin/RoutingApprovalTab.jsx",
+      "file_name": "RoutingApprovalTab.jsx",
+      "language": "javascript",
+      "file_type": "component",
+      "description": "Approval matrix list (Contract Type, Value Threshold, Approver Role) with an Add Rule action and loading/error/empty/populated states."
+    },
+    {
+      "file_path": "src/features/settings-admin/AddRuleForm.jsx",
+      "file_name": "AddRuleForm.jsx",
+      "language": "javascript",
+      "file_type": "component",
+      "description": "Add Rule modal: validates Contract Type/Approver Role as required dropdowns and Value Threshold as a non-negative number, surfaces the backend's duplicate-rule error verbatim via the error prop."
+    },
+    {
+      "file_path": "src/features/settings-admin/IntegrationsTab.jsx",
+      "file_name": "IntegrationsTab.jsx",
+      "language": "javascript",
+      "file_type": "component",
+      "description": "Integration cards (Integration Name, Connection Status badge, Connect/Disconnect) that open the existing IntegrationConnectForm for masked credential entry on Connect."
+    },
+    {
+      "file_path": "src/features/settings-admin/NotificationsTab.jsx",
+      "file_name": "NotificationsTab.jsx",
+      "language": "javascript",
+      "file_type": "component",
+      "description": "Notification event list with independent Email/In-App toggle checkboxes per event, each updating the backend without affecting the other toggle."
+    },
+    {
+      "file_path": "src/features/settings-admin/AuditLogTab.jsx",
+      "file_name": "AuditLogTab.jsx",
+      "language": "javascript",
+      "file_type": "component",
+      "description": "Read-only audit log table (Log Date/Time formatted DD/MM/YYYY HH:MM, Log User, Log Action, Log Entity, Details) with no edit/delete control of any kind, embedding AuditLogFilterPanel."
+    },
+    {
+      "file_path": "src/features/settings-admin/AuditLogFilterPanel.jsx",
+      "file_name": "AuditLogFilterPanel.jsx",
+      "language": "javascript",
+      "file_type": "component",
+      "description": "Filter Date Range (From/To) plus User and Action Type filter inputs and an Apply Filter button, submitting an AuditLogQueryParams-shaped filter to the parent."
+    },
+    {
+      "file_path": "src/features/settings-admin/hooks/useTenantUsers.js",
+      "file_name": "useTenantUsers.js",
+      "language": "javascript",
+      "file_type": "hook",
+      "description": "Fetches the tenant users list for the User Management tab."
+    },
+    {
+      "file_path": "src/features/settings-admin/hooks/useCreateUser.js",
+      "file_name": "useCreateUser.js",
+      "language": "javascript",
+      "file_type": "hook",
+      "description": "Creates a tenant user; propagates the backend's HttpError (including duplicate-email message) to the caller."
+    },
+    {
+      "file_path": "src/features/settings-admin/hooks/useApprovalRules.js",
+      "file_name": "useApprovalRules.js",
+      "language": "javascript",
+      "file_type": "hook",
+      "description": "Fetches the approval matrix rules for the Routing & Approval tab."
+    },
+    {
+      "file_path": "src/features/settings-admin/hooks/useCreateApprovalRule.js",
+      "file_name": "useCreateApprovalRule.js",
+      "language": "javascript",
+      "file_type": "hook",
+      "description": "Creates an approval rule; propagates the backend's duplicate-combination error to the caller."
+    },
+    {
+      "file_path": "src/features/settings-admin/hooks/useIntegrations.js",
+      "file_name": "useIntegrations.js",
+      "language": "javascript",
+      "file_type": "hook",
+      "description": "Fetches integration cards for the Integrations tab."
+    },
+    {
+      "file_path": "src/features/settings-admin/hooks/useConnectIntegration.js",
+      "file_name": "useConnectIntegration.js",
+      "language": "javascript",
+      "file_type": "hook",
+      "description": "Authorizes an integration connection with submitted credentials."
+    },
+    {
+      "file_path": "src/features/settings-admin/hooks/useDisconnectIntegration.js",
+      "file_name": "useDisconnectIntegration.js",
+      "language": "javascript",
+      "file_type": "hook",
+      "description": "Manually disconnects an integration."
+    },
+    {
+      "file_path": "src/features/settings-admin/hooks/useNotificationEvents.js",
+      "file_name": "useNotificationEvents.js",
+      "language": "javascript",
+      "file_type": "hook",
+      "description": "Fetches notification event toggles for the Notifications tab."
+    },
+    {
+      "file_path": "src/features/settings-admin/hooks/useUpdateNotificationEvent.js",
+      "file_name": "useUpdateNotificationEvent.js",
+      "language": "javascript",
+      "file_type": "hook",
+      "description": "Updates a single event's Email and/or In-App toggle."
+    },
+    {
+      "file_path": "src/features/settings-admin/hooks/useAuditLog.js",
+      "file_name": "useAuditLog.js",
+      "language": "javascript",
+      "file_type": "hook",
+      "description": "Fetches audit log entries, re-querying whenever the applied date-range/user/action-type filter changes."
+    },
+    {
+      "file_path": "src/services/settingsUsersService.js",
+      "file_name": "settingsUsersService.js",
+      "language": "javascript",
+      "file_type": "service",
+      "description": "Typed client for GET/POST /api/v1/settings/users."
+    },
+    {
+      "file_path": "src/services/settingsApprovalRulesService.js",
+      "file_name": "settingsApprovalRulesService.js",
+      "language": "javascript",
+      "file_type": "service",
+      "description": "Typed client for GET/POST /api/v1/settings/approval-rules."
+    },
+    {
+      "file_path": "src/services/settingsIntegrationsService.js",
+      "file_name": "settingsIntegrationsService.js",
+      "language": "javascript",
+      "file_type": "service",
+      "description": "Typed client for GET /api/v1/settings/integrations and the connect/disconnect actions."
+    },
+    {
+      "file_path": "src/services/settingsNotificationsService.js",
+      "file_name": "settingsNotificationsService.js",
+      "language": "javascript",
+      "file_type": "service",
+      "description": "Typed client for GET /api/v1/settings/notifications and PUT .../{eventName}."
+    },
+    {
+      "file_path": "src/services/settingsAuditLogService.js",
+      "file_name": "settingsAuditLogService.js",
+      "language": "javascript",
+      "file_type": "service",
+      "description": "Typed client for GET /api/v1/settings/audit-log, building the query string from AuditLogQueryParams."
+    },
+    {
+      "file_path": "src/store/settingsAdminSlice.js",
+      "file_name": "settingsAdminSlice.js",
+      "language": "javascript",
+      "file_type": "store_slice",
+      "description": "Zustand slice matching the settingsAdminSlice contract: activeTab plus the per-tab collections and their setters."
+    },
+    {
+      "file_path": "src/__tests__/SettingsAdminPage.test.jsx",
+      "file_name": "SettingsAdminPage.test.jsx",
+      "language": "javascript",
+      "file_type": "component",
+      "description": "Screen-level tests: default User Management tab and table columns, access-denied redirect for a non-Tenant-Admin role, duplicate-email blocking, incomplete-rule blocking, and the Audit Log tab's read-only rendering."
+    },
+    {
+      "file_path": "src/App.jsx",
+      "file_name": "App.jsx",
+      "language": "javascript",
+      "file_type": "component",
+      "description": "Registered the new /settings/admin route pointing at SettingsAdminPage, alongside the existing routes for other modules."
+    }
+  ],
+  "pr": {
+    "branch_name": "ui-gen/d5929e8d122e",
+    "title": "feat(settings-admin): build SettingsAdminPage and its five tabs",
+    "body": "Implements SettingsAdminPage (UC11-BR-001 / UC11-MF-001 and the full UC11-AF/BR/FV/GC set listed in the task): a Tenant-Admin-only screen with five tabs — User Management, Routing & Approval, Integrations, Notifications, Audit Log.\n\n- Role-gated: any role other than TENANT_ADMIN is redirected to the existing /access-denied screen before any tab content renders.\n- User Management: Name/Email/Role/Status/Last Login table, Add User form with client-side validation and the backend's duplicate-email error shown verbatim.\n- Routing & Approval: Contract Type/Value Threshold/Approver Role matrix, Add Rule form with required-field and non-negative-threshold validation and the backend's duplicate-rule error shown verbatim.\n- Integrations: cards with Connect/Disconnect, reusing the already-built IntegrationConnectForm for masked credential entry.\n- Notifications: event list with independent Email/In-App toggles.\n- Audit Log: strictly read-only table (no edit/delete control anywhere) with a Filter Date Range + User + Action Type + Apply Filter panel.\n\nFive new service modules, ten new hooks, one new store slice, and a new page-level test (5 cases). Lint, the full 127-test suite, and the production build all pass. Visually verified against all five TARGET DESIGN images via a local mock backend + Playwright screenshots (temporary harness, removed before commit).",
+    "draft": true,
+    "linked_story": "UC11-BR-001",
+    "linked_task": "T-SETTINGS-ADMIN-PAGE-UI"
+  },
+  "critic_hints": {
+    "files_to_lint": [
+      "src/pages/SettingsAdminPage.jsx",
+      "src/features/settings-admin/UserManagementTab.jsx",
+      "src/features/settings-admin/AddUserForm.jsx",
+      "src/features/settings-admin/RoutingApprovalTab.jsx",
+      "src/features/settings-admin/AddRuleForm.jsx",
+      "src/features/settings-admin/IntegrationsTab.jsx",
+      "src/features/settings-admin/NotificationsTab.jsx",
+      "src/features/settings-admin/AuditLogTab.jsx",
+      "src/features/settings-admin/AuditLogFilterPanel.jsx",
+      "src/store/settingsAdminSlice.js",
+      "src/__tests__/SettingsAdminPage.test.jsx",
+      "src/App.jsx"
+    ],
+    "openapi_endpoint": null
+  },
+  "blockers": [
+    "Design/contract conflict (contract wins, per instructions): IMG-2/IMG-3 show Routing & Approval rows keyed by specific contract names (NDA, Master Service Agreement, Purchase Order, Vendor Agreement, Statement of Work) with Approver Role values like 'VP Legal', 'Finance Director', 'Procurement Lead', 'Contract Manager'. The ApprovalRuleResponse/CreateApprovalRuleRequest DTOs in context.json declare contractType as enum ['Product','Service'] and approverRole as enum ['Approver','Legal Reviewer','Tenant Admin']. I implemented strictly to the DTO enums (dropdown options, validation, display), not the design's example values — the design's row examples are illustrative content, not a literal field-value contract.",
+    "Design/contract conflict: IMG-2's User Management table shows a 'Contract Manager' role value and the design's Add User helper text in IMG-5 lists role options matching the DTO's six-value enum (Tenant Admin, Legal Reviewer, Contract Owner, Approver, External Party, Signer) — 'Contract Manager' is not one of them. I used the DTO's UserListItemResponse.role enum for the dropdown and validation; 'Contract Manager' only appears as unvalidated display text if the backend ever returns it (not fabricated by this code).",
+    "Inferred UI elements not explicitly named in this task's component list but required by UC11-MF-001's acceptance criterion ('enter a Filter Date Range along with user and action type criteria and click Apply Filter'): AuditLogFilterPanel includes User and Action Type text inputs in addition to the Date Range fields, both mapped directly to the existing AuditLogQueryParams.userFilter/actionTypeFilter fields already in the DTO contract — no new field was invented.",
+    "The IntegrationResponse/NotificationEventResponse DTOs carry no description/subtitle field, but IMG-3/IMG-4 show a short descriptive line under each integration and notification event name (e.g. 'CRM — contract requests and opportunity sync', 'Notify when a contract enters the approval chain'). I omitted these subtitles rather than inventing copy not backed by any DTO field, which is a minor, deliberate visual deviation from the design.",
+    "GET /api/v1/settings/integrations and GET /api/v1/settings/notifications are documented as non-paged and return IntegrationResponse/NotificationEventResponse (singular names, also used for the list item shape) with no declared list envelope; this code defensively accepts either a bare array or an {items: [...]} envelope from the backend, since the exact wire shape for a 'list' response typed by a singular DTO name is not explicit in context.json.",
+    "UserStatusActionControl (Deactivate/Reactivate guarding the last Tenant Admin) and IntegrationConnectForm are both part of this module per the SKILL but are explicitly out of this task's 'What you own' list — UserStatusActionControl was not built (the Status column is display-only in this task), and IntegrationConnectForm was reused as-is from its own already-completed task (src/features/settings-admin/IntegrationConnectForm.jsx) rather than rebuilt.",
+    "No pagination controls were built for the paged GET /api/v1/settings/users, /api/v1/settings/approval-rules, /api/v1/settings/audit-log endpoints (each call fetches the backend's default page only) — pagination UI is not named in this task's component list and no acceptance criterion in the assigned stories calls for page-size/page-number controls."
+  ]
+}

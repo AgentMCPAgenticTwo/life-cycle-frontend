@@ -1,0 +1,51 @@
+{
+  "status": "SUCCESS",
+  "summary": "Built AccessDeniedPage as a standalone routed screen (src/pages/AccessDeniedPage.jsx, route /access-denied) matching the repo's established dark-theme chrome: breadcrumb header, centered alert card with red warning icon, the exact copy 'You do not have permission to view this page.', and a 'Back to Dashboard' link to '/'. It also auto-redirects to '/' after 3s so direct-link access per UC10-AF-002/UC11-AF-001/UC11-BR-012 never leaves the denial screen rendered indefinitely. No network calls are made by this page itself (it renders no Tracker/Settings data by design). Lint, full test suite (111 tests incl. 3 new ones) and production build all pass; verified visually via Playwright screenshot against a running dev server.",
+  "task_id": "T-ACCESS-DENIED-PAGE-UI",
+  "story_id": "UC10-AF-002",
+  "code_files": [
+    {
+      "file_path": "src/pages/AccessDeniedPage.jsx",
+      "file_name": "AccessDeniedPage.jsx",
+      "language": "javascript",
+      "file_type": "component",
+      "description": "Standalone PAGE shown when a role-restricted user hits a direct link to Tracker or Settings/Admin; displays the exact denial message, no restricted content, a manual 'Back to Dashboard' link, and auto-redirects to '/' after 3s."
+    },
+    {
+      "file_path": "src/__tests__/AccessDeniedPage.test.jsx",
+      "file_name": "AccessDeniedPage.test.jsx",
+      "language": "javascript",
+      "file_type": "component",
+      "description": "Colocated screen-level test asserting the denial message renders, the Back to Dashboard link points to '/', and the auto-redirect timer fires without throwing."
+    },
+    {
+      "file_path": "src/App.jsx",
+      "file_name": "App.jsx",
+      "language": "javascript",
+      "file_type": "component",
+      "description": "Registered the new '/access-denied' route pointing at AccessDeniedPage, alongside the existing routes for other modules."
+    }
+  ],
+  "pr": {
+    "branch_name": "ui-gen/d5929e8d122e",
+    "title": "feat(ui-gen): AccessDeniedPage for Tracker and Settings/Admin direct-link blocking",
+    "body": "Implements AccessDeniedPage (UC10-AF-002, UC11-AF-001, UC11-BR-012): a standalone full-screen page shown when a user without a permitted role hits a direct link to the Tracker or Settings/Admin screens. Shows the exact required message, renders none of the blocked screen's content, offers a manual link back to the Dashboard, and auto-redirects after a short delay. Routed at /access-denied in App.jsx. No other module's files were touched.",
+    "draft": true,
+    "linked_story": "UC10-AF-002",
+    "linked_task": "T-ACCESS-DENIED-PAGE-UI"
+  },
+  "critic_hints": {
+    "files_to_lint": [
+      "src/pages/AccessDeniedPage.jsx",
+      "src/__tests__/AccessDeniedPage.test.jsx",
+      "src/App.jsx"
+    ],
+    "openapi_endpoint": null
+  },
+  "blockers": [
+    "None of the six TARGET DESIGN images (IMG-1..IMG-6) actually depict an access-denied state: IMG-1 shows the populated Tracker screen and IMG-2..IMG-6 show the populated Settings/Admin screens and their dialogs (Add User, Add Approval Matrix Rule) — content that belongs to the lifecycle-uc10-uc11 Tracker/Settings pages, not to this task's AccessDeniedPage. Since no screenshot shows the actual denial screen to reproduce pixel-for-pixel, I built AccessDeniedPage using this repo's already-established visual language for permission-denied states (see src/features/contract-repository/components/AccessDeniedView.jsx and the inline access-denied block in src/pages/EsignatureSettingsPage.jsx): dark background, breadcrumb header, centered card with a red warning icon, and an emerald primary CTA — plus the exact copy and redirect behavior the acceptance criteria specify.",
+    "The Tracker and Settings/Admin pages themselves (TrackerPage, SettingsAdminPage) are not yet built in this repo (no /tracker or /settings-admin routes exist), so this task could not wire a real route guard that renders AccessDeniedPage when an unauthorized role requests those paths — that wiring is out of this task's scope ('AccessDeniedPage' only) and belongs with whichever task builds TrackerPage/SettingsAdminPage. AccessDeniedPage was registered at its own route, '/access-denied', so it is reachable and testable now; the guard's navigate(..., { state: { accessDeniedMessage } }) call should target this route once those pages exist.",
+    "Inferred field: AccessDeniedPage reads an optional `location.state.accessDeniedMessage` string (falling back to the default 'You do not have permission to view this page.') so a future Tracker/Settings guard can pass a role-specific message, matching the existing NewContractAccessGuard pattern in src/features/contracts/components/NewContractAccessGuard.jsx. This field is not declared in any DTO in context.json — it is local router state, not an API contract, inferred from the design pattern already used elsewhere in this codebase.",
+    "This task calls no API endpoints (AccessDeniedPage renders only static content on blocked access, per the acceptance criteria that no Tracker/Settings data of any kind reach the user), so the GET endpoints listed in the task's 'API endpoints you must call' section (tracker/ownership, cycle-time, bottleneck, turnaround, settings/users) were not wired into this component — wiring them here would contradict the acceptance criteria that none of that data is ever exposed to a blocked user."
+  ]
+}

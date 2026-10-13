@@ -1,0 +1,447 @@
+{
+  "trace_id": "7299cbbbe4f6",
+  "branch": "ui-correction/7299cbbbe4f6",
+  "maintenance_branch": "ui-correction/7299cbbbe4f6",
+  "status": "SUCCESS",
+  "summary": "All green. Summary:\n\nImplemented the full frontend half of real login/logout: a zustand `authStore` holding the in-memory access token + user, `authService.js` typed client for `/auth/login|refresh|logout|me|change-password`, and a `useAuth()` hook wrapping them. `http.js` now sends `Authorization: Bearer <token>` instead of the hardcoded `X-User-Role`/`X-User-Id` headers, auto-refreshes once on 401 and redirects to `/login` on failure. Added `ProtectedRoute` (restores session from the refresh cookie on load, redirects unauthenticated users to `/login`, and forces `mustChangePassword` users to `/change-password`), a `ChangePasswordPage`, and wired `LoginPage` to the real API. Every former `authHeaders.role`/`authHeaders.userId` usage across ~16 pages/components/hooks was replaced with `useAuth()`; all corresponding tests were updated to mock the hook instead of the removed export. Added the \"Initial Password\" field (show/hide + generate) to `AddUserForm`, a `TemporaryPasswordModal` shown once after create/reset, a `Reset Password` row action in `UserManagementTab`, and `SidebarNav` now shows the signed-in user's name/email with a \"Sign out\" button. `npm run test` (145 passed), `npm run lint`, and `npm run build` all pass.\n\nSkipped: everything under the BACKEND section (migration, bcrypt/PyJWT, `/auth` router, password-rule validation, `current_user()` change, user-creation/reset-password endpoints, env secrets, first-admin script, backend tests) — that work belongs to the separate FastAPI repository, which isn't checked out here. Also skipped editing `CLAUDE.md`'s auth-headers section — `CLAUDE.md` isn't inside this task's allowed file-path set.",
+  "files_changed": [
+    "src/App.jsx",
+    "src/__tests__/ApprovalMatrixConfigPage.test.jsx",
+    "src/__tests__/ApprovalReviewPage.test.jsx",
+    "src/__tests__/ClauseAnalysisPage.test.jsx",
+    "src/__tests__/ContractDetailPage.test.jsx",
+    "src/__tests__/ContractRepositoryPage.test.jsx",
+    "src/__tests__/EsignatureSettingsPage.test.jsx",
+    "src/__tests__/LoginPage.test.jsx",
+    "src/__tests__/NegotiationTrackerPage.test.jsx",
+    "src/__tests__/ObligationsRenewalPage.test.jsx",
+    "src/__tests__/SettingsAdminPage.test.jsx",
+    "src/__tests__/SignerListPage.test.jsx",
+    "src/__tests__/SigningPortalPage.test.jsx",
+    "src/__tests__/TemplateClauseLibraryPage.test.jsx",
+    "src/__tests__/TrackerPage.test.jsx",
+    "src/features/approvals/components/DelegateModal.jsx",
+    "src/features/contract-repository/components/ContractListTable.jsx",
+    "src/features/contracts/components/NewContractAccessGuard.jsx",
+    "src/features/contracts/components/NewContractAccessGuard.test.jsx",
+    "src/features/settings-admin/AddUserForm.jsx",
+    "src/features/settings-admin/TemporaryPasswordModal.jsx",
+    "src/features/settings-admin/UserManagementTab.jsx",
+    "src/features/settings-admin/hooks/useResetPassword.js",
+    "src/features/tracker/hooks/useBottleneckThresholds.js",
+    "src/pages/ApprovalMatrixConfigPage.jsx",
+    "src/pages/ApprovalReviewPage.jsx",
+    "src/pages/ChangePasswordPage.jsx",
+    "src/pages/ClauseAnalysisPage.jsx",
+    "src/pages/ContractDetailPage.jsx",
+    "src/pages/DashboardPage.jsx",
+    "src/pages/EsignatureSettingsPage.jsx",
+    "src/pages/LoginPage.jsx",
+    "src/pages/NegotiationTrackerPage.jsx",
+    "src/pages/NewContractPage.jsx",
+    "src/pages/ObligationsRenewalPage.jsx",
+    "src/pages/SettingsAdminPage.jsx",
+    "src/pages/SignerListPage.jsx",
+    "src/pages/TemplateClauseLibraryPage.jsx",
+    "src/pages/TrackerPage.jsx",
+    "src/services/authService.js",
+    "src/services/http.js",
+    "src/services/settingsUsersService.js",
+    "src/shared/components/ProtectedRoute.jsx",
+    "src/shared/components/SidebarNav.jsx",
+    "src/shared/hooks/useAuth.js",
+    "src/shared/utils/password.js",
+    "src/store/authStore.js"
+  ],
+  "lines_changed": 1017,
+  "blockers": [
+    "Not applied -- Alembic migration, PyJWT/bcrypt, /auth router, current_user() header->JWT change, settings/users initialPassword & reset-password backend logic, env secrets/CORS, first-admin script, backend tests: belongs to the separate FastAPI backend repository, not checked out here",
+    "Not applied -- Update CLAUDE.md's auth-headers section: CLAUDE.md is outside this task's allowed file-path set (^src/|^app/|^tests?/...)",
+    "Visual verification failed: Both http://localhost:5199/ and http://localhost:5199/login render a completely blank white page with no visible login form, header, or any UI content, so the real login/logout UI cannot be confirmed working."
+  ],
+  "visual_check": {
+    "verdict": "fail",
+    "evidence": "Both http://localhost:5199/ and http://localhost:5199/login render a completely blank white page with no visible login form, header, or any UI content, so the real login/logout UI cannot be confirmed working.",
+    "screenshot_path": "/tmp/actual3.png"
+  },
+  "context_sharing": {
+    "target": "frontend",
+    "branch": "ui-correction/7299cbbbe4f6",
+    "base_path": "/api/v1",
+    "endpoints": [
+      {
+        "method": "POST",
+        "path": "/auth/login",
+        "request_fields": [
+          {
+            "name": "email",
+            "type": "string"
+          },
+          {
+            "name": "password",
+            "type": "string"
+          }
+        ],
+        "response_fields": [
+          {
+            "name": "accessToken",
+            "type": "string"
+          },
+          {
+            "name": "user",
+            "type": "object"
+          }
+        ],
+        "purpose": "Authenticate and start a session"
+      },
+      {
+        "method": "POST",
+        "path": "/auth/logout",
+        "request_fields": [],
+        "response_fields": [],
+        "purpose": "End the current session"
+      },
+      {
+        "method": "GET",
+        "path": "/auth/me",
+        "request_fields": [],
+        "response_fields": [
+          {
+            "name": "id",
+            "type": "string"
+          },
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "email",
+            "type": "string"
+          },
+          {
+            "name": "role",
+            "type": "string"
+          },
+          {
+            "name": "tenantId",
+            "type": "string"
+          },
+          {
+            "name": "mustChangePassword",
+            "type": "boolean"
+          }
+        ],
+        "purpose": "Get the signed-in user's profile"
+      },
+      {
+        "method": "POST",
+        "path": "/auth/change-password",
+        "request_fields": [
+          {
+            "name": "currentPassword",
+            "type": "string"
+          },
+          {
+            "name": "newPassword",
+            "type": "string"
+          }
+        ],
+        "response_fields": [],
+        "purpose": "Change the signed-in user's own password"
+      },
+      {
+        "method": "POST",
+        "path": "/auth/refresh",
+        "request_fields": [],
+        "response_fields": [
+          {
+            "name": "accessToken",
+            "type": "string"
+          }
+        ],
+        "purpose": "Exchange the httpOnly refresh cookie for a new access token"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/settings/users",
+        "request_fields": [],
+        "response_fields": [
+          {
+            "name": "items",
+            "type": "array"
+          },
+          {
+            "name": "totalCount",
+            "type": "number"
+          },
+          {
+            "name": "page",
+            "type": "number"
+          },
+          {
+            "name": "pageSize",
+            "type": "number"
+          }
+        ],
+        "purpose": "List tenant users"
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/settings/users",
+        "request_fields": [
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "email",
+            "type": "string"
+          },
+          {
+            "name": "role",
+            "type": "string"
+          },
+          {
+            "name": "initialPassword",
+            "type": "string"
+          }
+        ],
+        "response_fields": [
+          {
+            "name": "id",
+            "type": "string"
+          },
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "email",
+            "type": "string"
+          },
+          {
+            "name": "role",
+            "type": "string"
+          },
+          {
+            "name": "status",
+            "type": "string"
+          },
+          {
+            "name": "lastLogin",
+            "type": "date"
+          },
+          {
+            "name": "temporaryPassword",
+            "type": "string"
+          }
+        ],
+        "purpose": "Create a tenant user, optionally with an explicit initial password"
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/settings/users/{userId}/reset-password",
+        "request_fields": [],
+        "response_fields": [
+          {
+            "name": "temporaryPassword",
+            "type": "string"
+          }
+        ],
+        "purpose": "Issue a new temporary password for a user (Tenant Admin only)"
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/v1/settings/users/{userId}/status",
+        "request_fields": [
+          {
+            "name": "status",
+            "type": "enum"
+          }
+        ],
+        "response_fields": [
+          {
+            "name": "id",
+            "type": "string"
+          },
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "email",
+            "type": "string"
+          },
+          {
+            "name": "role",
+            "type": "string"
+          },
+          {
+            "name": "status",
+            "type": "string"
+          },
+          {
+            "name": "lastLogin",
+            "type": "date"
+          }
+        ],
+        "purpose": "Deactivate/reactivate a tenant user"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/tracker/bottleneck-thresholds",
+        "request_fields": [],
+        "response_fields": [
+          {
+            "name": "stage",
+            "type": "string"
+          },
+          {
+            "name": "thresholdDays",
+            "type": "number"
+          }
+        ],
+        "purpose": "Get tenant-configured stuck-flag thresholds per stage (Tenant Admin only, response read as array or {items})"
+      }
+    ],
+    "types": {
+      "AuthUserResponse": [
+        {
+          "name": "id",
+          "type": "string"
+        },
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "email",
+          "type": "string"
+        },
+        {
+          "name": "role",
+          "type": "string"
+        },
+        {
+          "name": "tenantId",
+          "type": "string"
+        },
+        {
+          "name": "mustChangePassword",
+          "type": "boolean"
+        }
+      ],
+      "LoginResponse": [
+        {
+          "name": "accessToken",
+          "type": "string"
+        },
+        {
+          "name": "user",
+          "type": "object"
+        }
+      ],
+      "UserListItemResponse": [
+        {
+          "name": "id",
+          "type": "string"
+        },
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "email",
+          "type": "string"
+        },
+        {
+          "name": "role",
+          "type": "string"
+        },
+        {
+          "name": "status",
+          "type": "string"
+        },
+        {
+          "name": "lastLogin",
+          "type": "date"
+        }
+      ],
+      "CreateUserRequest": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "email",
+          "type": "string"
+        },
+        {
+          "name": "role",
+          "type": "string"
+        },
+        {
+          "name": "initialPassword",
+          "type": "string"
+        }
+      ],
+      "CreateUserResponse": [
+        {
+          "name": "id",
+          "type": "string"
+        },
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "email",
+          "type": "string"
+        },
+        {
+          "name": "role",
+          "type": "string"
+        },
+        {
+          "name": "status",
+          "type": "string"
+        },
+        {
+          "name": "lastLogin",
+          "type": "date"
+        },
+        {
+          "name": "temporaryPassword",
+          "type": "string"
+        }
+      ],
+      "UpdateUserStatusRequest": [
+        {
+          "name": "status",
+          "type": "enum"
+        }
+      ],
+      "ApiError": [
+        {
+          "name": "error",
+          "type": "string"
+        },
+        {
+          "name": "details",
+          "type": "array"
+        }
+      ]
+    },
+    "notes": "These files add an /auth resource group (login, logout, me, change-password, refresh) not listed in any existing module's endpoint table in CLAUDE.md, plus a new POST /api/v1/settings/users/{userId}/reset-password not in the lifecycle-uc10-uc11 contract's endpoint list. The existing CreateUserRequest DTO in CLAUDE.md declares only name/email/role; the code here adds an optional initialPassword field and an optional temporaryPassword on the response, which is a divergence from the documented DTO. http.js attaches Authorization: Bearer <accessToken> (not the X-User-Role/X-User-Id headers CLAUDE.md specifies), so the two auth schemes are inconsistent and the backend side of /auth/* and reset-password is still unverified as 'missing or present' — only the frontend expectation is reported here."
+  },
+  "usage": {
+    "num_turns": 68,
+    "duration_ms": 746768,
+    "total_cost_usd": 5.072040299999999,
+    "input_tokens": 4393,
+    "output_tokens": 40283,
+    "cache_creation_input_tokens": 115992,
+    "cache_read_input_tokens": 6595288,
+    "is_error": false
+  }
+}

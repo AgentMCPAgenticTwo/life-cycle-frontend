@@ -14,7 +14,8 @@ import ManualObligationForm from '@/features/contract-repository/components/Manu
 import RenewalAlertPanel from '@/features/contract-repository/components/RenewalAlertPanel';
 import RenewAmendTerminateButtons from '@/features/contract-repository/components/RenewAmendTerminateButtons';
 import TerminationReasonDialog from '@/features/contract-repository/components/TerminationReasonDialog';
-import { authHeaders, HttpError } from '@/services/http';
+import { HttpError } from '@/services/http';
+import { useAuth } from '@/shared/hooks/useAuth';
 
 // GET_contract_obligations / GET_contract_renewal only allow these roles
 // (UC9-BR-012 blocks Approver, External Party and Signer outright).
@@ -39,7 +40,7 @@ export default function ObligationsRenewalPage() {
   const { amend, isSaving: isAmending } = useAmendContract(contractId);
   const [isTerminateOpen, setIsTerminateOpen] = useState(false);
 
-  const role = authHeaders.role;
+  const { role } = useAuth();
   const readOnly = READ_ONLY_ROLES.includes(role);
 
   if (!ALLOWED_ROLES.includes(role)) {

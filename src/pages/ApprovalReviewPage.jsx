@@ -7,7 +7,7 @@ import ApprovalHistoryTab from '@/features/approvals/components/ApprovalHistoryT
 import { useApprovalDetail } from '@/features/approvals/hooks/useApprovalDetail';
 import { useSubmitApprovalAction } from '@/features/approvals/hooks/useSubmitApprovalAction';
 import { useDelegateApproval } from '@/features/approvals/hooks/useDelegateApproval';
-import { authHeaders } from '@/services/http';
+import { useAuth } from '@/shared/hooks/useAuth';
 
 // GET /api/v1/approvals/{approvalId} is readable by exactly these four
 // roles (see module contract); Signer and any External Party are excluded
@@ -18,7 +18,7 @@ const STALE_STATE_MESSAGE = "This contract's approval status has changed. Please
 
 export default function ApprovalReviewPage() {
   const { approvalId } = useParams();
-  const role = authHeaders.role;
+  const { role } = useAuth();
   const isAllowed = ALLOWED_ROLES.includes(role);
 
   const { data: approval, isLoading, error, refetch } = useApprovalDetail(isAllowed ? approvalId : null);

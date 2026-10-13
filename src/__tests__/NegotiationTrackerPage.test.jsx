@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import NegotiationTrackerPage from '@/pages/NegotiationTrackerPage';
-import { http, authHeaders, HttpError } from '@/services/http';
+import { http, HttpError } from '@/services/http';
 import { useNegotiationStore } from '@/store/negotiationSlice';
 
 vi.mock('@/services/http', async () => {
@@ -10,9 +10,11 @@ vi.mock('@/services/http', async () => {
   return {
     ...actual,
     http: { get: vi.fn(), post: vi.fn(), put: vi.fn(), del: vi.fn() },
-    authHeaders: { role: 'CONTRACT_OWNER', userId: '00000000-0000-0000-0000-000000000001' },
   };
 });
+
+const authState = vi.hoisted(() => ({ role: 'CONTRACT_OWNER', userId: '00000000-0000-0000-0000-000000000001' }));
+vi.mock('@/shared/hooks/useAuth', () => ({ useAuth: () => authState }));
 
 const CONTRACT_ID = '44444444-4444-4444-4444-444444444444';
 
@@ -63,7 +65,7 @@ function renderPage() {
 
 beforeEach(() => {
   vi.clearAllMocks();
-  authHeaders.role = 'CONTRACT_OWNER';
+  authState.role = 'CONTRACT_OWNER';
   useNegotiationStore.getState().clear();
 });
 
@@ -105,7 +107,7 @@ describe('NegotiationTrackerPage', () => {
   });
 
   it('denies access to roles outside the negotiation tracker contract', async () => {
-    authHeaders.role = 'SIGNER';
+    authState.role = 'SIGNER';
     http.get.mockResolvedValue(TRACKER);
     renderPage();
 
@@ -114,7 +116,7 @@ describe('NegotiationTrackerPage', () => {
   });
 
   it('only shows Mark as Agreed to the Legal Reviewer', async () => {
-    authHeaders.role = 'LEGAL_REVIEWER';
+    authState.role = 'LEGAL_REVIEWER';
     http.get.mockResolvedValue(TRACKER);
     renderPage();
 
@@ -123,7 +125,7 @@ describe('NegotiationTrackerPage', () => {
   });
 
   it('hides Mark as Agreed for roles other than Legal Reviewer', async () => {
-    authHeaders.role = 'CONTRACT_OWNER';
+    authState.role = 'CONTRACT_OWNER';
     http.get.mockResolvedValue(TRACKER);
     renderPage();
 

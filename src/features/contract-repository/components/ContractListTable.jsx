@@ -2,7 +2,7 @@ import { useState } from 'react';
 import StatusBadge from '@/features/contract-repository/components/StatusBadge';
 import AddFolderTagDialog from '@/features/contract-repository/components/AddFolderTagDialog';
 import { formatCurrency, formatDate, formatDateTime } from '@/features/contract-repository/utils/format';
-import { authHeaders } from '@/services/http';
+import { useAuth } from '@/shared/hooks/useAuth';
 
 const COLUMNS = [
   { key: 'contractName', label: 'Contract Name' },
@@ -23,8 +23,9 @@ const FOLDER_TAG_MANAGER_ROLES = ['TENANT_ADMIN', 'CONTRACT_OWNER'];
  * for that row without navigating away (UC8-BR-004 / UC8-BR-007 / UC8-BR-008).
  */
 export default function ContractListTable({ contracts, onRowClick, sortBy, sortDirection, onSort }) {
+  const { role } = useAuth();
   const [taggingContractId, setTaggingContractId] = useState(null);
-  const canManageFolderTags = FOLDER_TAG_MANAGER_ROLES.includes(authHeaders.role);
+  const canManageFolderTags = FOLDER_TAG_MANAGER_ROLES.includes(role);
 
   return (
     <div className="overflow-x-auto rounded-xl border border-neutral-800">

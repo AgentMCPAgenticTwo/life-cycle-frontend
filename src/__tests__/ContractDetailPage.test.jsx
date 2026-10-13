@@ -2,16 +2,18 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import ContractDetailPage from '@/pages/ContractDetailPage';
-import { http, authHeaders, HttpError } from '@/services/http';
+import { http, HttpError } from '@/services/http';
 
 vi.mock('@/services/http', async () => {
   const actual = await vi.importActual('@/services/http');
   return {
     ...actual,
     http: { get: vi.fn(), post: vi.fn(), put: vi.fn(), del: vi.fn() },
-    authHeaders: { role: 'TENANT_ADMIN', userId: '00000000-0000-0000-0000-000000000001' },
   };
 });
+
+const authState = vi.hoisted(() => ({ role: 'TENANT_ADMIN', userId: '00000000-0000-0000-0000-000000000001' }));
+vi.mock('@/shared/hooks/useAuth', () => ({ useAuth: () => authState }));
 
 const CONTRACT_ID = '11111111-1111-1111-1111-111111111111';
 
@@ -68,7 +70,7 @@ function renderPage() {
 
 beforeEach(() => {
   vi.clearAllMocks();
-  authHeaders.role = 'TENANT_ADMIN';
+  authState.role = 'TENANT_ADMIN';
 });
 
 describe('ContractDetailPage', () => {
@@ -107,7 +109,7 @@ describe('ContractDetailPage', () => {
   });
 
   it('hides the Add Folder/Tag button for Legal Reviewer (UC8-BR-009)', async () => {
-    authHeaders.role = 'LEGAL_REVIEWER';
+    authState.role = 'LEGAL_REVIEWER';
     mockEndpoints();
     renderPage();
     await waitFor(() => expect(screen.getByText('Master Services Agreement')).toBeTruthy());
@@ -115,7 +117,7 @@ describe('ContractDetailPage', () => {
   });
 
   it('shows the Add Folder/Tag button for Contract Owner (UC8-BR-008)', async () => {
-    authHeaders.role = 'CONTRACT_OWNER';
+    authState.role = 'CONTRACT_OWNER';
     mockEndpoints();
     renderPage();
     await waitFor(() => expect(screen.getByText('Master Services Agreement')).toBeTruthy());

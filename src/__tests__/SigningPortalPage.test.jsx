@@ -9,7 +9,6 @@ vi.mock('@/services/http', async () => {
   return {
     ...actual,
     http: { get: vi.fn(), post: vi.fn(), put: vi.fn(), del: vi.fn() },
-    authHeaders: { role: 'SIGNER', userId: '00000000-0000-0000-0000-000000000001' },
   };
 });
 

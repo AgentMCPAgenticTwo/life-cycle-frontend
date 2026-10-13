@@ -1,4 +1,5 @@
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
+import { useAuth } from '@/shared/hooks/useAuth';
 
 const NAV_SECTIONS = [
   {
@@ -36,6 +37,15 @@ function linkClasses({ isActive }) {
  * drawer (controlled by isOpen/onClose) below that breakpoint.
  */
 export default function SidebarNav({ isOpen, onClose }) {
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
+
+  async function handleSignOut() {
+    await logout();
+    onClose?.();
+    navigate('/login', { replace: true });
+  }
+
   return (
     <>
       {isOpen && (
@@ -84,6 +94,24 @@ export default function SidebarNav({ isOpen, onClose }) {
             </div>
           ))}
         </nav>
+
+        {user && (
+          <div className="mt-6 border-t border-neutral-800 pt-4">
+            <p className="truncate px-3 text-sm font-medium text-neutral-200" title={user.name}>
+              {user.name}
+            </p>
+            <p className="truncate px-3 text-xs text-neutral-500" title={user.email}>
+              {user.email}
+            </p>
+            <button
+              type="button"
+              onClick={handleSignOut}
+              className="mt-3 w-full rounded-md border border-neutral-700 px-3 py-2 text-left text-sm font-medium text-neutral-300 hover:border-neutral-500 hover:text-neutral-100"
+            >
+              Sign out
+            </button>
+          </div>
+        )}
       </aside>
     </>
   );

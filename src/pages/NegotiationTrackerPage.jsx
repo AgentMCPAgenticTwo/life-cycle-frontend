@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { authHeaders } from '@/services/http';
+import { useAuth } from '@/shared/hooks/useAuth';
 import RoutingPanel from '@/features/negotiation/components/RoutingPanel';
 import ReviewerList from '@/features/negotiation/components/ReviewerList';
 import CommentBoxPanel from '@/features/negotiation/components/CommentBoxPanel';
@@ -21,7 +21,7 @@ const STATUS_LABELS = {
 
 export default function NegotiationTrackerPage() {
   const { contractId } = useParams();
-  const role = authHeaders.role;
+  const { role } = useAuth();
   const canView = VIEW_ALLOWED_ROLES.includes(role);
   const canRoute = ROUTING_ALLOWED_ROLES.includes(role);
   const isLegalReviewer = role === 'LEGAL_REVIEWER';

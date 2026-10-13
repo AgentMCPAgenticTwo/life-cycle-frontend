@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import ClauseAnalysisPage from '@/pages/ClauseAnalysisPage';
-import { http, authHeaders } from '@/services/http';
+import { http } from '@/services/http';
 import { useClauseAnalysisStore } from '@/store/clauseAnalysisSlice';
 
 vi.mock('@/services/http', async () => {
@@ -10,9 +10,11 @@ vi.mock('@/services/http', async () => {
   return {
     ...actual,
     http: { get: vi.fn(), post: vi.fn(), put: vi.fn(), del: vi.fn() },
-    authHeaders: { role: 'LEGAL_REVIEWER', userId: '00000000-0000-0000-0000-000000000001' },
   };
 });
+
+const authState = vi.hoisted(() => ({ role: 'LEGAL_REVIEWER', userId: '00000000-0000-0000-0000-000000000001' }));
+vi.mock('@/shared/hooks/useAuth', () => ({ useAuth: () => authState }));
 
 const CONTRACT_ID = '33333333-3333-3333-3333-333333333333';
 
@@ -87,7 +89,7 @@ function renderPage() {
 
 beforeEach(() => {
   vi.clearAllMocks();
-  authHeaders.role = 'LEGAL_REVIEWER';
+  authState.role = 'LEGAL_REVIEWER';
   useClauseAnalysisStore.getState().clear();
 });
 
@@ -130,7 +132,7 @@ describe('ClauseAnalysisPage', () => {
   });
 
   it('denies access to roles outside Legal Reviewer, Contract Owner and Tenant Admin', async () => {
-    authHeaders.role = 'APPROVER';
+    authState.role = 'APPROVER';
     mockEndpoints();
     renderPage();
 

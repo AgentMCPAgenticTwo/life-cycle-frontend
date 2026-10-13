@@ -7,8 +7,10 @@ import AddRuleForm from '@/features/settings-admin/AddRuleForm';
 import IntegrationsTab from '@/features/settings-admin/IntegrationsTab';
 import NotificationsTab from '@/features/settings-admin/NotificationsTab';
 import AuditLogTab from '@/features/settings-admin/AuditLogTab';
+import TemporaryPasswordModal from '@/features/settings-admin/TemporaryPasswordModal';
 import { useTenantUsers } from '@/features/settings-admin/hooks/useTenantUsers';
 import { useCreateUser } from '@/features/settings-admin/hooks/useCreateUser';
+import { useResetPassword } from '@/features/settings-admin/hooks/useResetPassword';
 import { useApprovalRules } from '@/features/settings-admin/hooks/useApprovalRules';
 import { useCreateApprovalRule } from '@/features/settings-admin/hooks/useCreateApprovalRule';
 import { useIntegrations } from '@/features/settings-admin/hooks/useIntegrations';
@@ -18,7 +20,7 @@ import { useNotificationEvents } from '@/features/settings-admin/hooks/useNotifi
 import { useUpdateNotificationEvent } from '@/features/settings-admin/hooks/useUpdateNotificationEvent';
 import { useAuditLog } from '@/features/settings-admin/hooks/useAuditLog';
 import { useSettingsAdminStore } from '@/store/settingsAdminSlice';
-import { authHeaders } from '@/services/http';
+import { useAuth } from '@/shared/hooks/useAuth';
 
 // UC11-BR-001: only Tenant Admin may access this screen at all.
 const ALLOWED_ROLES = ['TENANT_ADMIN'];
@@ -33,7 +35,8 @@ const TABS = [
 
 export default function SettingsAdminPage() {
   const navigate = useNavigate();
-  const isAllowed = ALLOWED_ROLES.includes(authHeaders.role);
+  const { role } = useAuth();
+  const isAllowed = ALLOWED_ROLES.includes(role);
 
   useEffect(() => {
     if (!isAllowed) {
@@ -62,6 +65,8 @@ export default function SettingsAdminPage() {
 
   const usersResult = useTenantUsers();
   const createUser = useCreateUser();
+  const resetPassword = useResetPassword();
+  const [temporaryPasswordInfo, setTemporaryPasswordInfo] = useState(null);
   const rulesResult = useApprovalRules();
   const createRule = useCreateApprovalRule();
   const integrationsResult = useIntegrations();
@@ -86,12 +91,25 @@ export default function SettingsAdminPage() {
   async function handleAddUser(request) {
     setAddUserError(null);
     try {
-      await createUser.createUser(request);
+      const created = await createUser.createUser(request);
       setShowAddUser(false);
       setSuccessMessage('User invited successfully');
       await usersResult.refetch();
+      if (created.temporaryPassword) {
+        setTemporaryPasswordInfo({ userName: created.name, temporaryPassword: created.temporaryPassword });
+      }
     } catch (err) {
       setAddUserError(err.message || 'Unable to create user. Please try again.');
+    }
+  }
+
+  async function handleResetPassword(user) {
+    try {
+      const result = await resetPassword.resetPassword(user.id);
+      setTemporaryPasswordInfo({ userName: user.name, temporaryPassword: result.temporaryPassword });
+    } catch (err) {
+      setSuccessMessage(null);
+      setAddUserError(err.message || 'Unable to reset password. Please try again.');
     }
   }
 
@@ -207,6 +225,7 @@ export default function SettingsAdminPage() {
               setShowAddUser(true);
             }}
             onStatusChanged={handleUserStatusChanged}
+            onResetPassword={handleResetPassword}
           />
         )}
 
@@ -273,6 +292,14 @@ export default function SettingsAdminPage() {
           onCancel={() => setShowAddRule(false)}
           isSubmitting={createRule.isLoading}
           error={addRuleError}
+        />
+      )}
+
+      {temporaryPasswordInfo && (
+        <TemporaryPasswordModal
+          userName={temporaryPasswordInfo.userName}
+          temporaryPassword={temporaryPasswordInfo.temporaryPassword}
+          onClose={() => setTemporaryPasswordInfo(null)}
         />
       )}
     </div>

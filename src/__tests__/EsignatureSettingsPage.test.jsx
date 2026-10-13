@@ -2,16 +2,18 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import EsignatureSettingsPage from '@/pages/EsignatureSettingsPage';
-import { http, authHeaders } from '@/services/http';
+import { http } from '@/services/http';
 
 vi.mock('@/services/http', async () => {
   const actual = await vi.importActual('@/services/http');
   return {
     ...actual,
     http: { get: vi.fn(), post: vi.fn(), put: vi.fn(), del: vi.fn() },
-    authHeaders: { role: 'TENANT_ADMIN', userId: '00000000-0000-0000-0000-000000000001' },
   };
 });
+
+const authState = vi.hoisted(() => ({ role: 'TENANT_ADMIN', userId: '00000000-0000-0000-0000-000000000001' }));
+vi.mock('@/shared/hooks/useAuth', () => ({ useAuth: () => authState }));
 
 const SETTINGS = { reminderFrequencyDays: 5, defaultSignatureProvider: 'DocuSign' };
 
@@ -32,7 +34,7 @@ function renderPage() {
 
 beforeEach(() => {
   vi.clearAllMocks();
-  authHeaders.role = 'TENANT_ADMIN';
+  authState.role = 'TENANT_ADMIN';
 });
 
 describe('EsignatureSettingsPage', () => {
@@ -46,7 +48,7 @@ describe('EsignatureSettingsPage', () => {
   });
 
   it('blocks access for an unauthorized role', () => {
-    authHeaders.role = 'CONTRACT_OWNER';
+    authState.role = 'CONTRACT_OWNER';
     mockEndpoints();
     renderPage();
 

@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import ApprovalMatrixRuleCard from '@/features/approvals/components/ApprovalMatrixRuleCard';
 import { useApprovalMatrixConfig } from '@/features/approvals/hooks/useApprovalMatrixConfig';
 import { useUpdateApprovalMatrixConfig } from '@/features/approvals/hooks/useUpdateApprovalMatrixConfig';
-import { authHeaders } from '@/services/http';
+import { useAuth } from '@/shared/hooks/useAuth';
 
 // GET/PUT /api/v1/approval-matrix-config are TENANT_ADMIN-only (see module
 // contract); every other role is denied this screen outright.
@@ -22,7 +22,7 @@ function emptyRule() {
 }
 
 export default function ApprovalMatrixConfigPage() {
-  const role = authHeaders.role;
+  const { role } = useAuth();
   const isAllowed = ALLOWED_ROLES.includes(role);
 
   const { data, isLoading, error, refetch } = useApprovalMatrixConfig();

@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import ObligationsRenewalPage from '@/pages/ObligationsRenewalPage';
-import { http, authHeaders } from '@/services/http';
+import { http } from '@/services/http';
 import { useObligationsStore } from '@/store/obligationsSlice';
 
 vi.mock('@/services/http', async () => {
@@ -10,9 +10,11 @@ vi.mock('@/services/http', async () => {
   return {
     ...actual,
     http: { get: vi.fn(), post: vi.fn(), put: vi.fn(), patch: vi.fn(), del: vi.fn() },
-    authHeaders: { role: 'TENANT_ADMIN', userId: '00000000-0000-0000-0000-000000000001' },
   };
 });
+
+const authState = vi.hoisted(() => ({ role: 'TENANT_ADMIN', userId: '00000000-0000-0000-0000-000000000001' }));
+vi.mock('@/shared/hooks/useAuth', () => ({ useAuth: () => authState }));
 
 const CONTRACT_ID = '11111111-1111-1111-1111-111111111111';
 
@@ -82,7 +84,7 @@ function renderPage() {
 
 beforeEach(() => {
   vi.clearAllMocks();
-  authHeaders.role = 'TENANT_ADMIN';
+  authState.role = 'TENANT_ADMIN';
   useObligationsStore.setState({ obligations: [], renewal: null });
 });
 
@@ -119,14 +121,14 @@ describe('ObligationsRenewalPage', () => {
   });
 
   it('shows the access-denied view for an Approver (UC9-BR-012)', async () => {
-    authHeaders.role = 'APPROVER';
+    authState.role = 'APPROVER';
     mockEndpoints();
     renderPage();
     await waitFor(() => expect(screen.getByText('You do not have permission to view this page')).toBeTruthy());
   });
 
   it('disables the Renew/Amend/Terminate buttons and hides Edit for a Legal Reviewer (UC9-BR-011)', async () => {
-    authHeaders.role = 'LEGAL_REVIEWER';
+    authState.role = 'LEGAL_REVIEWER';
     mockEndpoints();
     renderPage();
     await waitFor(() => expect(screen.getByText('Deliver quarterly logistics performance report')).toBeTruthy());

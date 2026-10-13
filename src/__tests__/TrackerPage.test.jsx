@@ -2,16 +2,18 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import TrackerPage from '@/pages/TrackerPage';
-import { http, authHeaders } from '@/services/http';
+import { http } from '@/services/http';
 
 vi.mock('@/services/http', async () => {
   const actual = await vi.importActual('@/services/http');
   return {
     ...actual,
     http: { get: vi.fn(), post: vi.fn(), put: vi.fn(), patch: vi.fn(), del: vi.fn() },
-    authHeaders: { role: 'TENANT_ADMIN', userId: '00000000-0000-0000-0000-000000000001' },
   };
 });
+
+const authState = vi.hoisted(() => ({ role: 'TENANT_ADMIN', userId: '00000000-0000-0000-0000-000000000001' }));
+vi.mock('@/shared/hooks/useAuth', () => ({ useAuth: () => authState }));
 
 const OWNERSHIP_ROW = {
   ownerName: 'Priya Nambiar',
@@ -54,7 +56,7 @@ function renderPage() {
 
 beforeEach(() => {
   vi.clearAllMocks();
-  authHeaders.role = 'TENANT_ADMIN';
+  authState.role = 'TENANT_ADMIN';
 });
 
 describe('TrackerPage', () => {
@@ -69,7 +71,7 @@ describe('TrackerPage', () => {
   });
 
   it('redirects a role without Tracker access to the access-denied screen', async () => {
-    authHeaders.role = 'SIGNER';
+    authState.role = 'SIGNER';
     mockEndpoints();
     renderPage();
 

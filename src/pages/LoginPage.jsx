@@ -1,30 +1,45 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '@/shared/hooks/useAuth';
 
 /**
- * Entry point linked from the session-expired redirect (see DashboardPage).
- * The API contract has no auth endpoint yet (CLAUDE.md: the dev X-User-Role /
- * X-User-Id headers stand in for a login flow), so this screen gates entry
- * client-side and hands the user back into the app rather than calling a
- * backend route that doesn't exist.
+ * Entry point for the real auth flow (POST /auth/login). On success it
+ * forwards a user with mustChangePassword to /change-password; ProtectedRoute
+ * enforces that redirect for direct navigation too, this just skips the
+ * detour through the dashboard.
  */
 export default function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const infoMessage = location.state?.message || null;
+  const { login } = useAuth();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [formError, setFormError] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
     if (!email.trim() || !password.trim()) {
       setFormError('Enter your email and password to continue.');
       return;
     }
     setFormError(null);
-    navigate('/', { replace: true });
+    setIsSubmitting(true);
+    try {
+      const user = await login(email.trim(), password);
+      const redirectTo = location.state?.from?.pathname;
+      if (user.mustChangePassword) {
+        navigate('/change-password', { replace: true });
+      } else {
+        navigate(redirectTo || '/', { replace: true });
+      }
+    } catch (err) {
+      setFormError(err.message || 'Invalid email or password');
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -80,9 +95,10 @@ export default function LoginPage() {
           </div>
           <button
             type="submit"
-            className="mt-2 rounded-md bg-emerald-500 px-4 py-2 text-sm font-semibold text-neutral-950 transition-colors hover:bg-emerald-400"
+            disabled={isSubmitting}
+            className="mt-2 rounded-md bg-emerald-500 px-4 py-2 text-sm font-semibold text-neutral-950 transition-colors hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            Sign in
+            {isSubmitting ? 'Signing in…' : 'Sign in'}
           </button>
         </form>
 

@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { authHeaders } from '@/services/http';
+import { useAuth } from '@/shared/hooks/useAuth';
 
 /**
  * Blocks unauthorized roles from rendering the New Contract Creation screen
@@ -10,7 +10,8 @@ import { authHeaders } from '@/services/http';
  */
 export default function NewContractAccessGuard({ allowedRoles, children }) {
   const navigate = useNavigate();
-  const isAllowed = allowedRoles.includes(authHeaders.role);
+  const { role } = useAuth();
+  const isAllowed = allowedRoles.includes(role);
 
   useEffect(() => {
     if (!isAllowed) {

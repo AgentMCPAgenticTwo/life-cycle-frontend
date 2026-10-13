@@ -1,0 +1,43 @@
+{
+  "status": "SUCCESS",
+  "summary": "Built TrackerEmptyState (src/features/tracker/TrackerEmptyState.jsx), a single-purpose presentational component that renders whichever empty/no-records/conflicting-filter copy the caller passes via its `message` prop, so it can stand in for any Tracker tab's table (UC10-AF-001 'No contract data available to display.', UC10-AF-003 'No records found for the selected period.', UC10-AF-005 'No records match the selected filters.'). Styled to match this repo's established dark-theme empty-state convention (dashed neutral-800 border, neutral-900/40 fill, centered neutral-300 text, role=\"status\" for accessibility) seen in ObligationsEmptyState/EmptyRepositoryState. Added a colocated test (src/features/tracker/TrackerEmptyState.test.jsx) covering all three message variants plus the status role. Lint (0 warnings), the full test suite (126 tests across 25 files, all passing), and the production build all pass. Visually verified by temporarily mounting the component on a scratch route, screenshotting it with Playwright at 1440x900, and confirming it renders the dark dashed-border card with the exact copy and typography matching this product's visual language -- the scratch route and its App.jsx edit were reverted before finishing, so no router/App changes ship with this task.",
+  "task_id": "T-TRACKER-EMPTY-STATE-UI",
+  "story_id": "UC10-AF-001",
+  "code_files": [
+    {
+      "file_path": "src/features/tracker/TrackerEmptyState.jsx",
+      "file_name": "TrackerEmptyState.jsx",
+      "language": "javascript",
+      "file_type": "component",
+      "description": "Presentational component that renders a dark, dashed-border card with a centered message, used in place of a Tracker tab's table/chart whenever there is nothing to show. Takes a single `message` prop so the host screen/tab can supply the exact empty-state, no-records, or conflicting-filter copy for its scenario."
+    },
+    {
+      "file_path": "src/features/tracker/TrackerEmptyState.test.jsx",
+      "file_name": "TrackerEmptyState.test.jsx",
+      "language": "javascript",
+      "file_type": "component",
+      "description": "Colocated test asserting the component renders each of the three acceptance-criteria messages (UC10-AF-001/003/005) verbatim and exposes an accessible status role."
+    }
+  ],
+  "pr": {
+    "branch_name": "ui-gen/d5929e8d122e",
+    "title": "feat(ui-gen): TrackerEmptyState component for Tracker empty/no-records states",
+    "body": "Implements TrackerEmptyState (UC10-AF-001, UC10-AF-003, UC10-AF-005): a small, reusable component that replaces a Tracker tab's table with a centered message card when there is no contract data in the tenant, no records in the selected date range, or no records matching the current filter combination. It takes the exact message as a prop so each calling site supplies its own required copy. No other module's files were touched.",
+    "draft": true,
+    "linked_story": "UC10-AF-001",
+    "linked_task": "T-TRACKER-EMPTY-STATE-UI"
+  },
+  "critic_hints": {
+    "files_to_lint": [
+      "src/features/tracker/TrackerEmptyState.jsx",
+      "src/features/tracker/TrackerEmptyState.test.jsx"
+    ],
+    "openapi_endpoint": null
+  },
+  "blockers": [
+    "This task owns only TrackerEmptyState, a pure presentational component with no data fetching of its own -- none of the five listed Tracker endpoints (GET ownership/cycle-time/bottleneck/turnaround, POST export) are called from this file. The host screen/tabs (TrackerPage, OwnershipTab, CycleTimeTab, BottleneckTab, TurnaroundTab, TrackerReportControlsPanel) are responsible for calling those endpoints via their own hooks, inspecting each response's `isEmpty`/`emptyStateMessage` fields (and filter-state such as date-range/filter-conflict detection), and rendering `<TrackerEmptyState message={...} />` in place of their table when appropriate. None of those sibling components exist in this repo yet (no /tracker route, no TrackerPage, no OwnershipTab etc.), so TrackerEmptyState cannot be wired into a real host screen as part of this task -- that wiring belongs to whichever task builds TrackerPage and the four tab components.",
+    "TARGET DESIGN IMG-1 shows the fully populated Ownership tab (Contracts by Owner table with real rows), not any of the three empty/no-records/conflicting-filter states this component renders -- no screenshot depicts the actual target state. Since there is no pixel reference for the empty state itself, I built it using this repo's already-established dark-theme empty-state convention (dashed neutral-800 border, neutral-900/40 background, centered neutral-300 text) seen in ObligationsEmptyState and EmptyRepositoryState elsewhere in this codebase, matching the overall dark palette and typography visible in IMG-1's chrome.",
+    "The `message` prop and its three literal copy strings ('No contract data available to display.', 'No records found for the selected period.', 'No records match the selected filters.') are taken verbatim from the stories' acceptance criteria, not from context.json (which only declares the prop name `message` with no enumerated values) -- this is the minimum inference needed to satisfy the stories and is recorded here per the task's 'missing type' guidance.",
+    "DP-UC10-020 ('Change UC10 BR4 to') is referenced across all three stories as an amendment to BR-4's Estimated Turnaround exclusion rule, but its full replacement wording was never supplied in context.json or the stories -- consistent with the stories' own notes_assumptions, I did not invent replacement BR-4 text; TrackerEmptyState only needed to know that the empty-state message takes precedence over any turnaround calculation when no contracts remain, which is already satisfied by it being a stateless display component that renders whatever message its caller passes."
+  ]
+}

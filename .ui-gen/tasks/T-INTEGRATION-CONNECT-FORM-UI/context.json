@@ -1,0 +1,452 @@
+{
+  "group_id": "integration-connect-form",
+  "task_id": "T-INTEGRATION-CONNECT-FORM-UI",
+  "primary_story_id": "UC11-AF-004",
+  "story_ids": [
+    "UC11-AF-004",
+    "UC11-AF-007",
+    "UC11-BR-009",
+    "UC11-BR-016"
+  ],
+  "page_component": null,
+  "components": [
+    {
+      "name": "IntegrationConnectForm",
+      "type": "COMPONENT",
+      "props": [
+        "onSubmit"
+      ],
+      "story_refs": [
+        "UC11-AF-004",
+        "UC11-AF-007",
+        "UC11-BR-009",
+        "UC11-BR-016"
+      ],
+      "description": "Credential entry form, masks input and shows failure message"
+    }
+  ],
+  "hooks": [
+    {
+      "name": "useConnectIntegration",
+      "returns": "{ connect: (name: string, req: ConnectIntegrationRequest) => Promise<IntegrationResponse> }",
+      "story_refs": [
+        "UC11-AF-004",
+        "UC11-AF-007",
+        "UC11-BR-016"
+      ],
+      "description": "Authorizes integration connection"
+    }
+  ],
+  "store_slices": [
+    {
+      "name": "trackerFiltersSlice",
+      "actions": [
+        "setPeriod",
+        "setContractTypeFilter",
+        "setOwnerFilter",
+        "setDateRange",
+        "setActiveTab",
+        "resetOnOpen"
+      ],
+      "state_shape": "{ period: string; contractTypeFilter: string; ownerFilter: string; dateRangeFrom: string | null; dateRangeTo: string | null; activeTab: string }"
+    },
+    {
+      "name": "settingsAdminSlice",
+      "actions": [
+        "setActiveTab",
+        "setUsers",
+        "setApprovalRules",
+        "setIntegrations",
+        "setNotificationEvents"
+      ],
+      "state_shape": "{ activeTab: string; users: UserListItemResponse[]; approvalRules: ApprovalRuleResponse[]; integrations: IntegrationResponse[]; notificationEvents: NotificationEventResponse[] }"
+    },
+    {
+      "name": "auditLogSlice",
+      "actions": [
+        "setEntries",
+        "setFilterDateRange",
+        "clearFilter"
+      ],
+      "state_shape": "{ entries: AuditLogEntryResponse[]; filterDateRangeFrom: string | null; filterDateRangeTo: string | null }"
+    }
+  ],
+  "relevant_endpoints": [
+    {
+      "id": "GET_settings_integrations",
+      "path": "/api/v1/settings/integrations",
+      "roles": [
+        "TENANT_ADMIN"
+      ],
+      "method": "GET",
+      "summary": "List integration cards (Integration Name/Connection Status)",
+      "is_paged": false,
+      "story_refs": [
+        "UC11-MF-001",
+        "UC11-BR-001",
+        "UC11-BR-009",
+        "UC11-BR-010",
+        "UC11-FV-003"
+      ],
+      "response_dto": "IntegrationResponse",
+      "auth_required": true
+    },
+    {
+      "id": "POST_settings_integration_connect",
+      "path": "/api/v1/settings/integrations/{integrationName}/connect",
+      "roles": [
+        "TENANT_ADMIN"
+      ],
+      "method": "POST",
+      "summary": "Submit credentials and authorize integration connection, masks credentials on success",
+      "is_paged": false,
+      "story_refs": [
+        "UC11-MF-001",
+        "UC11-AF-004",
+        "UC11-AF-007",
+        "UC11-BR-009",
+        "UC11-BR-016",
+        "UC11-BR-017",
+        "UC11-FV-003"
+      ],
+      "request_dto": "ConnectIntegrationRequest",
+      "response_dto": "IntegrationResponse",
+      "auth_required": true
+    },
+    {
+      "id": "GET_settings_audit_log",
+      "path": "/api/v1/settings/audit-log",
+      "roles": [
+        "TENANT_ADMIN"
+      ],
+      "method": "GET",
+      "summary": "Get read-only audit log entries sorted newest first with Filter Date Range",
+      "is_paged": true,
+      "story_refs": [
+        "UC11-MF-001",
+        "UC11-AF-002",
+        "UC11-AF-004",
+        "UC11-AF-006",
+        "UC11-AF-007",
+        "UC11-BR-001",
+        "UC11-BR-003",
+        "UC11-BR-004",
+        "UC11-BR-005",
+        "UC11-BR-006",
+        "UC11-BR-010",
+        "UC11-BR-011",
+        "UC11-BR-013",
+        "UC11-BR-014",
+        "UC11-BR-015",
+        "UC11-BR-016",
+        "UC11-BR-017",
+        "UC11-FV-005",
+        "UC11-GC-003"
+      ],
+      "request_dto": "AuditLogQueryParams",
+      "response_dto": "AuditLogEntryResponse",
+      "auth_required": true
+    }
+  ],
+  "relevant_dtos": [
+    {
+      "name": "IntegrationResponse",
+      "type": "RESPONSE",
+      "fields": [
+        {
+          "enum": [
+            "Salesforce",
+            "HubSpot",
+            "ERP",
+            "Google Drive",
+            "SharePoint",
+            "DocuSign",
+            "Adobe Sign"
+          ],
+          "name": "integrationName",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "enum": [
+            "Connected",
+            "Disconnected",
+            "Disconnected - reconnect required"
+          ],
+          "name": "connectionStatus",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "name": "maskedCredential",
+          "type": "string",
+          "nullable": true
+        }
+      ]
+    },
+    {
+      "name": "ConnectIntegrationRequest",
+      "type": "REQUEST",
+      "fields": [
+        {
+          "name": "credentials",
+          "type": "object",
+          "nullable": false
+        }
+      ]
+    },
+    {
+      "name": "AuditLogQueryParams",
+      "type": "REQUEST",
+      "fields": [
+        {
+          "name": "filterDateRangeFrom",
+          "type": "date",
+          "nullable": true
+        },
+        {
+          "name": "filterDateRangeTo",
+          "type": "date",
+          "nullable": true
+        },
+        {
+          "name": "userFilter",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "actionTypeFilter",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "page",
+          "type": "integer",
+          "nullable": true
+        },
+        {
+          "name": "pageSize",
+          "type": "integer",
+          "nullable": true
+        }
+      ]
+    },
+    {
+      "name": "AuditLogEntryResponse",
+      "type": "RESPONSE",
+      "fields": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": false
+        },
+        {
+          "name": "logDateTime",
+          "type": "datetime",
+          "nullable": false
+        },
+        {
+          "name": "logUser",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "enum": [
+            "Created",
+            "Updated",
+            "Deleted"
+          ],
+          "name": "logAction",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "name": "logEntity",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "name": "details",
+          "type": "string",
+          "nullable": true
+        }
+      ]
+    }
+  ],
+  "stories": [
+    {
+      "epic": "Settings / Admin",
+      "actor": "Tenant Admin",
+      "title": "Display connection failure message on invalid integration credentials",
+      "images": [
+        "IMG-2",
+        "IMG-3",
+        "IMG-4",
+        "IMG-5",
+        "IMG-6"
+      ],
+      "story_id": "UC11-AF-004",
+      "references": [
+        "UC11-AF-004",
+        "BR-16",
+        "BR-9",
+        "F-12",
+        "F-13",
+        "F-14",
+        "F-15",
+        "DP-UC11-008",
+        "DP-UC11-009",
+        "DP-UC11-016",
+        "DP-UC11-017",
+        "DP-UC11-018",
+        "DP-UC11-019",
+        "DP-UC11-020",
+        "DP-UC11-003",
+        "DP-UC11-004",
+        "DP-UC11-005",
+        "DP-UC11-012",
+        "DP-UC11-013",
+        "DP-UC11-014"
+      ],
+      "story_type": "alternate-flow",
+      "story_statement": "As a Tenant Admin, I want to be notified when an integration connection attempt fails due to invalid credentials, so that I can correct the credentials and retry the connection.",
+      "source_reference": "UC11 / Alternate Flow / AF-4",
+      "notes_assumptions": "Assumes failed connection attempts are logged to the Audit Log for traceability, even though credentials themselves are never displayed per BR-9; other tabs' data points are listed to confirm the failure is scoped to the Integrations Tab only and does not affect unrelated settings.",
+      "acceptance_criteria": [
+        "Given the Tenant Admin is on the Integrations Tab viewing an integration card with Integration Name and Connection Status 'Disconnected', When the Tenant Admin enters invalid credentials and clicks the Connect/Disconnect Button, Then the system displays the message 'Connection failed. Please check your credentials and try again' and the Connection Status remains 'Disconnected'",
+        "Given a failed connection attempt occurred, When the Tenant Admin retries with corrected credentials, Then the Integration transitions from Disconnected to Connected per BR-16 and the Connection Status label updates accordingly",
+        "Given the failed connection attempt, When the system records the event, Then an Audit Log entry is created capturing Log Date/Time, Log User, Log Action, and Log Entity reflecting the failed integration connection attempt, consistent with the audit log table shown under the Audit Log Tab",
+        "Given the Audit Log Tab is open, When the Tenant Admin applies the Filter Date Range to locate the failed connection event, Then the audit log table refreshes to show matching entries with Log Date/Time, Log User, Log Action, and Log Entity",
+        "Given the integration remains Disconnected after the failed attempt, When the Tenant Admin reviews Routing & Approval settings, Then the Contract Type, Value Threshold, and Approver Role configurations on the Routing & Approval Tab remain unaffected by the integration failure",
+        "Given the integration connection failure occurs, When notification events are configured, Then the Event Name entries and their Email Toggle and In-App Toggle settings on the Notifications Tab remain unchanged by the failed connection attempt"
+      ]
+    },
+    {
+      "epic": "Settings / Admin",
+      "actor": "Tenant Admin",
+      "title": "Display Disconnected Status When Integration Token Expires",
+      "images": [
+        "IMG-2",
+        "IMG-3",
+        "IMG-4",
+        "IMG-5",
+        "IMG-6"
+      ],
+      "story_id": "UC11-AF-007",
+      "references": [
+        "UC11",
+        "AF-7",
+        "BR-17",
+        "F-12",
+        "F-13",
+        "F-14",
+        "F-15",
+        "DP-UC11-003",
+        "DP-UC11-004",
+        "DP-UC11-005",
+        "DP-UC11-008",
+        "DP-UC11-009",
+        "DP-UC11-012",
+        "DP-UC11-013",
+        "DP-UC11-014",
+        "DP-UC11-016",
+        "DP-UC11-017",
+        "DP-UC11-018",
+        "DP-UC11-019",
+        "DP-UC11-020"
+      ],
+      "story_type": "alternate-flow",
+      "story_statement": "As a Tenant Admin, I want to see a clear status label when a previously active integration becomes disconnected, so that I know to reconnect it before dependent workflows are affected.",
+      "source_reference": "UC11 / Alternate Flow / AF-7",
+      "notes_assumptions": "The Routing & Approval data points (Contract Type, Value Threshold, Approver Role) are not directly triggered by this alternate flow but are included as required data points to confirm no cross-impact occurs on unrelated tabs.",
+      "acceptance_criteria": [
+        "Given the Tenant Admin is on the Integrations Tab, When an Integration Name (e.g. Salesforce, HubSpot, ERP, Google Drive, SharePoint, DocuSign, Adobe Sign) that was previously Connected becomes disconnected because its token expires, Then the Connection Status label for that Integration Name updates from Connected to 'Disconnected - reconnect required'.",
+        "Given the Connection Status for an Integration Name has changed to 'Disconnected - reconnect required', When the Tenant Admin views the Audit Log Tab, Then a new entry is created showing Log Date/Time (DD/MM/YYYY HH:MM), Log User (system), Log Action (e.g. Updated), and Log Entity (Integration) reflecting the status transition.",
+        "Given the Tenant Admin navigates to the Audit Log Tab and sets a Filter Date Range and clicks the Apply Filter Button, When the filter is applied, Then the audit log table refreshes and shows the Log Date/Time, Log User, Log Action, and Log Entity for the integration disconnection event if it falls within the selected range.",
+        "Given an Event Name such as 'Integration Disconnected' exists in the Notifications Tab, When the integration transitions to 'Disconnected - reconnect required', Then notifications are dispatched according to the current Email Toggle and In-App Toggle settings for that Event Name.",
+        "Given the Routing & Approval Tab remains unaffected by this alternate flow, When an approval rule is evaluated for a given Contract Type, Value Threshold, and Approver Role, Then the disconnection of an unrelated integration does not alter or block that rule's configuration or evaluation."
+      ]
+    },
+    {
+      "epic": "Settings / Admin",
+      "actor": "Tenant Admin",
+      "title": "Mask integration credentials after entry",
+      "images": [
+        "IMG-2",
+        "IMG-3",
+        "IMG-4",
+        "IMG-5",
+        "IMG-6"
+      ],
+      "story_id": "UC11-BR-009",
+      "references": [
+        "UC11-BR-009",
+        "F-13",
+        "F-14",
+        "DP-UC11-003",
+        "DP-UC11-004",
+        "DP-UC11-005",
+        "DP-UC11-008",
+        "DP-UC11-009",
+        "DP-UC11-012",
+        "DP-UC11-013",
+        "DP-UC11-014",
+        "DP-UC11-016",
+        "DP-UC11-017",
+        "DP-UC11-018",
+        "DP-UC11-019",
+        "DP-UC11-020"
+      ],
+      "story_type": "business-rule",
+      "story_statement": "As a Tenant Admin, I want to have integration credentials masked immediately after entry and permanently hidden in plain text once saved, so that sensitive connection secrets are protected from exposure across the Settings / Admin screen.",
+      "source_reference": "UC11 / Business Rules / BR-9",
+      "notes_assumptions": "Masking applies specifically to integration credential values (Integration Name/Connection Status context); other listed data points (approval rule, notification, and audit log fields) are enumerated here only to demonstrate they are unaffected by credential masking, per the required data points list.",
+      "acceptance_criteria": [
+        "Given the Tenant Admin is on the Integrations Tab entering credentials for an Integration Name (e.g. Salesforce, HubSpot, ERP, Google Drive, SharePoint, DocuSign, Adobe Sign), When the credentials are saved and the Connection Status changes to Connected, Then the credential value is immediately masked and never rendered in plain text in the UI or API responses thereafter.",
+        "Given credentials have already been masked and saved, When the Tenant Admin reopens the integration card or reloads the Integrations Tab, Then only masked placeholder characters are shown regardless of Connection Status (Connected or Disconnected), and no plain-text value is ever retrievable.",
+        "Given the Tenant Admin navigates across other Settings / Admin tabs that do not involve credential masking, When the Audit Log Tab records the credential-save action, Then the Audit Log entry captures Log Date/Time, Log User, Log Action, and Log Entity for that event without exposing the masked credential value itself.",
+        "Given the Tenant Admin applies a Filter Date Range on the Audit Log Tab to review credential-related actions, When the Apply Filter Button is clicked, Then matching Log Date/Time, Log User, Log Action, and Log Entity rows are displayed, still with no plain-text credential values shown.",
+        "Given the Tenant Admin configures unrelated Settings / Admin data such as a Routing & Approval rule with Contract Type, Value Threshold, and Approver Role, or a Notification event with Event Name, Email Toggle, and In-App Toggle, When these records are saved alongside integration credentials, Then only the Integration Name and Connection Status fields are affected by masking behavior, and Contract Type, Value Threshold, Approver Role, Event Name, Email Toggle, and In-App Toggle remain displayed normally and are not masked."
+      ]
+    },
+    {
+      "epic": "Settings / Admin",
+      "actor": "Tenant Admin",
+      "title": "Authorize valid credentials to connect an integration",
+      "images": [
+        "IMG-2",
+        "IMG-3",
+        "IMG-4",
+        "IMG-5",
+        "IMG-6"
+      ],
+      "story_id": "UC11-BR-016",
+      "references": [
+        "UC11-BR-016",
+        "BR-16",
+        "DP-UC11-003",
+        "DP-UC11-004",
+        "DP-UC11-005",
+        "DP-UC11-008",
+        "DP-UC11-009",
+        "DP-UC11-012",
+        "DP-UC11-013",
+        "DP-UC11-014",
+        "DP-UC11-016",
+        "DP-UC11-017",
+        "DP-UC11-018",
+        "DP-UC11-019",
+        "DP-UC11-020"
+      ],
+      "story_type": "business-rule",
+      "story_statement": "As a Tenant Admin, I want to authorize valid credentials for an integration so that the Integration record transitions from Disconnected to Connected only when authorization succeeds.",
+      "source_reference": "UC11 / Business Rules / BR-16",
+      "acceptance_criteria": [
+        "Given the Integrations Tab is open showing an integration card with Integration Name and Connection Status set to Disconnected, When the Tenant Admin clicks the Connect/Disconnect Button and submits valid credentials, Then the system authorizes the credentials and updates the Connection Status to Connected for that Integration Name.",
+        "Given the Tenant Admin submits invalid or incomplete credentials via the Connect/Disconnect Button, When authorization fails, Then the Integration record remains in Disconnected status and no transition to Connected occurs.",
+        "Given a successful credential authorization and Connection Status transition, When the change is saved, Then an entry is created in the audit log recording Log Date/Time, Log User, Log Action, and Log Entity for the integration connection event, and the entry is visible on the Audit Log Tab and retrievable via Filter Date Range.",
+        "Given the integration connection does not affect any other configuration areas of Settings / Admin, When the Tenant Admin reviews other tabs after connecting an integration, Then the Routing & Approval Tab fields (Contract Type, Value Threshold, Approver Role) and the Notifications Tab fields (Event Name, Email Toggle, In-App Toggle) remain unchanged by the integration connection action."
+      ]
+    }
+  ]
+}

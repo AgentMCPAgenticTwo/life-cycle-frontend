@@ -1,0 +1,780 @@
+{
+  "group_id": "access-denied-page",
+  "task_id": "T-ACCESS-DENIED-PAGE-UI",
+  "primary_story_id": "UC10-AF-002",
+  "story_ids": [
+    "UC10-AF-002",
+    "UC11-AF-001",
+    "UC11-BR-012"
+  ],
+  "page_component": {
+    "name": "AccessDeniedPage",
+    "type": "PAGE",
+    "props": [],
+    "story_refs": [
+      "UC10-AF-002",
+      "UC11-AF-001",
+      "UC11-BR-012"
+    ],
+    "description": "Permission-denied page redirecting to Dashboard"
+  },
+  "components": [],
+  "hooks": [],
+  "store_slices": [
+    {
+      "name": "trackerFiltersSlice",
+      "actions": [
+        "setPeriod",
+        "setContractTypeFilter",
+        "setOwnerFilter",
+        "setDateRange",
+        "setActiveTab",
+        "resetOnOpen"
+      ],
+      "state_shape": "{ period: string; contractTypeFilter: string; ownerFilter: string; dateRangeFrom: string | null; dateRangeTo: string | null; activeTab: string }"
+    },
+    {
+      "name": "settingsAdminSlice",
+      "actions": [
+        "setActiveTab",
+        "setUsers",
+        "setApprovalRules",
+        "setIntegrations",
+        "setNotificationEvents"
+      ],
+      "state_shape": "{ activeTab: string; users: UserListItemResponse[]; approvalRules: ApprovalRuleResponse[]; integrations: IntegrationResponse[]; notificationEvents: NotificationEventResponse[] }"
+    },
+    {
+      "name": "auditLogSlice",
+      "actions": [
+        "setEntries",
+        "setFilterDateRange",
+        "clearFilter"
+      ],
+      "state_shape": "{ entries: AuditLogEntryResponse[]; filterDateRangeFrom: string | null; filterDateRangeTo: string | null }"
+    }
+  ],
+  "relevant_endpoints": [
+    {
+      "id": "GET_tracker_ownership",
+      "path": "/api/v1/tracker/ownership",
+      "roles": [
+        "TENANT_ADMIN",
+        "CONTRACT_OWNER",
+        "LEGAL_REVIEWER",
+        "APPROVER"
+      ],
+      "method": "GET",
+      "summary": "Get Ownership tab data (Contracts by Owner) with period/filters",
+      "is_paged": true,
+      "story_refs": [
+        "UC10-MF-001",
+        "UC10-AF-001",
+        "UC10-AF-002",
+        "UC10-AF-003",
+        "UC10-AF-004",
+        "UC10-AF-005",
+        "UC10-BR-005",
+        "UC10-BR-006",
+        "UC10-BR-008",
+        "UC10-BR-009",
+        "UC10-BR-010",
+        "UC10-BR-011",
+        "UC10-BR-012",
+        "UC10-BR-013",
+        "UC10-FV-001",
+        "UC10-GC-001"
+      ],
+      "request_dto": "TrackerQueryParams",
+      "response_dto": "OwnershipTabResponse",
+      "auth_required": true
+    },
+    {
+      "id": "GET_tracker_cycle_time",
+      "path": "/api/v1/tracker/cycle-time",
+      "roles": [
+        "TENANT_ADMIN",
+        "CONTRACT_OWNER",
+        "LEGAL_REVIEWER",
+        "APPROVER"
+      ],
+      "method": "GET",
+      "summary": "Get Cycle Time tab data (avg cycle time per stage grouped by user/contract type)",
+      "is_paged": true,
+      "story_refs": [
+        "UC10-MF-001",
+        "UC10-AF-001",
+        "UC10-AF-002",
+        "UC10-AF-003",
+        "UC10-AF-004",
+        "UC10-AF-005",
+        "UC10-BR-001",
+        "UC10-BR-005",
+        "UC10-BR-006",
+        "UC10-BR-008",
+        "UC10-BR-009",
+        "UC10-BR-010",
+        "UC10-BR-011",
+        "UC10-BR-012",
+        "UC10-BR-013",
+        "UC10-FV-001",
+        "UC10-GC-002"
+      ],
+      "request_dto": "TrackerQueryParams",
+      "response_dto": "CycleTimeTabResponse",
+      "auth_required": true
+    },
+    {
+      "id": "GET_tracker_bottleneck",
+      "path": "/api/v1/tracker/bottleneck",
+      "roles": [
+        "TENANT_ADMIN",
+        "CONTRACT_OWNER",
+        "LEGAL_REVIEWER",
+        "APPROVER"
+      ],
+      "method": "GET",
+      "summary": "Get Bottleneck tab data (current stage, days in stage, stuck flag)",
+      "is_paged": true,
+      "story_refs": [
+        "UC10-MF-001",
+        "UC10-AF-001",
+        "UC10-AF-002",
+        "UC10-AF-003",
+        "UC10-AF-004",
+        "UC10-AF-005",
+        "UC10-BR-002",
+        "UC10-BR-005",
+        "UC10-BR-006",
+        "UC10-BR-008",
+        "UC10-BR-009",
+        "UC10-BR-010",
+        "UC10-BR-011",
+        "UC10-BR-012",
+        "UC10-BR-013",
+        "UC10-FV-001",
+        "UC10-GC-003"
+      ],
+      "request_dto": "TrackerQueryParams",
+      "response_dto": "BottleneckTabResponse",
+      "auth_required": true
+    },
+    {
+      "id": "GET_tracker_turnaround",
+      "path": "/api/v1/tracker/turnaround",
+      "roles": [
+        "TENANT_ADMIN",
+        "CONTRACT_OWNER",
+        "LEGAL_REVIEWER",
+        "APPROVER"
+      ],
+      "method": "GET",
+      "summary": "Get Turnaround tab data (estimated vs actual turnaround, variance)",
+      "is_paged": true,
+      "story_refs": [
+        "UC10-MF-001",
+        "UC10-AF-001",
+        "UC10-AF-002",
+        "UC10-AF-003",
+        "UC10-AF-004",
+        "UC10-AF-005",
+        "UC10-BR-003",
+        "UC10-BR-004",
+        "UC10-BR-005",
+        "UC10-BR-006",
+        "UC10-BR-007",
+        "UC10-BR-008",
+        "UC10-BR-009",
+        "UC10-BR-010",
+        "UC10-BR-011",
+        "UC10-BR-012",
+        "UC10-BR-013",
+        "UC10-FV-001",
+        "UC10-GC-004"
+      ],
+      "request_dto": "TrackerQueryParams",
+      "response_dto": "TurnaroundTabResponse",
+      "auth_required": true
+    },
+    {
+      "id": "GET_settings_users",
+      "path": "/api/v1/settings/users",
+      "roles": [
+        "TENANT_ADMIN"
+      ],
+      "method": "GET",
+      "summary": "List tenant users table (Name/Email/Role/Status/Last Login)",
+      "is_paged": true,
+      "story_refs": [
+        "UC11-MF-001",
+        "UC11-AF-001",
+        "UC11-FV-001",
+        "UC11-GC-001",
+        "UC11-BR-001",
+        "UC11-BR-010",
+        "UC11-BR-012"
+      ],
+      "response_dto": "UserListItemResponse",
+      "auth_required": true
+    }
+  ],
+  "relevant_dtos": [
+    {
+      "name": "TrackerQueryParams",
+      "type": "REQUEST",
+      "fields": [
+        {
+          "enum": [
+            "Daily",
+            "Weekly",
+            "Monthly"
+          ],
+          "name": "period",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "contractTypeFilter",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "ownerFilter",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "dateRangeFrom",
+          "type": "date",
+          "nullable": true
+        },
+        {
+          "name": "dateRangeTo",
+          "type": "date",
+          "nullable": true
+        },
+        {
+          "name": "page",
+          "type": "integer",
+          "nullable": true
+        },
+        {
+          "name": "pageSize",
+          "type": "integer",
+          "nullable": true
+        }
+      ]
+    },
+    {
+      "name": "OwnershipRowResponse",
+      "type": "RESPONSE",
+      "fields": [
+        {
+          "name": "ownerName",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "name": "contractsOwned",
+          "type": "integer",
+          "nullable": false
+        },
+        {
+          "name": "inDraftCount",
+          "type": "integer",
+          "nullable": false
+        },
+        {
+          "name": "inNegotiationCount",
+          "type": "integer",
+          "nullable": false
+        },
+        {
+          "name": "inApprovalCount",
+          "type": "integer",
+          "nullable": false
+        },
+        {
+          "name": "inSignatureCount",
+          "type": "integer",
+          "nullable": false
+        },
+        {
+          "name": "completedCount",
+          "type": "integer",
+          "nullable": false
+        },
+        {
+          "name": "averageCycleTime",
+          "type": "number",
+          "nullable": true
+        }
+      ]
+    },
+    {
+      "name": "OwnershipTabResponse",
+      "type": "RESPONSE",
+      "fields": [
+        {
+          "name": "rows",
+          "type": "array",
+          "items": {
+            "type": "OwnershipRowResponse"
+          },
+          "nullable": false
+        },
+        {
+          "name": "isEmpty",
+          "type": "boolean",
+          "nullable": false
+        },
+        {
+          "name": "emptyStateMessage",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "totalCount",
+          "type": "integer",
+          "nullable": false
+        },
+        {
+          "name": "page",
+          "type": "integer",
+          "nullable": false
+        },
+        {
+          "name": "pageSize",
+          "type": "integer",
+          "nullable": false
+        }
+      ]
+    },
+    {
+      "name": "CycleTimeRowResponse",
+      "type": "RESPONSE",
+      "fields": [
+        {
+          "enum": [
+            "Drafting",
+            "Negotiation",
+            "Approval",
+            "Signature"
+          ],
+          "name": "stage",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "name": "ownerName",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "contractType",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "contractsOwned",
+          "type": "integer",
+          "nullable": true
+        },
+        {
+          "name": "averageCycleTime",
+          "type": "number",
+          "nullable": true
+        }
+      ]
+    },
+    {
+      "name": "CycleTimeTabResponse",
+      "type": "RESPONSE",
+      "fields": [
+        {
+          "name": "rows",
+          "type": "array",
+          "items": {
+            "type": "CycleTimeRowResponse"
+          },
+          "nullable": false
+        },
+        {
+          "name": "isEmpty",
+          "type": "boolean",
+          "nullable": false
+        },
+        {
+          "name": "emptyStateMessage",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "totalCount",
+          "type": "integer",
+          "nullable": false
+        },
+        {
+          "name": "page",
+          "type": "integer",
+          "nullable": false
+        },
+        {
+          "name": "pageSize",
+          "type": "integer",
+          "nullable": false
+        }
+      ]
+    },
+    {
+      "name": "BottleneckRowResponse",
+      "type": "RESPONSE",
+      "fields": [
+        {
+          "name": "contractId",
+          "type": "uuid",
+          "nullable": false
+        },
+        {
+          "name": "contractName",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "name": "ownerName",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "enum": [
+            "Drafting",
+            "Negotiation",
+            "Approval",
+            "Signature"
+          ],
+          "name": "currentStage",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "name": "daysInCurrentStage",
+          "type": "integer",
+          "nullable": false
+        },
+        {
+          "enum": [
+            "Yes",
+            "No"
+          ],
+          "name": "stuckFlag",
+          "type": "string",
+          "nullable": false
+        }
+      ]
+    },
+    {
+      "name": "BottleneckTabResponse",
+      "type": "RESPONSE",
+      "fields": [
+        {
+          "name": "rows",
+          "type": "array",
+          "items": {
+            "type": "BottleneckRowResponse"
+          },
+          "nullable": false
+        },
+        {
+          "name": "isEmpty",
+          "type": "boolean",
+          "nullable": false
+        },
+        {
+          "name": "emptyStateMessage",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "totalCount",
+          "type": "integer",
+          "nullable": false
+        },
+        {
+          "name": "page",
+          "type": "integer",
+          "nullable": false
+        },
+        {
+          "name": "pageSize",
+          "type": "integer",
+          "nullable": false
+        }
+      ]
+    },
+    {
+      "name": "TurnaroundRowResponse",
+      "type": "RESPONSE",
+      "fields": [
+        {
+          "name": "contractId",
+          "type": "uuid",
+          "nullable": false
+        },
+        {
+          "name": "contractName",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "name": "contractType",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "name": "estimatedTurnaround",
+          "type": "number",
+          "nullable": true
+        },
+        {
+          "name": "estimatedTurnaroundNotSet",
+          "type": "boolean",
+          "nullable": false
+        },
+        {
+          "enum": [
+            "UC2_TARGET_COMPLETION_DATE",
+            "AI_SUGGESTED",
+            "NOT_SET"
+          ],
+          "name": "estimatedTurnaroundSource",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "actualTurnaround",
+          "type": "number",
+          "nullable": true
+        },
+        {
+          "name": "variance",
+          "type": "number",
+          "nullable": true
+        },
+        {
+          "enum": [
+            "RED",
+            "GREEN"
+          ],
+          "name": "varianceColor",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "excludedFromAverages",
+          "type": "boolean",
+          "nullable": false
+        }
+      ]
+    },
+    {
+      "name": "TurnaroundTabResponse",
+      "type": "RESPONSE",
+      "fields": [
+        {
+          "name": "rows",
+          "type": "array",
+          "items": {
+            "type": "TurnaroundRowResponse"
+          },
+          "nullable": false
+        },
+        {
+          "name": "isEmpty",
+          "type": "boolean",
+          "nullable": false
+        },
+        {
+          "name": "emptyStateMessage",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "totalCount",
+          "type": "integer",
+          "nullable": false
+        },
+        {
+          "name": "page",
+          "type": "integer",
+          "nullable": false
+        },
+        {
+          "name": "pageSize",
+          "type": "integer",
+          "nullable": false
+        }
+      ]
+    },
+    {
+      "name": "UserListItemResponse",
+      "type": "RESPONSE",
+      "fields": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": false
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "name": "email",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "enum": [
+            "Tenant Admin",
+            "Legal Reviewer",
+            "Contract Owner",
+            "Approver",
+            "External Party",
+            "Signer"
+          ],
+          "name": "role",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "enum": [
+            "Invited",
+            "Active",
+            "Deactivated"
+          ],
+          "name": "status",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "name": "lastLogin",
+          "type": "datetime",
+          "nullable": true
+        }
+      ]
+    }
+  ],
+  "stories": [
+    {
+      "epic": "Tracker",
+      "actor": "Tenant Admin, Contract Owner (Sales/Procurement), Legal Reviewer, Approver",
+      "title": "Block unauthorized direct-link access to Tracker",
+      "images": [
+        "IMG-1"
+      ],
+      "story_id": "UC10-AF-002",
+      "references": [
+        "UC10",
+        "AF-2",
+        "BR-5",
+        "BR-12",
+        "DP-UC10-001",
+        "DP-UC10-002",
+        "DP-UC10-003",
+        "DP-UC10-004",
+        "DP-UC10-005",
+        "DP-UC10-010",
+        "DP-UC10-011",
+        "DP-UC10-012",
+        "DP-UC10-013",
+        "DP-UC10-014",
+        "DP-UC10-015",
+        "DP-UC10-016",
+        "DP-UC10-017",
+        "DP-UC10-018",
+        "DP-UC10-020"
+      ],
+      "story_type": "alternate-flow",
+      "story_statement": "As a user without a permitted Tracker role, I want to be blocked from viewing the Tracker when I attempt direct-link access, so that contract reporting data visible via Period, Contract Type Filter, Owner Filter, Date Range From, Date Range To, Owner Name, Contracts Owned, Average Cycle Time, Current Stage, Days in Current Stage, Stuck Flag, Estimated Turnaround, Actual Turnaround, and Variance remains restricted to authorized roles only.",
+      "source_reference": "UC10 / Alternate Flow / AF-2",
+      "notes_assumptions": "DP-UC10-020 ('Change UC10 BR4 to') refers to a documented revision of BR-4; exact revised wording was not provided in this unit's context, so acceptance criterion 7 confirms the access-control behavior is unaffected by the pending BR-4 change rather than specifying its new text.",
+      "acceptance_criteria": [
+        "Given a user who is not a Tenant Admin, Contract Owner (Sales/Procurement), Legal Reviewer, or Approver, when they attempt to access the Tracker screen via a direct link, then the system displays the message 'You do not have permission to view this page.' and redirects the user to the Dashboard without rendering any Tracker content.",
+        "Given the access attempt is blocked, then none of the Tracker's filter controls or data fields are exposed to the user, including Period, Contract Type Filter, Owner Filter, Date Range From, and Date Range To.",
+        "Given the access attempt is blocked, then none of the Ownership tab data is exposed to the user, including Owner Name and Contracts Owned.",
+        "Given the access attempt is blocked, then none of the Cycle Time tab data is exposed to the user, including Average Cycle Time.",
+        "Given the access attempt is blocked, then none of the Bottleneck tab data is exposed to the user, including Current Stage, Days in Current Stage, and Stuck Flag.",
+        "Given the access attempt is blocked, then none of the Turnaround tab data is exposed to the user, including Estimated Turnaround, Actual Turnaround, and Variance.",
+        "Given BR-4 governs Estimated Turnaround Days behavior when no target completion date was set, when the business rule change referenced as 'Change UC10 BR4 to' is applied, then the updated rule is enforced consistently and does not alter the access-denial behavior defined in this alternate flow for unauthorized users."
+      ]
+    },
+    {
+      "epic": "Settings / Admin",
+      "actor": "Tenant Admin",
+      "title": "Block Unauthorized Access to Settings / Admin Screen",
+      "images": [
+        "IMG-2",
+        "IMG-3",
+        "IMG-4",
+        "IMG-5",
+        "IMG-6"
+      ],
+      "story_id": "UC11-AF-001",
+      "references": [
+        "UC11",
+        "BR-1",
+        "BR-12"
+      ],
+      "story_type": "alternate-flow",
+      "story_statement": "As a Tenant Admin, I want non-Tenant-Admin users to be blocked from accessing the Settings / Admin screen, so that sensitive tenant configuration and audit data remain protected from unauthorized roles.",
+      "source_reference": "UC11 / Alternate Flow / AF-1",
+      "acceptance_criteria": [
+        "Given a user who is not assigned the Tenant Admin role is logged in, When that user attempts to navigate directly to the Settings / Admin screen URL or clicks a Settings / Admin menu entry, Then the system blocks access and displays 'You do not have permission to view this page'.",
+        "Given a non-Tenant-Admin user is viewing the application, When the main navigation renders, Then no Settings / Admin menu entry is shown to that user per BR-1 and BR-12.",
+        "Given access to the Settings / Admin screen is blocked for a non-Tenant-Admin user, When the block is enforced, Then none of the following data groups are rendered or returned to that user: Contract Type [DP-UC11-003], Value Threshold [DP-UC11-004], Approver Role [DP-UC11-005], Integration Name [DP-UC11-008], Connection Status [DP-UC11-009], Event Name [DP-UC11-012], Email Toggle [DP-UC11-013], In-App Toggle [DP-UC11-014], Log Date/Time [DP-UC11-016], Log User [DP-UC11-017], Log Action [DP-UC11-018], Log Entity [DP-UC11-019], and Filter Date Range [DP-UC11-020].",
+        "Given a user with any of the roles Legal Reviewer, Contract Owner, Approver, External Party, or Signer, When they attempt to access the Routing & Approval, Integrations, Notifications, or Audit Log tabs directly, Then access is denied and the same permission-denied message is displayed, regardless of tab."
+      ]
+    },
+    {
+      "epic": "Settings / Admin",
+      "actor": "Tenant Admin",
+      "title": "Restrict Settings/Admin screen access from non-Tenant-Admin roles",
+      "images": [
+        "IMG-2",
+        "IMG-3",
+        "IMG-4",
+        "IMG-5",
+        "IMG-6"
+      ],
+      "story_id": "UC11-BR-012",
+      "references": [
+        "UC11-BR-012",
+        "DP-UC11-003",
+        "DP-UC11-004",
+        "DP-UC11-005",
+        "DP-UC11-008",
+        "DP-UC11-009",
+        "DP-UC11-012",
+        "DP-UC11-013",
+        "DP-UC11-014",
+        "DP-UC11-016",
+        "DP-UC11-017",
+        "DP-UC11-018",
+        "DP-UC11-019",
+        "DP-UC11-020"
+      ],
+      "story_type": "business-rule",
+      "story_statement": "As a Tenant Admin, I want Legal Reviewer, Contract Owner, Approver, External Party and Signer roles to be blocked from the Settings / Admin screen, so that sensitive tenant configuration and data remain accessible only to authorized administrators.",
+      "source_reference": "UC11 / Business Rules / BR-12",
+      "acceptance_criteria": [
+        "Given a user logged in with the Legal Reviewer, Contract Owner, Approver, External Party, or Signer role, When that user attempts to navigate to the Settings / Admin screen, Then access is denied and no Settings / Admin menu entry or screen content is rendered.",
+        "Given a user in any of the restricted roles is denied access, When the system blocks navigation, Then none of the Routing & Approval Tab data points including Contract Type, Value Threshold, and Approver Role are exposed to that user.",
+        "Given a user in any of the restricted roles is denied access, When the system blocks navigation, Then none of the Integrations Tab data points including Integration Name and Connection Status are exposed to that user.",
+        "Given a user in any of the restricted roles is denied access, When the system blocks navigation, Then none of the Notifications Tab data points including Event Name, Email Toggle, and In-App Toggle are exposed to that user.",
+        "Given a user in any of the restricted roles is denied access, When the system blocks navigation, Then none of the Audit Log Tab data points including Log Date/Time, Log User, Log Action, Log Entity, and Filter Date Range are exposed to that user.",
+        "Given a Tenant Admin user, When that user navigates to the Settings / Admin screen, Then full access to all tabs and their associated data points (Contract Type, Value Threshold, Approver Role, Integration Name, Connection Status, Event Name, Email Toggle, In-App Toggle, Log Date/Time, Log User, Log Action, Log Entity, Filter Date Range) is granted as expected."
+      ]
+    }
+  ]
+}

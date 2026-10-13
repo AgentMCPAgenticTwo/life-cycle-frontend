@@ -1,0 +1,180 @@
+{
+  "status": "SUCCESS",
+  "summary": "Built the Contract Tracker screen: TrackerPage (route /tracker, role-gated to Tenant Admin / Contract Owner / Legal Reviewer / Approver with redirect to the existing /access-denied screen for every other role, e.g. Signer/External Party) matching IMG-1 closely -- breadcrumb Home Page / CLM Hub / Tracker, 'Contract Tracker' header with Export button top-right, Filters panel, and a four-tab bar (Ownership, Cycle Time, Bottleneck, Turnaround) defaulting to Ownership. TrackerReportControlsPanel renders Period (mandatory: Daily/Weekly/Monthly), Contract Type Filter and Owner Filter (optional, 'All' plus tenant lookups), and Date Range From/To with From-before-To validation (UC10-FV-001). OwnershipTab renders the Contracts by Owner table (Owner Name, Contracts Owned, In Draft, In Negotiation, In Approval, In Signature, Completed) with a period-window caption ('Weekly view — last 7 days', etc., per UC10-BR-006). CycleTimeTab renders a per-stage average-cycle-time bar chart plus a grouped table, showing 'Not available' when a stage has no completed contracts (UC10-BR-001). BottleneckTab renders Current Stage/Days in Current Stage/Stuck Flag with a Yes/No badge, plus the tenant's configured stuck-flag thresholds when viewed as Tenant Admin (UC10-BR-002). TurnaroundTab renders Contract Name/Type/Estimated/Actual/Variance with red/green color coding (UC10-BR-003), 'Not Set' display and average-exclusion for contracts with no target completion date (UC10-BR-004), an 'AI Suggested' badge, and an inline override control that logs original value/new value/user/timestamp (UC10-BR-007). TrackerExportButton triggers POST /tracker/export for the active tab/period/filters and shows 'Export failed. Please try again.' on failure without disturbing the current view or active tab (UC10-AF-004). Per UC10-BR-013 the screen has no persisted object state: Period, filters and the active Tab all reset to their defaults (Weekly / All / Ownership) via trackerFiltersSlice.resetOnOpen() on every mount. Four tab-data hooks, an export hook and an override hook were added, one new service module (trackerService.js) wired to exactly the seven listed endpoints, and a new store slice (trackerFiltersSlice). Lint, the full 131-test suite (5 new tests), and the production build all pass. Visually verified against IMG-1 via a temporary local mock backend + Playwright screenshot at 1440x900 (removed before finishing) -- the Ownership tab (the only state the design depicts) is a close match: breadcrumb, header, Export button placement, Filters card layout and helper copy, tab bar, and the Contracts by Owner table's exact columns and row data all line up.",
+  "task_id": "T-TRACKER-PAGE-UI",
+  "story_id": "UC10-AF-002",
+  "code_files": [
+    {
+      "file_path": "src/pages/TrackerPage.jsx",
+      "file_name": "TrackerPage.jsx",
+      "language": "javascript",
+      "file_type": "component",
+      "description": "Top-level Tracker screen: breadcrumb/header/Export, Tenant-Admin/Contract-Owner/Legal-Reviewer/Approver-only access guard redirecting to /access-denied, Filters panel, four-tab navigation, and orchestration of all four tabs' data hooks plus export/override handlers."
+    },
+    {
+      "file_path": "src/features/tracker/TrackerReportControlsPanel.jsx",
+      "file_name": "TrackerReportControlsPanel.jsx",
+      "language": "javascript",
+      "file_type": "component",
+      "description": "Period dropdown (mandatory), Contract Type Filter and Owner Filter (optional, tenant lookups plus All), and Date Range From/To with From-earlier-than-To validation."
+    },
+    {
+      "file_path": "src/features/tracker/TrackerExportButton.jsx",
+      "file_name": "TrackerExportButton.jsx",
+      "language": "javascript",
+      "file_type": "component",
+      "description": "Export trigger button that shows the 'Export failed. Please try again.' message on failure without touching the current view."
+    },
+    {
+      "file_path": "src/features/tracker/OwnershipTab.jsx",
+      "file_name": "OwnershipTab.jsx",
+      "language": "javascript",
+      "file_type": "component",
+      "description": "Contracts by Owner table (Owner Name, Contracts Owned, In Draft, In Negotiation, In Approval, In Signature, Completed) with loading/error/empty/populated states and a period-window caption."
+    },
+    {
+      "file_path": "src/features/tracker/CycleTimeTab.jsx",
+      "file_name": "CycleTimeTab.jsx",
+      "language": "javascript",
+      "file_type": "component",
+      "description": "Average Cycle Time per stage bar chart and grouped (stage/owner/contract type) table, showing 'Not available' when a stage has no completed contracts."
+    },
+    {
+      "file_path": "src/features/tracker/BottleneckTab.jsx",
+      "file_name": "BottleneckTab.jsx",
+      "language": "javascript",
+      "file_type": "component",
+      "description": "Current Stage / Days in Current Stage / Stuck Flag table with a Yes/No badge, plus the tenant's configured stuck-flag thresholds caption for Tenant Admin."
+    },
+    {
+      "file_path": "src/features/tracker/TurnaroundTab.jsx",
+      "file_name": "TurnaroundTab.jsx",
+      "language": "javascript",
+      "file_type": "component",
+      "description": "Contract Name/Type, Estimated/Actual Turnaround, Variance table with red/green color coding, 'Not Set' + AI Suggested labelling, and an inline Estimated Turnaround override control."
+    },
+    {
+      "file_path": "src/features/tracker/hooks/useTrackerTabData.js",
+      "file_name": "useTrackerTabData.js",
+      "language": "javascript",
+      "file_type": "hook",
+      "description": "Shared fetch-on-filter-change implementation used by the four per-tab hooks below."
+    },
+    {
+      "file_path": "src/features/tracker/hooks/useOwnershipTab.js",
+      "file_name": "useOwnershipTab.js",
+      "language": "javascript",
+      "file_type": "hook",
+      "description": "Fetches Ownership tab data."
+    },
+    {
+      "file_path": "src/features/tracker/hooks/useCycleTimeTab.js",
+      "file_name": "useCycleTimeTab.js",
+      "language": "javascript",
+      "file_type": "hook",
+      "description": "Fetches Cycle Time tab data."
+    },
+    {
+      "file_path": "src/features/tracker/hooks/useBottleneckTab.js",
+      "file_name": "useBottleneckTab.js",
+      "language": "javascript",
+      "file_type": "hook",
+      "description": "Fetches Bottleneck tab data."
+    },
+    {
+      "file_path": "src/features/tracker/hooks/useTurnaroundTab.js",
+      "file_name": "useTurnaroundTab.js",
+      "language": "javascript",
+      "file_type": "hook",
+      "description": "Fetches Turnaround tab data."
+    },
+    {
+      "file_path": "src/features/tracker/hooks/useTrackerExport.js",
+      "file_name": "useTrackerExport.js",
+      "language": "javascript",
+      "file_type": "hook",
+      "description": "Triggers a Tracker export and surfaces the failure message without disturbing the caller's current view."
+    },
+    {
+      "file_path": "src/features/tracker/hooks/useEstimatedTurnaroundOverride.js",
+      "file_name": "useEstimatedTurnaroundOverride.js",
+      "language": "javascript",
+      "file_type": "hook",
+      "description": "Submits an override of an AI-suggested Estimated Turnaround value."
+    },
+    {
+      "file_path": "src/features/tracker/hooks/useTrackerFilterOptions.js",
+      "file_name": "useTrackerFilterOptions.js",
+      "language": "javascript",
+      "file_type": "hook",
+      "description": "Populates the Contract Type Filter / Owner Filter dropdowns from the tenant's real lookup data (reuses GET /api/v1/dashboard/filters -- see blockers)."
+    },
+    {
+      "file_path": "src/features/tracker/hooks/useBottleneckThresholds.js",
+      "file_name": "useBottleneckThresholds.js",
+      "language": "javascript",
+      "file_type": "hook",
+      "description": "Fetches the tenant-configured stuck-flag thresholds per stage for Tenant Admin viewers only (the endpoint is Tenant-Admin-scoped)."
+    },
+    {
+      "file_path": "src/services/trackerService.js",
+      "file_name": "trackerService.js",
+      "language": "javascript",
+      "file_type": "service",
+      "description": "Typed client for the seven /api/v1/tracker endpoints: ownership, cycle-time, bottleneck, turnaround, export, estimated-override, bottleneck-thresholds."
+    },
+    {
+      "file_path": "src/store/trackerFiltersSlice.js",
+      "file_name": "trackerFiltersSlice.js",
+      "language": "javascript",
+      "file_type": "store_slice",
+      "description": "Period/filter/activeTab state with resetOnOpen(), matching the trackerFiltersSlice contract; the Tracker has no persisted object state of its own (UC10-BR-013)."
+    },
+    {
+      "file_path": "src/__tests__/TrackerPage.test.jsx",
+      "file_name": "TrackerPage.test.jsx",
+      "language": "javascript",
+      "file_type": "component",
+      "description": "Screen-level tests: default Ownership tab render, access-denial redirect for a disallowed role, tab switching to Bottleneck's empty state, export failure message without losing the table data, and Date-Range-From/To validation."
+    },
+    {
+      "file_path": "src/App.jsx",
+      "file_name": "App.jsx",
+      "language": "javascript",
+      "file_type": "component",
+      "description": "Adds the /tracker route for TrackerPage."
+    }
+  ],
+  "pr": {
+    "branch_name": "ui-gen/d5929e8d122e",
+    "title": "feat(tracker): build TrackerPage with Ownership/Cycle Time/Bottleneck/Turnaround tabs",
+    "body": "Implements the Contract Tracker screen (UC10-AF-002 / UC10-MF-001 and the full UC10-AF/BR/FV/GC set listed in the task): a Tenant Admin / Contract Owner / Legal Reviewer / Approver screen at /tracker with four reporting tabs.\n\n- Role-gated: Signer, External Party and any other role are redirected to the existing /access-denied screen before any Tracker content renders (UC10-AF-002 / UC10-BR-012).\n- TrackerReportControlsPanel: mandatory Period (Daily/Weekly/Monthly), optional Contract Type Filter and Owner Filter (tenant lookups plus All), Date Range From/To with From-before-To validation (UC10-FV-001).\n- Ownership tab: Contracts by Owner table (Owner Name, Contracts Owned, In Draft, In Negotiation, In Approval, In Signature, Completed) with a period-window caption.\n- Cycle Time tab: average-cycle-time bar chart and grouped table, 'Not available' when a stage has no completions (UC10-BR-001).\n- Bottleneck tab: Current Stage / Days in Current Stage / Stuck Flag with a Yes/No badge and the tenant's configured thresholds for Tenant Admin (UC10-BR-002).\n- Turnaround tab: Contract Name/Type/Estimated/Actual/Variance with red/green color coding, 'Not Set' + AI Suggested labelling and an auditable override control (UC10-BR-003/004/007).\n- Export: POST /tracker/export for the active tab/period/filters, with an inline failure message that never disturbs the current view (UC10-AF-004).\n- No persisted state: Period, filters and the active tab reset to their defaults on every open (UC10-BR-013).\n\nOne new service module (7 endpoints), 8 new hooks, one new store slice, and a new page-level test (5 cases). Lint, the full 131-test suite, and the production build all pass. Visually verified against IMG-1 via a local mock backend + Playwright screenshot at 1440x900 (temporary harness, removed before commit) -- a close match on breadcrumb, header, Export placement, Filters layout/copy, tab bar, and the Ownership table's exact columns and data.",
+    "draft": true,
+    "linked_story": "UC10-AF-002",
+    "linked_task": "T-TRACKER-PAGE-UI"
+  },
+  "critic_hints": {
+    "files_to_lint": [
+      "src/pages/TrackerPage.jsx",
+      "src/features/tracker/TrackerReportControlsPanel.jsx",
+      "src/features/tracker/TrackerExportButton.jsx",
+      "src/features/tracker/OwnershipTab.jsx",
+      "src/features/tracker/CycleTimeTab.jsx",
+      "src/features/tracker/BottleneckTab.jsx",
+      "src/features/tracker/TurnaroundTab.jsx",
+      "src/store/trackerFiltersSlice.js",
+      "src/services/trackerService.js",
+      "src/__tests__/TrackerPage.test.jsx",
+      "src/App.jsx"
+    ],
+    "openapi_endpoint": null
+  },
+  "blockers": [
+    "Missing lookup endpoint (inferred, not invented): UC10-FV-001 requires the Contract Type Filter / Owner Filter dropdowns to be populated from 'the tenant's configured contract types/users' (matching the design's helper copy 'Tenant's configured contract types, plus All' / 'Tenant users with owned contracts, plus All'), but this module's endpoint contract lists no tracker-specific options endpoint. Rather than inventing a new URL, useTrackerFilterOptions.js reuses the already-built GET /api/v1/dashboard/filters (from the uc123 module, which returns contractTypes[] and owners[{id,name}][]) since it is the closest existing real lookup and CLAUDE.md forbids inline constants for filter options. If the backend intends a tracker-scoped lookup instead, this call site is the one place to repoint.",
+    "Inferred response shape: the contract's BottleneckThresholdResponse DTO is declared as a single {stage, thresholdDays} object, but the endpoint summary says 'per stage' (plural) and BR-2 clearly needs all four stages' thresholds at once. useBottleneckThresholds.js treats the response as (or unwraps) an array of that shape; confirm the actual envelope with the backend.",
+    "Design/story tension (story wins, per instructions): IMG-1 only depicts the Ownership tab, so the Cycle Time/Bottleneck/Turnaround tabs' exact column layout, bar-chart styling and the Turnaround override UI were built from the DTO fields and acceptance criteria (UC10-GC-002/003/004, UC10-BR-007) rather than from a screenshot. These three tabs were verified functionally (loading/error/empty/populated states, color coding, tab-switch) but not against a pixel design, since none was provided.",
+    "Judgement call: the Export Button in IMG-1 sits in the page header (not inside the Filters card), so TrackerExportButton is rendered in TrackerPage's header rather than inside TrackerReportControlsPanel, even though context.json's component prop list ties onFilterChange/Export concerns to the same panel area. This matches the screenshot's actual placement.",
+    "Judgement call: UC10-BR-007's 'Estimated Turnaround override' control (value edit + Save/Cancel inline in the Turnaround row) was inferred from the acceptance criteria and EstimatedTurnaroundOverrideRequest DTO, since no design shows this interaction; overriddenBy/overrideTimestamp are populated client-side from the current session's X-User-Id and the current time, per the DTO's required fields.",
+    "No endpoint exists in this module's contract to fetch a single contract's role-assignment/approver-list (needed to fully implement BR-005/009/010/011 role-scoping on the frontend); this is a backend-side filtering concern given the endpoints all accept only period/contractTypeFilter/ownerFilter/date-range params and return already-scoped rows, so no additional frontend code was added for it beyond trusting the API's role-scoped response."
+  ]
+}

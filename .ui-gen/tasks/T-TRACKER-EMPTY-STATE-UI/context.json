@@ -1,0 +1,791 @@
+{
+  "group_id": "tracker-empty-state",
+  "task_id": "T-TRACKER-EMPTY-STATE-UI",
+  "primary_story_id": "UC10-AF-001",
+  "story_ids": [
+    "UC10-AF-001",
+    "UC10-AF-003",
+    "UC10-AF-005"
+  ],
+  "page_component": null,
+  "components": [
+    {
+      "name": "TrackerEmptyState",
+      "type": "COMPONENT",
+      "props": [
+        "message"
+      ],
+      "story_refs": [
+        "UC10-AF-001",
+        "UC10-AF-003",
+        "UC10-AF-005"
+      ],
+      "description": "Shows empty-state/no-records/conflicting-filter messages"
+    }
+  ],
+  "hooks": [],
+  "store_slices": [
+    {
+      "name": "trackerFiltersSlice",
+      "actions": [
+        "setPeriod",
+        "setContractTypeFilter",
+        "setOwnerFilter",
+        "setDateRange",
+        "setActiveTab",
+        "resetOnOpen"
+      ],
+      "state_shape": "{ period: string; contractTypeFilter: string; ownerFilter: string; dateRangeFrom: string | null; dateRangeTo: string | null; activeTab: string }"
+    }
+  ],
+  "relevant_endpoints": [
+    {
+      "id": "GET_tracker_ownership",
+      "path": "/api/v1/tracker/ownership",
+      "roles": [
+        "TENANT_ADMIN",
+        "CONTRACT_OWNER",
+        "LEGAL_REVIEWER",
+        "APPROVER"
+      ],
+      "method": "GET",
+      "summary": "Get Ownership tab data (Contracts by Owner) with period/filters",
+      "is_paged": true,
+      "story_refs": [
+        "UC10-MF-001",
+        "UC10-AF-001",
+        "UC10-AF-002",
+        "UC10-AF-003",
+        "UC10-AF-004",
+        "UC10-AF-005",
+        "UC10-BR-005",
+        "UC10-BR-006",
+        "UC10-BR-008",
+        "UC10-BR-009",
+        "UC10-BR-010",
+        "UC10-BR-011",
+        "UC10-BR-012",
+        "UC10-BR-013",
+        "UC10-FV-001",
+        "UC10-GC-001"
+      ],
+      "request_dto": "TrackerQueryParams",
+      "response_dto": "OwnershipTabResponse",
+      "auth_required": true
+    },
+    {
+      "id": "GET_tracker_cycle_time",
+      "path": "/api/v1/tracker/cycle-time",
+      "roles": [
+        "TENANT_ADMIN",
+        "CONTRACT_OWNER",
+        "LEGAL_REVIEWER",
+        "APPROVER"
+      ],
+      "method": "GET",
+      "summary": "Get Cycle Time tab data (avg cycle time per stage grouped by user/contract type)",
+      "is_paged": true,
+      "story_refs": [
+        "UC10-MF-001",
+        "UC10-AF-001",
+        "UC10-AF-002",
+        "UC10-AF-003",
+        "UC10-AF-004",
+        "UC10-AF-005",
+        "UC10-BR-001",
+        "UC10-BR-005",
+        "UC10-BR-006",
+        "UC10-BR-008",
+        "UC10-BR-009",
+        "UC10-BR-010",
+        "UC10-BR-011",
+        "UC10-BR-012",
+        "UC10-BR-013",
+        "UC10-FV-001",
+        "UC10-GC-002"
+      ],
+      "request_dto": "TrackerQueryParams",
+      "response_dto": "CycleTimeTabResponse",
+      "auth_required": true
+    },
+    {
+      "id": "GET_tracker_bottleneck",
+      "path": "/api/v1/tracker/bottleneck",
+      "roles": [
+        "TENANT_ADMIN",
+        "CONTRACT_OWNER",
+        "LEGAL_REVIEWER",
+        "APPROVER"
+      ],
+      "method": "GET",
+      "summary": "Get Bottleneck tab data (current stage, days in stage, stuck flag)",
+      "is_paged": true,
+      "story_refs": [
+        "UC10-MF-001",
+        "UC10-AF-001",
+        "UC10-AF-002",
+        "UC10-AF-003",
+        "UC10-AF-004",
+        "UC10-AF-005",
+        "UC10-BR-002",
+        "UC10-BR-005",
+        "UC10-BR-006",
+        "UC10-BR-008",
+        "UC10-BR-009",
+        "UC10-BR-010",
+        "UC10-BR-011",
+        "UC10-BR-012",
+        "UC10-BR-013",
+        "UC10-FV-001",
+        "UC10-GC-003"
+      ],
+      "request_dto": "TrackerQueryParams",
+      "response_dto": "BottleneckTabResponse",
+      "auth_required": true
+    },
+    {
+      "id": "GET_tracker_turnaround",
+      "path": "/api/v1/tracker/turnaround",
+      "roles": [
+        "TENANT_ADMIN",
+        "CONTRACT_OWNER",
+        "LEGAL_REVIEWER",
+        "APPROVER"
+      ],
+      "method": "GET",
+      "summary": "Get Turnaround tab data (estimated vs actual turnaround, variance)",
+      "is_paged": true,
+      "story_refs": [
+        "UC10-MF-001",
+        "UC10-AF-001",
+        "UC10-AF-002",
+        "UC10-AF-003",
+        "UC10-AF-004",
+        "UC10-AF-005",
+        "UC10-BR-003",
+        "UC10-BR-004",
+        "UC10-BR-005",
+        "UC10-BR-006",
+        "UC10-BR-007",
+        "UC10-BR-008",
+        "UC10-BR-009",
+        "UC10-BR-010",
+        "UC10-BR-011",
+        "UC10-BR-012",
+        "UC10-BR-013",
+        "UC10-FV-001",
+        "UC10-GC-004"
+      ],
+      "request_dto": "TrackerQueryParams",
+      "response_dto": "TurnaroundTabResponse",
+      "auth_required": true
+    },
+    {
+      "id": "POST_tracker_export",
+      "path": "/api/v1/tracker/export",
+      "roles": [
+        "TENANT_ADMIN",
+        "CONTRACT_OWNER",
+        "LEGAL_REVIEWER",
+        "APPROVER"
+      ],
+      "method": "POST",
+      "summary": "Export currently selected tab data for selected period/filters to Excel or PDF",
+      "is_paged": false,
+      "story_refs": [
+        "UC10-MF-001",
+        "UC10-AF-001",
+        "UC10-AF-003",
+        "UC10-AF-004",
+        "UC10-BR-003",
+        "UC10-BR-008",
+        "UC10-BR-009",
+        "UC10-GC-001"
+      ],
+      "request_dto": "TrackerExportRequest",
+      "response_dto": "TrackerExportResponse",
+      "auth_required": true
+    }
+  ],
+  "relevant_dtos": [
+    {
+      "name": "TrackerQueryParams",
+      "type": "REQUEST",
+      "fields": [
+        {
+          "enum": [
+            "Daily",
+            "Weekly",
+            "Monthly"
+          ],
+          "name": "period",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "contractTypeFilter",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "ownerFilter",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "dateRangeFrom",
+          "type": "date",
+          "nullable": true
+        },
+        {
+          "name": "dateRangeTo",
+          "type": "date",
+          "nullable": true
+        },
+        {
+          "name": "page",
+          "type": "integer",
+          "nullable": true
+        },
+        {
+          "name": "pageSize",
+          "type": "integer",
+          "nullable": true
+        }
+      ]
+    },
+    {
+      "name": "OwnershipRowResponse",
+      "type": "RESPONSE",
+      "fields": [
+        {
+          "name": "ownerName",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "name": "contractsOwned",
+          "type": "integer",
+          "nullable": false
+        },
+        {
+          "name": "inDraftCount",
+          "type": "integer",
+          "nullable": false
+        },
+        {
+          "name": "inNegotiationCount",
+          "type": "integer",
+          "nullable": false
+        },
+        {
+          "name": "inApprovalCount",
+          "type": "integer",
+          "nullable": false
+        },
+        {
+          "name": "inSignatureCount",
+          "type": "integer",
+          "nullable": false
+        },
+        {
+          "name": "completedCount",
+          "type": "integer",
+          "nullable": false
+        },
+        {
+          "name": "averageCycleTime",
+          "type": "number",
+          "nullable": true
+        }
+      ]
+    },
+    {
+      "name": "OwnershipTabResponse",
+      "type": "RESPONSE",
+      "fields": [
+        {
+          "name": "rows",
+          "type": "array",
+          "items": {
+            "type": "OwnershipRowResponse"
+          },
+          "nullable": false
+        },
+        {
+          "name": "isEmpty",
+          "type": "boolean",
+          "nullable": false
+        },
+        {
+          "name": "emptyStateMessage",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "totalCount",
+          "type": "integer",
+          "nullable": false
+        },
+        {
+          "name": "page",
+          "type": "integer",
+          "nullable": false
+        },
+        {
+          "name": "pageSize",
+          "type": "integer",
+          "nullable": false
+        }
+      ]
+    },
+    {
+      "name": "CycleTimeRowResponse",
+      "type": "RESPONSE",
+      "fields": [
+        {
+          "enum": [
+            "Drafting",
+            "Negotiation",
+            "Approval",
+            "Signature"
+          ],
+          "name": "stage",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "name": "ownerName",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "contractType",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "contractsOwned",
+          "type": "integer",
+          "nullable": true
+        },
+        {
+          "name": "averageCycleTime",
+          "type": "number",
+          "nullable": true
+        }
+      ]
+    },
+    {
+      "name": "CycleTimeTabResponse",
+      "type": "RESPONSE",
+      "fields": [
+        {
+          "name": "rows",
+          "type": "array",
+          "items": {
+            "type": "CycleTimeRowResponse"
+          },
+          "nullable": false
+        },
+        {
+          "name": "isEmpty",
+          "type": "boolean",
+          "nullable": false
+        },
+        {
+          "name": "emptyStateMessage",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "totalCount",
+          "type": "integer",
+          "nullable": false
+        },
+        {
+          "name": "page",
+          "type": "integer",
+          "nullable": false
+        },
+        {
+          "name": "pageSize",
+          "type": "integer",
+          "nullable": false
+        }
+      ]
+    },
+    {
+      "name": "BottleneckRowResponse",
+      "type": "RESPONSE",
+      "fields": [
+        {
+          "name": "contractId",
+          "type": "uuid",
+          "nullable": false
+        },
+        {
+          "name": "contractName",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "name": "ownerName",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "enum": [
+            "Drafting",
+            "Negotiation",
+            "Approval",
+            "Signature"
+          ],
+          "name": "currentStage",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "name": "daysInCurrentStage",
+          "type": "integer",
+          "nullable": false
+        },
+        {
+          "enum": [
+            "Yes",
+            "No"
+          ],
+          "name": "stuckFlag",
+          "type": "string",
+          "nullable": false
+        }
+      ]
+    },
+    {
+      "name": "BottleneckTabResponse",
+      "type": "RESPONSE",
+      "fields": [
+        {
+          "name": "rows",
+          "type": "array",
+          "items": {
+            "type": "BottleneckRowResponse"
+          },
+          "nullable": false
+        },
+        {
+          "name": "isEmpty",
+          "type": "boolean",
+          "nullable": false
+        },
+        {
+          "name": "emptyStateMessage",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "totalCount",
+          "type": "integer",
+          "nullable": false
+        },
+        {
+          "name": "page",
+          "type": "integer",
+          "nullable": false
+        },
+        {
+          "name": "pageSize",
+          "type": "integer",
+          "nullable": false
+        }
+      ]
+    },
+    {
+      "name": "TurnaroundRowResponse",
+      "type": "RESPONSE",
+      "fields": [
+        {
+          "name": "contractId",
+          "type": "uuid",
+          "nullable": false
+        },
+        {
+          "name": "contractName",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "name": "contractType",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "name": "estimatedTurnaround",
+          "type": "number",
+          "nullable": true
+        },
+        {
+          "name": "estimatedTurnaroundNotSet",
+          "type": "boolean",
+          "nullable": false
+        },
+        {
+          "enum": [
+            "UC2_TARGET_COMPLETION_DATE",
+            "AI_SUGGESTED",
+            "NOT_SET"
+          ],
+          "name": "estimatedTurnaroundSource",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "actualTurnaround",
+          "type": "number",
+          "nullable": true
+        },
+        {
+          "name": "variance",
+          "type": "number",
+          "nullable": true
+        },
+        {
+          "enum": [
+            "RED",
+            "GREEN"
+          ],
+          "name": "varianceColor",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "excludedFromAverages",
+          "type": "boolean",
+          "nullable": false
+        }
+      ]
+    },
+    {
+      "name": "TurnaroundTabResponse",
+      "type": "RESPONSE",
+      "fields": [
+        {
+          "name": "rows",
+          "type": "array",
+          "items": {
+            "type": "TurnaroundRowResponse"
+          },
+          "nullable": false
+        },
+        {
+          "name": "isEmpty",
+          "type": "boolean",
+          "nullable": false
+        },
+        {
+          "name": "emptyStateMessage",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "totalCount",
+          "type": "integer",
+          "nullable": false
+        },
+        {
+          "name": "page",
+          "type": "integer",
+          "nullable": false
+        },
+        {
+          "name": "pageSize",
+          "type": "integer",
+          "nullable": false
+        }
+      ]
+    },
+    {
+      "name": "TrackerExportRequest",
+      "type": "REQUEST",
+      "fields": [
+        {
+          "enum": [
+            "Ownership",
+            "CycleTime",
+            "Bottleneck",
+            "Turnaround"
+          ],
+          "name": "tab",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "enum": [
+            "Excel",
+            "PDF"
+          ],
+          "name": "format",
+          "type": "string",
+          "nullable": false
+        },
+        {
+          "enum": [
+            "Daily",
+            "Weekly",
+            "Monthly"
+          ],
+          "name": "period",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "contractTypeFilter",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "ownerFilter",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "dateRangeFrom",
+          "type": "date",
+          "nullable": true
+        },
+        {
+          "name": "dateRangeTo",
+          "type": "date",
+          "nullable": true
+        }
+      ]
+    },
+    {
+      "name": "TrackerExportResponse",
+      "type": "RESPONSE",
+      "fields": [
+        {
+          "name": "success",
+          "type": "boolean",
+          "nullable": false
+        },
+        {
+          "name": "fileUrl",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "failureMessage",
+          "type": "string",
+          "nullable": true
+        }
+      ]
+    }
+  ],
+  "stories": [
+    {
+      "epic": "Tracker",
+      "actor": "Tenant Admin",
+      "title": "Display empty-state message when no contracts exist in tenant",
+      "images": [
+        "IMG-1"
+      ],
+      "story_id": "UC10-AF-001",
+      "references": [
+        "UC10",
+        "AF-1",
+        "BR-4"
+      ],
+      "story_type": "alternate-flow",
+      "story_statement": "As a Tenant Admin, I want to see a clear empty-state message when no contracts exist in the tenant, so that I understand why the Tracker has no data to display rather than assuming it is broken.",
+      "source_reference": "UC10 / Alternate Flow / AF-1",
+      "notes_assumptions": "DP-UC10-020 ('Change UC10 BR4 to') refers to a reviewer-requested amendment to BR-4 whose full replacement text was not supplied in this unit; its presence is acknowledged here as it pertains to Estimated Turnaround handling, but the exact revised rule text should be confirmed from the BR-4 change record.",
+      "acceptance_criteria": [
+        "Given a tenant with no contracts in the system, when any permitted user (Tenant Admin, Contract Owner, Legal Reviewer, or Approver) opens the Tracker, then the system displays the message \"No contract data available to display.\" instead of any tab content.",
+        "Given the empty-state message is displayed, when the screen renders, then the Period [DP-UC10-001] dropdown, Contract Type Filter [DP-UC10-002], Owner Filter [DP-UC10-003], Date Range From [DP-UC10-004], and Date Range To [DP-UC10-005] controls are still shown but yield no results when applied, since no contracts exist.",
+        "Given the empty-state message is displayed, when the user inspects the Ownership tab, then no rows are shown for Owner Name [DP-UC10-010], Contracts Owned [DP-UC10-011], or Average Cycle Time [DP-UC10-012], and the empty-state message is shown in place of the table.",
+        "Given the empty-state message is displayed, when the user inspects the Bottleneck tab, then no rows are shown for Current Stage [DP-UC10-013], Days in Current Stage [DP-UC10-014], or Stuck Flag [DP-UC10-015], and the empty-state message is shown in place of the table.",
+        "Given the empty-state message is displayed, when the user inspects the Turnaround tab, then no rows are shown for Estimated Turnaround [DP-UC10-016], Actual Turnaround [DP-UC10-017], or Variance [DP-UC10-018], and the empty-state message is shown in place of the table.",
+        "Given BR-4 is updated per the reviewer-supplied change [DP-UC10-020], when Estimated Turnaround would otherwise be calculated, then the empty-state message takes precedence over any turnaround calculation display since no contracts exist to evaluate.",
+        "Given the empty-state message is displayed, when the user attempts to use the Export Button, then no export is available since there is no contract data to export."
+      ]
+    },
+    {
+      "epic": "Tracker",
+      "actor": "Tenant Admin",
+      "title": "Display no-records message for empty date range selection",
+      "images": [
+        "IMG-1"
+      ],
+      "story_id": "UC10-AF-003",
+      "references": [
+        "UC10-AF-003",
+        "BR-6",
+        "BR-4",
+        "DP-UC10-001",
+        "DP-UC10-002",
+        "DP-UC10-003",
+        "DP-UC10-004",
+        "DP-UC10-005",
+        "DP-UC10-010",
+        "DP-UC10-011",
+        "DP-UC10-012",
+        "DP-UC10-013",
+        "DP-UC10-014",
+        "DP-UC10-015",
+        "DP-UC10-016",
+        "DP-UC10-017",
+        "DP-UC10-018",
+        "DP-UC10-020"
+      ],
+      "story_type": "alternate-flow",
+      "story_statement": "As a Tenant Admin, I want to see a clear message when my selected date range contains no contracts, so that I understand there is no data to display rather than assuming the Tracker has failed.",
+      "source_reference": "UC10 / Alternate Flow / AF-3",
+      "notes_assumptions": "DP-UC10-020 'Change UC10 BR4 to' is treated as a reference marker to a BR-4 amendment affecting Estimated Turnaround exclusion logic; exact amended wording not provided in source.",
+      "acceptance_criteria": [
+        "Given I am on the Tracker screen with Period, Contract Type Filter, Owner Filter, Date Range From, and Date Range To all available as filter inputs, When I select a Date Range From and Date Range To spanning a period in which no contracts exist, Then the system displays the message \"No records found for the selected period.\" instead of any tab data.",
+        "Given the no-records message is displayed, When I view the Ownership Tab, Cycle Time Tab, Bottleneck Tab, or Turnaround Tab, Then none of the following data points are populated with values: Owner Name, Contracts Owned, Average Cycle Time, Current Stage, Days in Current Stage, Stuck Flag, Estimated Turnaround, Actual Turnaround, Variance.",
+        "Given the selected Date Range From is earlier than the selected Date Range To and overrides the Period dropdown per BR-6, When no contracts fall within that range, Then the Period, Contract Type Filter, and Owner Filter selections remain visible on screen but yield no matching records and the no-records message is shown.",
+        "Given Estimated Turnaround is not set for a contract, When BR-4 is applied so that Estimated Turnaround displays 'Not Set' and the contract is excluded from turnaround averages, Then the Change UC10 BR4 to data point reflects this exclusion rule consistently with the no-records scenario when such exclusions result in zero remaining contracts for the selected period.",
+        "Given the no-records message is displayed, When I attempt to trigger an export via the Export Button, Then the export produces a file indicating no records for the selected period rather than an empty or malformed report."
+      ]
+    },
+    {
+      "epic": "Tracker",
+      "actor": "Tenant Admin",
+      "title": "Display empty table when conflicting filters are applied",
+      "images": [
+        "IMG-1"
+      ],
+      "story_id": "UC10-AF-005",
+      "references": [
+        "UC10-AF-005",
+        "BR-4",
+        "F-1",
+        "F-2",
+        "F-3",
+        "F-4",
+        "F-5",
+        "F-10",
+        "F-11",
+        "F-12",
+        "F-13",
+        "F-14",
+        "F-15",
+        "F-16",
+        "F-17",
+        "F-18"
+      ],
+      "story_type": "alternate-flow",
+      "story_statement": "As a Tenant Admin, I want to be shown a clear empty-state message when my Tracker filter selections conflict, so that I understand no records match rather than assuming the report is broken.",
+      "source_reference": "UC10 / Alternate Flow / AF-5",
+      "notes_assumptions": "DP-UC10-020 ('Change UC10 BR4 to') is interpreted as a reference to an updated BR-4 exclusion rule for Estimated Turnaround affecting empty-result display; exact revised wording of BR-4 was not provided and should be confirmed with the business.",
+      "acceptance_criteria": [
+        "Given the Tracker screen is open with Period [DP-UC10-001] selected, When the user sets a Contract Type Filter [DP-UC10-002] value that has no contracts owned by the selected Owner Filter [DP-UC10-003] value, Then the system displays an empty table with the message \"No records match the selected filters.\"",
+        "Given a Date Range From [DP-UC10-004] and Date Range To [DP-UC10-005] combination is applied together with a conflicting Contract Type Filter [DP-UC10-002] and Owner Filter [DP-UC10-003], When no contracts satisfy all selected filter conditions, Then the system suppresses the data table rows and columns including Owner Name [DP-UC10-010], Contracts Owned [DP-UC10-011], Average Cycle Time [DP-UC10-012], Current Stage [DP-UC10-013], Days in Current Stage [DP-UC10-014], Stuck Flag [DP-UC10-015], Estimated Turnaround [DP-UC10-016], Actual Turnaround [DP-UC10-017], and Variance [DP-UC10-018], and shows only the empty-state message.",
+        "Given the empty-state message \"No records match the selected filters.\" is displayed, When the user adjusts the Contract Type Filter [DP-UC10-002], Owner Filter [DP-UC10-003], Date Range From [DP-UC10-004], or Date Range To [DP-UC10-005] to a non-conflicting combination, Then the table repopulates with matching records and the empty-state message is removed.",
+        "Given the updated turnaround-exclusion rule referenced as Change UC10 BR4 to [DP-UC10-020], When Estimated Turnaround [DP-UC10-016] is Not Set for all contracts matching the applied filters, Then those contracts are excluded from turnaround averages and, if no contracts remain, the empty-state message \"No records match the selected filters.\" is shown instead of a turnaround table."
+      ]
+    }
+  ]
+}

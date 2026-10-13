@@ -18,40 +18,48 @@ import ObligationsRenewalPage from '@/pages/ObligationsRenewalPage';
 import AccessDeniedPage from '@/pages/AccessDeniedPage';
 import SettingsAdminPage from '@/pages/SettingsAdminPage';
 import TrackerPage from '@/pages/TrackerPage';
+import LoginPage from '@/pages/LoginPage';
 import NewContractAccessGuard from '@/features/contracts/components/NewContractAccessGuard';
+import AppLayout from '@/shared/components/AppLayout';
 
 const NEW_CONTRACT_ALLOWED_ROLES = ['TENANT_ADMIN', 'CONTRACT_OWNER'];
 
 // Screens are added under src/pages/ as modules are implemented, and routed here.
+// Routes nested under AppLayout get the responsive sidebar; standalone/external
+// entry points (login, external negotiation review, the signing portal) do not.
 export default function App() {
   return (
     <Routes>
-      <Route path="/" element={<DashboardPage />} />
-      <Route path="/contracts" element={<ContractRepositoryListPage />} />
-      <Route
-        path="/contracts/new"
-        element={
-          <NewContractAccessGuard allowedRoles={NEW_CONTRACT_ALLOWED_ROLES}>
-            <NewContractPage />
-          </NewContractAccessGuard>
-        }
-      />
-      <Route path="/settings/template-clause-library" element={<TemplateClauseLibraryPage />} />
-      <Route path="/settings/approval-matrix-config" element={<ApprovalMatrixConfigPage />} />
-      <Route path="/settings/esignature-settings" element={<EsignatureSettingsPage />} />
-      <Route path="/approvals" element={<ApprovalsListPage />} />
-      <Route path="/approvals/:approvalId" element={<ApprovalReviewPage />} />
-      <Route path="/contracts/:contractId/clause-analysis" element={<ClauseAnalysisPage />} />
+      <Route path="/login" element={<LoginPage />} />
       <Route path="/negotiation/external/:linkToken" element={<ExternalReviewPage />} />
-      <Route path="/contracts/:contractId/negotiation" element={<NegotiationTrackerPage />} />
-      <Route path="/contracts/:contractId/signers" element={<SignerListPage />} />
       <Route path="/sign/:sessionId" element={<SigningPortalPage />} />
-      <Route path="/contracts/:contractId" element={<ContractDetailPage />} />
-      <Route path="/contracts/:contractId/obligations" element={<ObligationsRenewalPage />} />
-      <Route path="/contract-repository" element={<ContractRepositoryPage />} />
-      <Route path="/access-denied" element={<AccessDeniedPage />} />
-      <Route path="/settings/admin" element={<SettingsAdminPage />} />
-      <Route path="/tracker" element={<TrackerPage />} />
+
+      <Route element={<AppLayout />}>
+        <Route path="/" element={<DashboardPage />} />
+        <Route path="/contracts" element={<ContractRepositoryListPage />} />
+        <Route
+          path="/contracts/new"
+          element={
+            <NewContractAccessGuard allowedRoles={NEW_CONTRACT_ALLOWED_ROLES}>
+              <NewContractPage />
+            </NewContractAccessGuard>
+          }
+        />
+        <Route path="/settings/template-clause-library" element={<TemplateClauseLibraryPage />} />
+        <Route path="/settings/approval-matrix-config" element={<ApprovalMatrixConfigPage />} />
+        <Route path="/settings/esignature-settings" element={<EsignatureSettingsPage />} />
+        <Route path="/approvals" element={<ApprovalsListPage />} />
+        <Route path="/approvals/:approvalId" element={<ApprovalReviewPage />} />
+        <Route path="/contracts/:contractId/clause-analysis" element={<ClauseAnalysisPage />} />
+        <Route path="/contracts/:contractId/negotiation" element={<NegotiationTrackerPage />} />
+        <Route path="/contracts/:contractId/signers" element={<SignerListPage />} />
+        <Route path="/contracts/:contractId" element={<ContractDetailPage />} />
+        <Route path="/contracts/:contractId/obligations" element={<ObligationsRenewalPage />} />
+        <Route path="/contract-repository" element={<ContractRepositoryPage />} />
+        <Route path="/access-denied" element={<AccessDeniedPage />} />
+        <Route path="/settings/admin" element={<SettingsAdminPage />} />
+        <Route path="/tracker" element={<TrackerPage />} />
+      </Route>
     </Routes>
   );
 }

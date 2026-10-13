@@ -1,0 +1,42 @@
+{
+  "trace_id": "04945e96f5bc",
+  "branch": "ui-correction/04945e96f5bc",
+  "maintenance_branch": "ui-correction/04945e96f5bc",
+  "status": "SUCCESS",
+  "summary": "Clean. Visual browser verification wasn't possible in this sandbox (the headless screenshot tool returns a blank page for `localhost` dev/preview servers regardless of content — likely a network-proxy restriction, not an app error), but lint, build, and the full test suite (143 tests) all pass, including new tests exercising the Login form and sidebar links.\n\n## Summary\n\n- Added `src/pages/LoginPage.jsx`: a dark-themed sign-in form matching the existing page styling, showing the session-expired message `DashboardPage` already passes via `navigate('/login', { state: { message } })`. Since no login/auth endpoint exists in any module's contract (the HTTP client explicitly notes there's no login flow yet, only dev headers), this gates entry client-side and routes to `/` on submit rather than inventing a backend call.\n- Added `src/shared/components/SidebarNav.jsx` and `src/shared/components/AppLayout.jsx`: a responsive sidebar (static column on `md+`, off-canvas drawer with hamburger toggle below that) linking to all existing routed screens, grouped into Workspace/Settings sections.\n- Wired `/login` route and wrapped the rest of the routes in `AppLayout` in `src/App.jsx`; the external-facing `/negotiation/external/:linkToken` and `/sign/:sessionId` routes stay outside the layout since those are unauthenticated third-party pages.\n- Added tests: `src/__tests__/LoginPage.test.jsx` and `src/shared/components/SidebarNav.test.jsx`.",
+  "files_changed": [
+    "src/App.jsx",
+    "src/__tests__/LoginPage.test.jsx",
+    "src/pages/LoginPage.jsx",
+    "src/shared/components/AppLayout.jsx",
+    "src/shared/components/SidebarNav.jsx",
+    "src/shared/components/SidebarNav.test.jsx"
+  ],
+  "lines_changed": 366,
+  "blockers": [
+    "Not applied -- Backend authentication for the Login form: no login/auth endpoint exists in any module contract in CLAUDE.md, and the backend repo isn't visible here — the form is a client-side gate only, per the existing dev-header placeholder note in services/http.js"
+  ],
+  "visual_check": {
+    "verdict": "skipped",
+    "evidence": "verifier did not return parseable JSON",
+    "screenshot_path": ""
+  },
+  "context_sharing": {
+    "target": "frontend",
+    "branch": "ui-correction/04945e96f5bc",
+    "base_path": "",
+    "endpoints": [],
+    "types": {},
+    "notes": "No API calls appear in any of these six files. LoginPage.jsx is explicitly a client-side-only gate (per its own comment) that navigates to '/' on non-empty submit without calling a backend auth endpoint. App.jsx only defines react-router-dom routes, AppLayout.jsx and SidebarNav.jsx only render layout/nav UI, and both test files only exercise rendering/navigation behavior — none import src/services/http.ts or any service module."
+  },
+  "usage": {
+    "num_turns": 64,
+    "duration_ms": 373030,
+    "total_cost_usd": 3.0761385000000003,
+    "input_tokens": 4125,
+    "output_tokens": 24388,
+    "cache_creation_input_tokens": 204007,
+    "cache_read_input_tokens": 4910995,
+    "is_error": false
+  }
+}

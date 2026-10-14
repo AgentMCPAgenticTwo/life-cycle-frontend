@@ -8,6 +8,7 @@ import RedlineSubmitPanel from '@/features/negotiation/components/RedlineSubmitP
 import MarkAgreedButton from '@/features/negotiation/components/MarkAgreedButton';
 import SendReminderButton from '@/features/negotiation/components/SendReminderButton';
 import CompareVersionsModal from '@/features/negotiation/components/CompareVersionsModal';
+import RiskRecheckPanel from '@/features/negotiation/components/RiskRecheckPanel';
 import { useNegotiationTracker } from '@/features/negotiation/hooks/useNegotiationTracker';
 import { useSubmitRouting } from '@/features/negotiation/hooks/useSubmitRouting';
 
@@ -106,6 +107,11 @@ export default function NegotiationTrackerPage() {
   }
 
   const dueDatePassed = data.dueDate && new Date(data.dueDate).getTime() < Date.now();
+
+  // UC5: the latest version coming from the counterparty triggers a risk re-check
+  // of the clauses they changed.
+  const latestVersion = [...(data.versions || [])].sort((a, b) => b.versionNumber - a.versionNumber)[0];
+  const latestIsExternal = latestVersion?.source === 'External';
 
   return (
     <div className="min-h-screen bg-neutral-950 text-neutral-100">
@@ -217,6 +223,10 @@ export default function NegotiationTrackerPage() {
           </div>
 
           <div className="flex flex-col gap-6">
+            {latestIsExternal && (
+              <RiskRecheckPanel contractId={contractId} externalVersion={latestVersion.versionNumber} />
+            )}
+
             {data.negotiationStatus !== 'Agreed' && (isLegalReviewer || canRoute) && (
               <RedlineSubmitPanel
                 contractId={contractId}

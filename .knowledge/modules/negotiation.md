@@ -4,10 +4,10 @@ title: src/features/negotiation
 description: Negotiation tracker -- reviewer routing, comments, mark-agreed/reminder actions, version comparison, and the OTP-gated external review flow for third-party reviewers.
 resource: https://github.com/AgentMCPAgenticThree/life-cycle-frontend/tree/main/src/features/negotiation
 tags: [frontend, negotiation, external-review]
-generated: { by: sage-maintenance/claude-code, at: 2026-10-14T04:55:25Z }
+generated: { by: sage-maintenance/claude-code, at: 2026-10-14T05:27:12Z }
 sources:
   - id: cbm-graph
-    resource: codebase-memory-mcp project life-cycle-frontend @ 2980c74caa4fa3952f31f5cbaeff19b40c6dd55c
+    resource: codebase-memory-mcp project life-cycle-frontend @ 901976f229bbcc1750ffec78c46e6fc09a4d0882
     title: Codebase knowledge graph
 status: stable
 ---
@@ -16,9 +16,29 @@ status: stable
 
 `RoutingPanel.jsx`, `ReviewerList.jsx`, `OverdueFlagBadge.jsx`,
 `SendReminderButton.jsx`, `CompareVersionsModal.jsx`, `CommentBoxPanel.jsx`,
-`MarkAgreedButton.jsx`, `RedlineSubmitPanel.jsx`, `OtpVerificationForm.jsx`
-(the last used by the external, no-sidebar
+`MarkAgreedButton.jsx`, `RedlineSubmitPanel.jsx`, `RiskRecheckPanel.jsx`,
+`OtpVerificationForm.jsx` (the last used by the external, no-sidebar
 `/negotiation/external/:linkToken` route).
+
+### Risk re-check after an external redline (UC5)
+
+`RiskRecheckPanel.jsx` takes `contractId` + `externalVersion` and re-scores only
+the clauses the counterparty touched. It composes three hooks across two
+features: `useCompareVersions` (this module) for the diff between
+`externalVersion - 1` and `externalVersion`, plus `useClauseAnalysis` and
+`useRetryExtraction` from [clause-analysis](/modules/clause-analysis.md).
+
+| State | Rendered |
+|---|---|
+| comparing / analysing | "Re-checking risk…" |
+| `analysis.analysisStatus === 'Failed'` | `role="alert"` amber notice stating the version is still saved and previous scores unchanged, plus a **Retry Risk Analysis** button calling `handleRetry` (`useRetryExtraction` → `setData`) |
+| diff has changed clauses | list of re-scored clauses with `riskBadgeClass` severity badges, headed by the refreshed `overallContractRiskScore` |
+| diff has no changed clauses | "No clause changes were detected in this version…" |
+| `compareError \|\| analysisError` | `role="alert"` red message |
+
+`NegotiationTrackerPage.jsx` mounts it only when the highest-numbered entry in
+`data.versions` has `source === 'External'`, passing that entry's
+`versionNumber`.
 
 ### Concurrent redline conflict (UC5-AF-005)
 

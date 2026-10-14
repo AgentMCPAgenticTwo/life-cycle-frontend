@@ -142,7 +142,7 @@ export default function TrackerPage() {
               Ownership, cycle times, bottlenecks and turnaround performance across your contract portfolio
             </p>
           </div>
-          <TrackerExportButton onExport={() => handleExport('Excel')} isExporting={isExporting} failureMessage={failureMessage} />
+          <TrackerExportButton onExport={handleExport} isExporting={isExporting} failureMessage={failureMessage} />
         </div>
       </header>
 

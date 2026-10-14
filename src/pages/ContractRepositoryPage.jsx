@@ -112,6 +112,7 @@ export default function ContractRepositoryPage() {
                 sortBy={sortBy}
                 sortDirection={sortDirection}
                 onSort={handleSort}
+                searchText={filters.searchText}
               />
 
               <div className="mt-3 flex items-center justify-between text-xs text-neutral-500">

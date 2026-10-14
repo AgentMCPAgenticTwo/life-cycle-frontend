@@ -1,0 +1,695 @@
+{
+  "trace_id": "001e8afcd865",
+  "branch": "ui-correction/001e8afcd865",
+  "maintenance_branch": "ui-correction/001e8afcd865",
+  "status": "SUCCESS",
+  "summary": "All checks pass (lint clean, build OK, 145 tests green).\n\nI read the four items as a conformance check against the existing screens and only changed what was not already true here.\n\n**Changed:**\n- **UC8 — matched word highlighting.** Added `src/features/contract-repository/components/HighlightedText.jsx` (case-insensitive, regex-escaped) and wired it into `ContractListTable.jsx` for contract name, counterparty, value, start/end date and owner; `ContractRepositoryPage.jsx` now passes the active `filters.searchText` down.\n- **UC10 — \"the user picks Excel or PDF\".** `TrackerExportButton.jsx` now renders a format select (Excel / PDF) next to the Export button and passes the chosen format to `onExport`; `TrackerPage.jsx` stopped hard-coding `'Excel'` and passes `handleExport` directly, so the export request carries the picked format alongside the current tab, period and filters it already sent.\n\n**Already true, left alone:** UC7 provider-connection failure (`SignerListPage.jsx` shows \"Unable to connect to the selected e-signature provider…\" on `SignatureConnectionFailed` with no status change), the Executed state / audit-certificate download after the last signature, UC8's \"No contracts found matching your search.\" message, all of UC9 (empty message, \"AI Suggested\" badge, Accept/Edit), and UC10's \"Export failed. Please try again.\" in-place failure message.\n\nPDF locking, audit-certificate generation, obligation extraction on Executed, and the actual export file content are backend behaviours in the separate API repository — I did not stub them here; the frontend only consumes their responses.",
+  "files_changed": [
+    "src/features/contract-repository/components/ContractListTable.jsx",
+    "src/features/contract-repository/components/HighlightedText.jsx",
+    "src/features/tracker/TrackerExportButton.jsx",
+    "src/pages/ContractRepositoryPage.jsx",
+    "src/pages/TrackerPage.jsx"
+  ],
+  "lines_changed": 100,
+  "blockers": [
+    "Not applied -- UC7: provider connection failure shows 'Unable to connect…' and contract status does not change: already true — SignerListPage.jsx handles contractStatus 'SignatureConnectionFailed' with that message",
+    "Not applied -- UC7: after the last signature the PDF is locked, the audit certificate is generated and status becomes Executed: locking and certificate generation are backend work in the separate API repo; the frontend already renders the Executed state and enables the audit-certificate download",
+    "Not applied -- UC8: no-match message 'No contracts found matching your search.': already true — NoResultsMessage.jsx",
+    "Not applied -- UC8: users only see their own or assigned contracts: backend scoping on GET /api/v1/contracts via the X-User-Role/X-User-Id headers the shared client already sends",
+    "Not applied -- UC9: obligations created as 'AI Suggested' on Executed, empty message, manual add, Accept/Edit: already true in ObligationsTable/ObligationRowForm/ManualObligationForm/ObligationsEmptyState; extraction itself is backend",
+    "Not applied -- UC10: export failure shows 'Export failed. Please try again.' and the screen stays the same: already true — useTrackerExport.js GENERIC_FAILURE_MESSAGE rendered in place by TrackerExportButton",
+    "Not applied -- UC10: the exported file actually matches the current tab, period and filters: file generation is backend; the frontend already sends tab/period/filters and opens the returned fileUrl",
+    "Visual verification failed: The dev server at localhost:5199 returns a completely blank white page on /contract-repository, /tracker and even /login, so none of the UC8 search-highlight or UC10 export-failure changes are visible; the app appears to fail at startup (likely the required VITE_API_BASE_URL throw)."
+  ],
+  "visual_check": {
+    "verdict": "fail",
+    "evidence": "The dev server at localhost:5199 returns a completely blank white page on /contract-repository, /tracker and even /login, so none of the UC8 search-highlight or UC10 export-failure changes are visible; the app appears to fail at startup (likely the required VITE_API_BASE_URL throw).",
+    "screenshot_path": "/tmp/actual.png"
+  },
+  "context_sharing": {
+    "target": "frontend",
+    "branch": "ui-correction/001e8afcd865",
+    "base_path": "/api/v1",
+    "endpoints": [
+      {
+        "method": "GET",
+        "path": "/api/v1/contracts",
+        "request_fields": [
+          {
+            "name": "searchText",
+            "type": "string"
+          },
+          {
+            "name": "status",
+            "type": "string"
+          },
+          {
+            "name": "startDateFrom",
+            "type": "date"
+          },
+          {
+            "name": "startDateTo",
+            "type": "date"
+          },
+          {
+            "name": "endDateFrom",
+            "type": "date"
+          },
+          {
+            "name": "endDateTo",
+            "type": "date"
+          },
+          {
+            "name": "valueMin",
+            "type": "number"
+          },
+          {
+            "name": "valueMax",
+            "type": "number"
+          },
+          {
+            "name": "folderTagIds",
+            "type": "array"
+          },
+          {
+            "name": "sortBy",
+            "type": "string"
+          },
+          {
+            "name": "sortDirection",
+            "type": "enum"
+          },
+          {
+            "name": "page",
+            "type": "number"
+          },
+          {
+            "name": "pageSize",
+            "type": "number"
+          }
+        ],
+        "response_fields": [
+          {
+            "name": "items",
+            "type": "array"
+          },
+          {
+            "name": "totalCount",
+            "type": "number"
+          }
+        ],
+        "purpose": "Search/filter/sort/paginate contracts for the repository table"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/tracker/ownership",
+        "request_fields": [
+          {
+            "name": "period",
+            "type": "string"
+          },
+          {
+            "name": "contractTypeFilter",
+            "type": "string"
+          },
+          {
+            "name": "ownerFilter",
+            "type": "string"
+          },
+          {
+            "name": "dateRangeFrom",
+            "type": "date"
+          },
+          {
+            "name": "dateRangeTo",
+            "type": "date"
+          },
+          {
+            "name": "page",
+            "type": "number"
+          },
+          {
+            "name": "pageSize",
+            "type": "number"
+          }
+        ],
+        "response_fields": [
+          {
+            "name": "rows",
+            "type": "array"
+          },
+          {
+            "name": "isEmpty",
+            "type": "boolean"
+          },
+          {
+            "name": "emptyStateMessage",
+            "type": "string"
+          },
+          {
+            "name": "totalCount",
+            "type": "number"
+          },
+          {
+            "name": "page",
+            "type": "number"
+          },
+          {
+            "name": "pageSize",
+            "type": "number"
+          }
+        ],
+        "purpose": "Ownership tab data"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/tracker/cycle-time",
+        "request_fields": [
+          {
+            "name": "period",
+            "type": "string"
+          },
+          {
+            "name": "contractTypeFilter",
+            "type": "string"
+          },
+          {
+            "name": "ownerFilter",
+            "type": "string"
+          },
+          {
+            "name": "dateRangeFrom",
+            "type": "date"
+          },
+          {
+            "name": "dateRangeTo",
+            "type": "date"
+          },
+          {
+            "name": "page",
+            "type": "number"
+          },
+          {
+            "name": "pageSize",
+            "type": "number"
+          }
+        ],
+        "response_fields": [
+          {
+            "name": "rows",
+            "type": "array"
+          },
+          {
+            "name": "isEmpty",
+            "type": "boolean"
+          },
+          {
+            "name": "emptyStateMessage",
+            "type": "string"
+          },
+          {
+            "name": "totalCount",
+            "type": "number"
+          },
+          {
+            "name": "page",
+            "type": "number"
+          },
+          {
+            "name": "pageSize",
+            "type": "number"
+          }
+        ],
+        "purpose": "Cycle Time tab data"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/tracker/bottleneck",
+        "request_fields": [
+          {
+            "name": "period",
+            "type": "string"
+          },
+          {
+            "name": "contractTypeFilter",
+            "type": "string"
+          },
+          {
+            "name": "ownerFilter",
+            "type": "string"
+          },
+          {
+            "name": "dateRangeFrom",
+            "type": "date"
+          },
+          {
+            "name": "dateRangeTo",
+            "type": "date"
+          },
+          {
+            "name": "page",
+            "type": "number"
+          },
+          {
+            "name": "pageSize",
+            "type": "number"
+          }
+        ],
+        "response_fields": [
+          {
+            "name": "rows",
+            "type": "array"
+          },
+          {
+            "name": "isEmpty",
+            "type": "boolean"
+          },
+          {
+            "name": "emptyStateMessage",
+            "type": "string"
+          },
+          {
+            "name": "totalCount",
+            "type": "number"
+          },
+          {
+            "name": "page",
+            "type": "number"
+          },
+          {
+            "name": "pageSize",
+            "type": "number"
+          }
+        ],
+        "purpose": "Bottleneck tab data"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/tracker/turnaround",
+        "request_fields": [
+          {
+            "name": "period",
+            "type": "string"
+          },
+          {
+            "name": "contractTypeFilter",
+            "type": "string"
+          },
+          {
+            "name": "ownerFilter",
+            "type": "string"
+          },
+          {
+            "name": "dateRangeFrom",
+            "type": "date"
+          },
+          {
+            "name": "dateRangeTo",
+            "type": "date"
+          },
+          {
+            "name": "page",
+            "type": "number"
+          },
+          {
+            "name": "pageSize",
+            "type": "number"
+          }
+        ],
+        "response_fields": [
+          {
+            "name": "rows",
+            "type": "array"
+          },
+          {
+            "name": "isEmpty",
+            "type": "boolean"
+          },
+          {
+            "name": "emptyStateMessage",
+            "type": "string"
+          },
+          {
+            "name": "totalCount",
+            "type": "number"
+          },
+          {
+            "name": "page",
+            "type": "number"
+          },
+          {
+            "name": "pageSize",
+            "type": "number"
+          }
+        ],
+        "purpose": "Turnaround tab data"
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/tracker/export",
+        "request_fields": [
+          {
+            "name": "tab",
+            "type": "enum"
+          },
+          {
+            "name": "format",
+            "type": "enum"
+          },
+          {
+            "name": "period",
+            "type": "string"
+          },
+          {
+            "name": "contractTypeFilter",
+            "type": "string"
+          },
+          {
+            "name": "ownerFilter",
+            "type": "string"
+          },
+          {
+            "name": "dateRangeFrom",
+            "type": "date"
+          },
+          {
+            "name": "dateRangeTo",
+            "type": "date"
+          }
+        ],
+        "response_fields": [
+          {
+            "name": "success",
+            "type": "boolean"
+          },
+          {
+            "name": "fileUrl",
+            "type": "string"
+          },
+          {
+            "name": "failureMessage",
+            "type": "string"
+          }
+        ],
+        "purpose": "Export the selected tab to Excel or PDF"
+      },
+      {
+        "method": "PUT",
+        "path": "/api/v1/tracker/turnaround/{contractId}/estimated-override",
+        "request_fields": [
+          {
+            "name": "newEstimatedTurnaround",
+            "type": "number"
+          },
+          {
+            "name": "overrideReason",
+            "type": "string"
+          },
+          {
+            "name": "originalAiSuggestedValue",
+            "type": "number"
+          },
+          {
+            "name": "overriddenBy",
+            "type": "string"
+          },
+          {
+            "name": "overrideTimestamp",
+            "type": "date"
+          }
+        ],
+        "response_fields": [
+          {
+            "name": "contractId",
+            "type": "string"
+          },
+          {
+            "name": "contractName",
+            "type": "string"
+          },
+          {
+            "name": "contractType",
+            "type": "string"
+          },
+          {
+            "name": "estimatedTurnaround",
+            "type": "number"
+          },
+          {
+            "name": "estimatedTurnaroundNotSet",
+            "type": "boolean"
+          },
+          {
+            "name": "estimatedTurnaroundSource",
+            "type": "string"
+          },
+          {
+            "name": "actualTurnaround",
+            "type": "number"
+          },
+          {
+            "name": "variance",
+            "type": "number"
+          },
+          {
+            "name": "varianceColor",
+            "type": "string"
+          },
+          {
+            "name": "excludedFromAverages",
+            "type": "boolean"
+          }
+        ],
+        "purpose": "Override AI-suggested estimated turnaround"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/tracker/bottleneck-thresholds",
+        "request_fields": [],
+        "response_fields": [
+          {
+            "name": "stage",
+            "type": "string"
+          },
+          {
+            "name": "thresholdDays",
+            "type": "number"
+          }
+        ],
+        "purpose": "Tenant stuck-flag thresholds per stage"
+      }
+    ],
+    "types": {
+      "ContractListItemResponse": [
+        {
+          "name": "contractId",
+          "type": "string"
+        },
+        {
+          "name": "contractName",
+          "type": "string"
+        },
+        {
+          "name": "counterparty",
+          "type": "string"
+        },
+        {
+          "name": "status",
+          "type": "string"
+        },
+        {
+          "name": "value",
+          "type": "number"
+        },
+        {
+          "name": "startDate",
+          "type": "date"
+        },
+        {
+          "name": "endDate",
+          "type": "date"
+        },
+        {
+          "name": "owner",
+          "type": "string"
+        },
+        {
+          "name": "lastModified",
+          "type": "date"
+        },
+        {
+          "name": "folderTags",
+          "type": "array"
+        },
+        {
+          "name": "indexingInProgress",
+          "type": "boolean"
+        }
+      ],
+      "FolderTagOptionResponse": [
+        {
+          "name": "id",
+          "type": "string"
+        },
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "kind",
+          "type": "enum"
+        }
+      ],
+      "TrackerQueryParams": [
+        {
+          "name": "period",
+          "type": "string"
+        },
+        {
+          "name": "contractTypeFilter",
+          "type": "string"
+        },
+        {
+          "name": "ownerFilter",
+          "type": "string"
+        },
+        {
+          "name": "dateRangeFrom",
+          "type": "date"
+        },
+        {
+          "name": "dateRangeTo",
+          "type": "date"
+        },
+        {
+          "name": "page",
+          "type": "number"
+        },
+        {
+          "name": "pageSize",
+          "type": "number"
+        }
+      ],
+      "TrackerExportRequest": [
+        {
+          "name": "tab",
+          "type": "enum"
+        },
+        {
+          "name": "format",
+          "type": "enum"
+        },
+        {
+          "name": "period",
+          "type": "string"
+        },
+        {
+          "name": "contractTypeFilter",
+          "type": "string"
+        },
+        {
+          "name": "ownerFilter",
+          "type": "string"
+        },
+        {
+          "name": "dateRangeFrom",
+          "type": "date"
+        },
+        {
+          "name": "dateRangeTo",
+          "type": "date"
+        }
+      ],
+      "TrackerExportResponse": [
+        {
+          "name": "success",
+          "type": "boolean"
+        },
+        {
+          "name": "fileUrl",
+          "type": "string"
+        },
+        {
+          "name": "failureMessage",
+          "type": "string"
+        }
+      ],
+      "EstimatedTurnaroundOverrideRequest": [
+        {
+          "name": "newEstimatedTurnaround",
+          "type": "number"
+        },
+        {
+          "name": "overrideReason",
+          "type": "string"
+        },
+        {
+          "name": "originalAiSuggestedValue",
+          "type": "number"
+        },
+        {
+          "name": "overriddenBy",
+          "type": "string"
+        },
+        {
+          "name": "overrideTimestamp",
+          "type": "date"
+        }
+      ],
+      "TurnaroundRowResponse": [
+        {
+          "name": "contractId",
+          "type": "string"
+        },
+        {
+          "name": "contractName",
+          "type": "string"
+        },
+        {
+          "name": "contractType",
+          "type": "string"
+        },
+        {
+          "name": "estimatedTurnaround",
+          "type": "number"
+        },
+        {
+          "name": "estimatedTurnaroundNotSet",
+          "type": "boolean"
+        },
+        {
+          "name": "estimatedTurnaroundSource",
+          "type": "string"
+        },
+        {
+          "name": "actualTurnaround",
+          "type": "number"
+        },
+        {
+          "name": "variance",
+          "type": "number"
+        },
+        {
+          "name": "varianceColor",
+          "type": "string"
+        },
+        {
+          "name": "excludedFromAverages",
+          "type": "boolean"
+        }
+      ]
+    },
+    "notes": "GET /api/v1/contracts must return the paged envelope {items, totalCount}; the table sorts by the literal column keys contractName/counterparty/status/value/startDate/endDate/owner/lastModified sent as sortBy with sortDirection 'ASC'|'DESC'. The export request sends tab as 'Ownership'|'CycleTime'|'Bottleneck'|'Turnaround' and format as 'Excel'|'PDF', and a failed export must be a 2xx body with success=false plus failureMessage, not an error status. No request/response field names were changed by this correction; the changed files are presentation-only (search-term highlighting and export format picker)."
+  },
+  "usage": {
+    "num_turns": 19,
+    "duration_ms": 182037,
+    "total_cost_usd": 0.7762954499999999,
+    "input_tokens": 3211,
+    "output_tokens": 7108,
+    "cache_creation_input_tokens": 41423,
+    "cache_read_input_tokens": 795358,
+    "is_error": false
+  }
+}

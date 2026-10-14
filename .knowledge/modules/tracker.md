@@ -4,10 +4,10 @@ title: src/features/tracker
 description: Reporting screen with four tabs (ownership, cycle-time, bottleneck, turnaround), period/filter controls, export, and estimated-turnaround override.
 resource: https://github.com/AgentMCPAgenticThree/life-cycle-frontend/tree/main/src/features/tracker
 tags: [frontend, tracker, reporting]
-generated: { by: sage-maintenance/claude-code, at: 2026-10-13T06:17:20Z }
+generated: { by: sage-maintenance/claude-code, at: 2026-10-14T06:18:30Z }
 sources:
   - id: cbm-graph
-    resource: codebase-memory-mcp project life-cycle-frontend @ 49e9748c4f7780464fab1d3fc10815d84e990e6f
+    resource: codebase-memory-mcp project life-cycle-frontend @ 27d8f22b89f10e915476e7a907812638a1f1c6bd
     title: Codebase knowledge graph
 status: stable
 ---
@@ -19,7 +19,9 @@ Flat directory (components directly under `src/features/tracker/`, like
 
 `TrackerReportControlsPanel.jsx`, `OwnershipTab.jsx`, `CycleTimeTab.jsx`,
 `BottleneckTab.jsx`, `TurnaroundTab.jsx`, `TrackerEmptyState.jsx` (+ `.test.jsx`,
-a top-10 hotspot with 4 callers), `TrackerExportButton.jsx`.
+a top-10 hotspot with 4 callers), `TrackerExportButton.jsx` (its `FORMATS`
+constant fixes the offered export formats to `Excel` and `PDF`, matching the
+`format` field of `TrackerExportRequest`).
 
 ## Hooks (`hooks/`)
 

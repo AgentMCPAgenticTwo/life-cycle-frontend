@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import StatusBadge from '@/features/contract-repository/components/StatusBadge';
 import AddFolderTagDialog from '@/features/contract-repository/components/AddFolderTagDialog';
+import HighlightedText from '@/features/contract-repository/components/HighlightedText';
 import { formatCurrency, formatDate, formatDateTime } from '@/features/contract-repository/utils/format';
 import { useAuth } from '@/shared/hooks/useAuth';
 
@@ -22,7 +23,7 @@ const FOLDER_TAG_MANAGER_ROLES = ['TENANT_ADMIN', 'CONTRACT_OWNER'];
  * the contract; clicking the folder/tag icon opens the Add Folder/Tag dialog
  * for that row without navigating away (UC8-BR-004 / UC8-BR-007 / UC8-BR-008).
  */
-export default function ContractListTable({ contracts, onRowClick, sortBy, sortDirection, onSort }) {
+export default function ContractListTable({ contracts, onRowClick, sortBy, sortDirection, onSort, searchText }) {
   const { role } = useAuth();
   const [taggingContractId, setTaggingContractId] = useState(null);
   const canManageFolderTags = FOLDER_TAG_MANAGER_ROLES.includes(role);
@@ -58,7 +59,7 @@ export default function ContractListTable({ contracts, onRowClick, sortBy, sortD
               className="cursor-pointer transition-colors hover:bg-neutral-900/70"
             >
               <td className="px-4 py-3 font-medium text-neutral-100">
-                {contract.contractName}
+                <HighlightedText text={contract.contractName} query={searchText} />
                 {contract.indexingInProgress && (
                   <span
                     className="ml-2 align-middle text-[10px] font-normal uppercase tracking-wide text-amber-400"
@@ -68,14 +69,24 @@ export default function ContractListTable({ contracts, onRowClick, sortBy, sortD
                   </span>
                 )}
               </td>
-              <td className="px-4 py-3 text-neutral-300">{contract.counterparty}</td>
+              <td className="px-4 py-3 text-neutral-300">
+                <HighlightedText text={contract.counterparty} query={searchText} />
+              </td>
               <td className="px-4 py-3">
                 <StatusBadge status={contract.status} />
               </td>
-              <td className="px-4 py-3 text-neutral-200">{formatCurrency(contract.value)}</td>
-              <td className="px-4 py-3 text-neutral-400">{formatDate(contract.startDate)}</td>
-              <td className="px-4 py-3 text-neutral-400">{formatDate(contract.endDate)}</td>
-              <td className="px-4 py-3 text-neutral-300">{contract.owner}</td>
+              <td className="px-4 py-3 text-neutral-200">
+                <HighlightedText text={formatCurrency(contract.value)} query={searchText} />
+              </td>
+              <td className="px-4 py-3 text-neutral-400">
+                <HighlightedText text={formatDate(contract.startDate)} query={searchText} />
+              </td>
+              <td className="px-4 py-3 text-neutral-400">
+                <HighlightedText text={formatDate(contract.endDate)} query={searchText} />
+              </td>
+              <td className="px-4 py-3 text-neutral-300">
+                <HighlightedText text={contract.owner} query={searchText} />
+              </td>
               <td className="px-4 py-3 text-neutral-400">{formatDateTime(contract.lastModified)}</td>
               {canManageFolderTags && (
                 <td className="px-4 py-3 text-right">

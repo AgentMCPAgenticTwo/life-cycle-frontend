@@ -1,0 +1,906 @@
+{
+  "trace_id": "facb87b33e16",
+  "branch": "ui-correction/facb87b33e16",
+  "maintenance_branch": "ui-correction/facb87b33e16",
+  "status": "SUCCESS",
+  "summary": "All checks pass (lint clean, 145 tests pass, build OK).\n\n**What I changed**\n\n*6. Template File Upload (UC3)* — `TemplateEditor.jsx` now has a **Template File** picker (shown only to users who can manage templates, i.e. Tenant Admin / Legal Reviewer, which the page already gates). It accepts PDF/DOCX up to 25 MB and sets Document Format from the picked file; anything else is blocked with exactly `Unsupported file format. Please upload a PDF or DOCX file.` (and the existing 25 MB message for oversized files). Storing the file itself is backend work — the module contract has no template-file endpoint/field, so I did not invent a payload for it.\n\n*15. Thresholds and approval rules (UC10/UC11)* —\n- `BottleneckTab` gained an **Edit Thresholds** panel for Tenant Admins: per-stage day inputs validated as positive numbers only, saved via a new `updateBottleneckThresholds` (`PUT /api/v1/tracker/bottleneck-thresholds`) in `trackerService`/`useBottleneckThresholds`, after which the tab refetches so the Stuck Flag updates immediately.\n- Approval rules are now editable and deletable: `updateApprovalRule` (`PUT .../approval-rules/{id}`) and `deleteApprovalRule` (`DELETE .../approval-rules/{id}`) in `settingsApprovalRulesService`, new `useUpdateApprovalRule` / `useDeleteApprovalRule` hooks, Edit/Delete row actions in `RoutingApprovalTab`, and `AddRuleForm` reused in edit mode. Blank fields are blocked client-side; duplicate Contract Type + Value Threshold is blocked client-side (excluding the rule being edited) and still surfaces the server's message.\n\nLeft for the backend repository: the template-file storage endpoint, `PUT /api/v1/tracker/bottleneck-thresholds`, `PUT`/`DELETE /api/v1/settings/approval-rules/{ruleId}`, and the guarantee that deleting a rule leaves in-progress approvals untouched.",
+  "files_changed": [
+    "src/features/settings-admin/AddRuleForm.jsx",
+    "src/features/settings-admin/RoutingApprovalTab.jsx",
+    "src/features/settings-admin/hooks/useDeleteApprovalRule.js",
+    "src/features/settings-admin/hooks/useUpdateApprovalRule.js",
+    "src/features/templates/components/TemplateEditor.jsx",
+    "src/features/tracker/BottleneckTab.jsx",
+    "src/features/tracker/hooks/useBottleneckThresholds.js",
+    "src/pages/SettingsAdminPage.jsx",
+    "src/services/settingsApprovalRulesService.js",
+    "src/services/trackerService.js"
+  ],
+  "lines_changed": 408,
+  "blockers": [
+    "Not applied -- Persisting the uploaded template file content: no template-file endpoint or DTO field exists in the contract; belongs to the backend repository",
+    "Not applied -- Guaranteeing a deleted rule does not affect approvals already in progress: server-side behaviour — the frontend only states it in the confirmation message",
+    "Visual verification failed: The dev server at localhost:5199 renders a completely blank white page on /settings/admin, /settings-admin-page, and even the root route, so none of the Routing & Approval edit/delete controls or Bottleneck threshold editing from the instruction are visible."
+  ],
+  "visual_check": {
+    "verdict": "fail",
+    "evidence": "The dev server at localhost:5199 renders a completely blank white page on /settings/admin, /settings-admin-page, and even the root route, so none of the Routing & Approval edit/delete controls or Bottleneck threshold editing from the instruction are visible.",
+    "screenshot_path": "/tmp/actual.png"
+  },
+  "context_sharing": {
+    "target": "frontend",
+    "branch": "ui-correction/facb87b33e16",
+    "base_path": "/api/v1",
+    "endpoints": [
+      {
+        "method": "GET",
+        "path": "/api/v1/settings/approval-rules",
+        "request_fields": [],
+        "response_fields": [
+          {
+            "name": "items",
+            "type": "array"
+          },
+          {
+            "name": "totalCount",
+            "type": "number"
+          },
+          {
+            "name": "page",
+            "type": "number"
+          },
+          {
+            "name": "pageSize",
+            "type": "number"
+          }
+        ],
+        "purpose": "List approval matrix rules"
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/settings/approval-rules",
+        "request_fields": [
+          {
+            "name": "contractType",
+            "type": "string"
+          },
+          {
+            "name": "valueThreshold",
+            "type": "number"
+          },
+          {
+            "name": "approverRole",
+            "type": "string"
+          }
+        ],
+        "response_fields": [
+          {
+            "name": "id",
+            "type": "string"
+          },
+          {
+            "name": "contractType",
+            "type": "string"
+          },
+          {
+            "name": "valueThreshold",
+            "type": "number"
+          },
+          {
+            "name": "approverRole",
+            "type": "string"
+          }
+        ],
+        "purpose": "Create an approval rule"
+      },
+      {
+        "method": "PUT",
+        "path": "/api/v1/settings/approval-rules/{ruleId}",
+        "request_fields": [
+          {
+            "name": "contractType",
+            "type": "string"
+          },
+          {
+            "name": "valueThreshold",
+            "type": "number"
+          },
+          {
+            "name": "approverRole",
+            "type": "string"
+          }
+        ],
+        "response_fields": [
+          {
+            "name": "id",
+            "type": "string"
+          },
+          {
+            "name": "contractType",
+            "type": "string"
+          },
+          {
+            "name": "valueThreshold",
+            "type": "number"
+          },
+          {
+            "name": "approverRole",
+            "type": "string"
+          }
+        ],
+        "purpose": "Edit an existing approval rule; in-progress approvals keep their routing"
+      },
+      {
+        "method": "DELETE",
+        "path": "/api/v1/settings/approval-rules/{ruleId}",
+        "request_fields": [],
+        "response_fields": [],
+        "purpose": "Delete an approval rule; in-progress approvals unaffected"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/tracker/bottleneck-thresholds",
+        "request_fields": [],
+        "response_fields": [
+          {
+            "name": "stage",
+            "type": "string"
+          },
+          {
+            "name": "thresholdDays",
+            "type": "number"
+          }
+        ],
+        "purpose": "Get tenant-configured stuck-flag thresholds per stage (array; TENANT_ADMIN only)"
+      },
+      {
+        "method": "PUT",
+        "path": "/api/v1/tracker/bottleneck-thresholds",
+        "request_fields": [
+          {
+            "name": "stage",
+            "type": "string"
+          },
+          {
+            "name": "thresholdDays",
+            "type": "number"
+          }
+        ],
+        "response_fields": [
+          {
+            "name": "stage",
+            "type": "string"
+          },
+          {
+            "name": "thresholdDays",
+            "type": "number"
+          }
+        ],
+        "purpose": "Save stuck-flag thresholds per stage; request body is a bare array of these objects"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/tracker/bottleneck",
+        "request_fields": [
+          {
+            "name": "period",
+            "type": "string"
+          },
+          {
+            "name": "contractTypeFilter",
+            "type": "string"
+          },
+          {
+            "name": "ownerFilter",
+            "type": "string"
+          },
+          {
+            "name": "dateRangeFrom",
+            "type": "date"
+          },
+          {
+            "name": "dateRangeTo",
+            "type": "date"
+          },
+          {
+            "name": "page",
+            "type": "number"
+          },
+          {
+            "name": "pageSize",
+            "type": "number"
+          }
+        ],
+        "response_fields": [
+          {
+            "name": "rows",
+            "type": "array"
+          },
+          {
+            "name": "isEmpty",
+            "type": "boolean"
+          },
+          {
+            "name": "emptyStateMessage",
+            "type": "string"
+          },
+          {
+            "name": "totalCount",
+            "type": "number"
+          },
+          {
+            "name": "page",
+            "type": "number"
+          },
+          {
+            "name": "pageSize",
+            "type": "number"
+          }
+        ],
+        "purpose": "Bottleneck tab rows (current stage, days in stage, stuck flag)"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/tracker/ownership",
+        "request_fields": [
+          {
+            "name": "period",
+            "type": "string"
+          },
+          {
+            "name": "contractTypeFilter",
+            "type": "string"
+          },
+          {
+            "name": "ownerFilter",
+            "type": "string"
+          },
+          {
+            "name": "dateRangeFrom",
+            "type": "date"
+          },
+          {
+            "name": "dateRangeTo",
+            "type": "date"
+          },
+          {
+            "name": "page",
+            "type": "number"
+          },
+          {
+            "name": "pageSize",
+            "type": "number"
+          }
+        ],
+        "response_fields": [
+          {
+            "name": "rows",
+            "type": "array"
+          },
+          {
+            "name": "isEmpty",
+            "type": "boolean"
+          },
+          {
+            "name": "emptyStateMessage",
+            "type": "string"
+          },
+          {
+            "name": "totalCount",
+            "type": "number"
+          },
+          {
+            "name": "page",
+            "type": "number"
+          },
+          {
+            "name": "pageSize",
+            "type": "number"
+          }
+        ],
+        "purpose": "Ownership tab data"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/tracker/cycle-time",
+        "request_fields": [
+          {
+            "name": "period",
+            "type": "string"
+          },
+          {
+            "name": "contractTypeFilter",
+            "type": "string"
+          },
+          {
+            "name": "ownerFilter",
+            "type": "string"
+          },
+          {
+            "name": "dateRangeFrom",
+            "type": "date"
+          },
+          {
+            "name": "dateRangeTo",
+            "type": "date"
+          },
+          {
+            "name": "page",
+            "type": "number"
+          },
+          {
+            "name": "pageSize",
+            "type": "number"
+          }
+        ],
+        "response_fields": [
+          {
+            "name": "rows",
+            "type": "array"
+          },
+          {
+            "name": "isEmpty",
+            "type": "boolean"
+          },
+          {
+            "name": "emptyStateMessage",
+            "type": "string"
+          },
+          {
+            "name": "totalCount",
+            "type": "number"
+          },
+          {
+            "name": "page",
+            "type": "number"
+          },
+          {
+            "name": "pageSize",
+            "type": "number"
+          }
+        ],
+        "purpose": "Cycle Time tab data"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/tracker/turnaround",
+        "request_fields": [
+          {
+            "name": "period",
+            "type": "string"
+          },
+          {
+            "name": "contractTypeFilter",
+            "type": "string"
+          },
+          {
+            "name": "ownerFilter",
+            "type": "string"
+          },
+          {
+            "name": "dateRangeFrom",
+            "type": "date"
+          },
+          {
+            "name": "dateRangeTo",
+            "type": "date"
+          },
+          {
+            "name": "page",
+            "type": "number"
+          },
+          {
+            "name": "pageSize",
+            "type": "number"
+          }
+        ],
+        "response_fields": [
+          {
+            "name": "rows",
+            "type": "array"
+          },
+          {
+            "name": "isEmpty",
+            "type": "boolean"
+          },
+          {
+            "name": "emptyStateMessage",
+            "type": "string"
+          },
+          {
+            "name": "totalCount",
+            "type": "number"
+          },
+          {
+            "name": "page",
+            "type": "number"
+          },
+          {
+            "name": "pageSize",
+            "type": "number"
+          }
+        ],
+        "purpose": "Turnaround tab data"
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/tracker/export",
+        "request_fields": [
+          {
+            "name": "tab",
+            "type": "string"
+          },
+          {
+            "name": "format",
+            "type": "string"
+          },
+          {
+            "name": "period",
+            "type": "string"
+          },
+          {
+            "name": "contractTypeFilter",
+            "type": "string"
+          },
+          {
+            "name": "ownerFilter",
+            "type": "string"
+          },
+          {
+            "name": "dateRangeFrom",
+            "type": "date"
+          },
+          {
+            "name": "dateRangeTo",
+            "type": "date"
+          }
+        ],
+        "response_fields": [
+          {
+            "name": "success",
+            "type": "boolean"
+          },
+          {
+            "name": "fileUrl",
+            "type": "string"
+          },
+          {
+            "name": "failureMessage",
+            "type": "string"
+          }
+        ],
+        "purpose": "Export the selected tracker tab"
+      },
+      {
+        "method": "PUT",
+        "path": "/api/v1/tracker/turnaround/{contractId}/estimated-override",
+        "request_fields": [
+          {
+            "name": "newEstimatedTurnaround",
+            "type": "number"
+          },
+          {
+            "name": "overrideReason",
+            "type": "string"
+          },
+          {
+            "name": "originalAiSuggestedValue",
+            "type": "number"
+          },
+          {
+            "name": "overriddenBy",
+            "type": "string"
+          },
+          {
+            "name": "overrideTimestamp",
+            "type": "date"
+          }
+        ],
+        "response_fields": [
+          {
+            "name": "contractId",
+            "type": "string"
+          },
+          {
+            "name": "contractName",
+            "type": "string"
+          },
+          {
+            "name": "contractType",
+            "type": "string"
+          },
+          {
+            "name": "estimatedTurnaround",
+            "type": "number"
+          },
+          {
+            "name": "estimatedTurnaroundNotSet",
+            "type": "boolean"
+          },
+          {
+            "name": "estimatedTurnaroundSource",
+            "type": "string"
+          },
+          {
+            "name": "actualTurnaround",
+            "type": "number"
+          },
+          {
+            "name": "variance",
+            "type": "number"
+          },
+          {
+            "name": "varianceColor",
+            "type": "string"
+          },
+          {
+            "name": "excludedFromAverages",
+            "type": "boolean"
+          }
+        ],
+        "purpose": "Override AI-suggested estimated turnaround"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/settings/users",
+        "request_fields": [],
+        "response_fields": [
+          {
+            "name": "items",
+            "type": "array"
+          },
+          {
+            "name": "totalCount",
+            "type": "number"
+          },
+          {
+            "name": "page",
+            "type": "number"
+          },
+          {
+            "name": "pageSize",
+            "type": "number"
+          }
+        ],
+        "purpose": "List tenant users"
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/settings/users",
+        "request_fields": [
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "email",
+            "type": "string"
+          },
+          {
+            "name": "role",
+            "type": "string"
+          },
+          {
+            "name": "initialPassword",
+            "type": "string"
+          }
+        ],
+        "response_fields": [
+          {
+            "name": "id",
+            "type": "string"
+          },
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "email",
+            "type": "string"
+          },
+          {
+            "name": "role",
+            "type": "string"
+          },
+          {
+            "name": "status",
+            "type": "string"
+          },
+          {
+            "name": "lastLogin",
+            "type": "date"
+          },
+          {
+            "name": "temporaryPassword",
+            "type": "string"
+          }
+        ],
+        "purpose": "Create a user; temporaryPassword returned once"
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/settings/users/{userId}/reset-password",
+        "request_fields": [],
+        "response_fields": [
+          {
+            "name": "temporaryPassword",
+            "type": "string"
+          }
+        ],
+        "purpose": "Issue a new temporary password for a user"
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/v1/settings/users/{userId}/status",
+        "request_fields": [
+          {
+            "name": "status",
+            "type": "enum"
+          }
+        ],
+        "response_fields": [
+          {
+            "name": "id",
+            "type": "string"
+          },
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "email",
+            "type": "string"
+          },
+          {
+            "name": "role",
+            "type": "string"
+          },
+          {
+            "name": "status",
+            "type": "string"
+          },
+          {
+            "name": "lastLogin",
+            "type": "date"
+          }
+        ],
+        "purpose": "Deactivate/reactivate a user"
+      }
+    ],
+    "types": {
+      "ApprovalRuleResponse": [
+        {
+          "name": "id",
+          "type": "string"
+        },
+        {
+          "name": "contractType",
+          "type": "string"
+        },
+        {
+          "name": "valueThreshold",
+          "type": "number"
+        },
+        {
+          "name": "approverRole",
+          "type": "string"
+        }
+      ],
+      "CreateApprovalRuleRequest": [
+        {
+          "name": "contractType",
+          "type": "string"
+        },
+        {
+          "name": "valueThreshold",
+          "type": "number"
+        },
+        {
+          "name": "approverRole",
+          "type": "string"
+        }
+      ],
+      "TrackerQueryParams": [
+        {
+          "name": "period",
+          "type": "string"
+        },
+        {
+          "name": "contractTypeFilter",
+          "type": "string"
+        },
+        {
+          "name": "ownerFilter",
+          "type": "string"
+        },
+        {
+          "name": "dateRangeFrom",
+          "type": "date"
+        },
+        {
+          "name": "dateRangeTo",
+          "type": "date"
+        },
+        {
+          "name": "page",
+          "type": "number"
+        },
+        {
+          "name": "pageSize",
+          "type": "number"
+        }
+      ],
+      "BottleneckThresholdResponse": [
+        {
+          "name": "stage",
+          "type": "string"
+        },
+        {
+          "name": "thresholdDays",
+          "type": "number"
+        }
+      ],
+      "BottleneckRowResponse": [
+        {
+          "name": "contractId",
+          "type": "string"
+        },
+        {
+          "name": "contractName",
+          "type": "string"
+        },
+        {
+          "name": "ownerName",
+          "type": "string"
+        },
+        {
+          "name": "currentStage",
+          "type": "string"
+        },
+        {
+          "name": "daysInCurrentStage",
+          "type": "number"
+        },
+        {
+          "name": "stuckFlag",
+          "type": "string"
+        }
+      ],
+      "BottleneckTabResponse": [
+        {
+          "name": "rows",
+          "type": "array"
+        },
+        {
+          "name": "isEmpty",
+          "type": "boolean"
+        },
+        {
+          "name": "emptyStateMessage",
+          "type": "string"
+        },
+        {
+          "name": "totalCount",
+          "type": "number"
+        },
+        {
+          "name": "page",
+          "type": "number"
+        },
+        {
+          "name": "pageSize",
+          "type": "number"
+        }
+      ],
+      "UserListItemResponse": [
+        {
+          "name": "id",
+          "type": "string"
+        },
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "email",
+          "type": "string"
+        },
+        {
+          "name": "role",
+          "type": "string"
+        },
+        {
+          "name": "status",
+          "type": "string"
+        },
+        {
+          "name": "lastLogin",
+          "type": "date"
+        }
+      ],
+      "CreateUserRequest": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "email",
+          "type": "string"
+        },
+        {
+          "name": "role",
+          "type": "string"
+        },
+        {
+          "name": "initialPassword",
+          "type": "string"
+        }
+      ],
+      "CreateUserResponse": [
+        {
+          "name": "id",
+          "type": "string"
+        },
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "email",
+          "type": "string"
+        },
+        {
+          "name": "role",
+          "type": "string"
+        },
+        {
+          "name": "status",
+          "type": "string"
+        },
+        {
+          "name": "lastLogin",
+          "type": "date"
+        },
+        {
+          "name": "temporaryPassword",
+          "type": "string"
+        }
+      ],
+      "UpdateUserStatusRequest": [
+        {
+          "name": "status",
+          "type": "enum"
+        }
+      ],
+      "TemplateEditorSavePayload": [
+        {
+          "name": "templateName",
+          "type": "string"
+        },
+        {
+          "name": "templateCategory",
+          "type": "string"
+        },
+        {
+          "name": "documentFormat",
+          "type": "string"
+        },
+        {
+          "name": "templateBody",
+          "type": "string"
+        }
+      ]
+    },
+    "notes": "Four endpoints here are beyond the generated module contract and must exist on the backend: PUT and DELETE /api/v1/settings/approval-rules/{ruleId}, PUT /api/v1/tracker/bottleneck-thresholds (body and response are a bare JSON array of {stage, thresholdDays}, not an envelope), and POST /api/v1/settings/users/{userId}/reset-password. The frontend tolerates either a bare array or an {items: [...]} envelope from GET/PUT /api/v1/tracker/bottleneck-thresholds; status on PATCH user status is one of 'Invited' | 'Active' | 'Deactivated'. TemplateEditor.jsx makes no network call itself — it emits the save payload listed above to its parent."
+  },
+  "usage": {
+    "num_turns": 55,
+    "duration_ms": 257787,
+    "total_cost_usd": 1.7463612999999996,
+    "input_tokens": 3668,
+    "output_tokens": 20923,
+    "cache_creation_input_tokens": 67627,
+    "cache_read_input_tokens": 3381901,
+    "is_error": false
+  }
+}

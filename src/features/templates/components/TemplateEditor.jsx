@@ -8,11 +8,13 @@ const MERGE_FIELDS = ['{Counterparty Name}', '{Contract Value}', '{Start Date}']
 // Predefined per the design's Template Category helper text.
 const TEMPLATE_CATEGORIES = ['Sales Agreement', 'NDA', 'Procurement Contract', 'Service Agreement'];
 
-// No template-file-upload endpoint exists in this module's contract, so
-// Document Format is a constrained dropdown rather than an actual file
-// upload — this inherently satisfies AF-5 (PDF/DOCX only, nothing else
-// selectable).
 const DOCUMENT_FORMATS = ['PDF', 'DOCX'];
+
+// UC3-AF-005: only PDF/DOCX up to 25 MB may be picked for a template.
+const EXTENSION_TO_FORMAT = { pdf: 'PDF', docx: 'DOCX' };
+const MAX_TEMPLATE_FILE_BYTES = 25 * 1024 * 1024;
+const UNSUPPORTED_FORMAT_MESSAGE = 'Unsupported file format. Please upload a PDF or DOCX file.';
+const OVERSIZED_FILE_MESSAGE = 'File size exceeds the 25 MB limit. Please upload a smaller file.';
 
 const MAX_NAME_LENGTH = 150;
 
@@ -49,6 +51,8 @@ export default function TemplateEditor({
     templateBody: template?.templateBody || '',
   });
   const [errors, setErrors] = useState({});
+  const [templateFile, setTemplateFile] = useState(null);
+  const [fileError, setFileError] = useState(null);
   const bodyRef = useRef(null);
 
   useEffect(() => {
@@ -59,7 +63,30 @@ export default function TemplateEditor({
       templateBody: template?.templateBody || '',
     });
     setErrors({});
+    setTemplateFile(null);
+    setFileError(null);
   }, [template?.id]);
+
+  function handleTemplateFileChange(event) {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file) return;
+
+    const format = EXTENSION_TO_FORMAT[file.name.split('.').pop()?.toLowerCase()];
+    if (!format) {
+      setTemplateFile(null);
+      setFileError(UNSUPPORTED_FORMAT_MESSAGE);
+      return;
+    }
+    if (file.size > MAX_TEMPLATE_FILE_BYTES) {
+      setTemplateFile(null);
+      setFileError(OVERSIZED_FILE_MESSAGE);
+      return;
+    }
+    setFileError(null);
+    setTemplateFile({ name: file.name, size: file.size });
+    update({ documentFormat: format });
+  }
 
   function update(partial) {
     setValues((prev) => ({ ...prev, ...partial }));
@@ -185,6 +212,28 @@ export default function TemplateEditor({
             <span className="text-[11px] text-neutral-500">PDF, DOCX</span>
             {errors.documentFormat && <span className="text-[11px] text-red-400">{errors.documentFormat}</span>}
           </label>
+
+          {!readOnly && canManage && (
+            <label className="flex flex-col gap-1">
+              <span className="text-xs font-medium text-neutral-400">Template File</span>
+              <input
+                type="file"
+                accept=".pdf,.docx"
+                onChange={handleTemplateFileChange}
+                className="rounded-md border border-neutral-700 bg-neutral-900 px-3 py-2 text-sm text-neutral-300 file:mr-3 file:rounded file:border-0 file:bg-neutral-800 file:px-3 file:py-1 file:text-xs file:text-neutral-200"
+              />
+              <span className="text-[11px] text-neutral-500">
+                {templateFile
+                  ? `${templateFile.name} — sets Document Format to ${values.documentFormat}`
+                  : 'PDF or DOCX, up to 25 MB'}
+              </span>
+              {fileError && (
+                <span role="alert" className="text-[11px] text-red-400">
+                  {fileError}
+                </span>
+              )}
+            </label>
+          )}
 
           {!isNew && (
             <label className="flex flex-col gap-1">

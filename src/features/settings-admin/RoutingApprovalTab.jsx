@@ -7,7 +7,16 @@ function formatThreshold(value) {
  * Approval matrix table with Add Rule action (UC11-GC-002 / UC11-MF-001).
  * Columns are exactly Contract Type, Value Threshold, Approver Role.
  */
-export default function RoutingApprovalTab({ rules, isLoading, error, onRetry, onAddRule }) {
+export default function RoutingApprovalTab({
+  rules,
+  isLoading,
+  error,
+  onRetry,
+  onAddRule,
+  onEditRule,
+  onDeleteRule,
+  deletingRuleId = null,
+}) {
   return (
     <section className="rounded-xl border border-neutral-800 bg-neutral-900/60 p-6">
       <div className="flex items-center justify-between">
@@ -55,9 +64,28 @@ export default function RoutingApprovalTab({ rules, isLoading, error, onRetry, o
                     <p className="text-xs text-neutral-500">Threshold &gt; {formatThreshold(rule.valueThreshold)}</p>
                   </div>
                 </div>
-                <div className="text-right">
-                  <p className="text-sm font-medium text-neutral-100">{rule.approverRole}</p>
-                  <p className="text-xs uppercase tracking-wide text-neutral-500">Approver Role</p>
+                <div className="flex items-center gap-5">
+                  <div className="text-right">
+                    <p className="text-sm font-medium text-neutral-100">{rule.approverRole}</p>
+                    <p className="text-xs uppercase tracking-wide text-neutral-500">Approver Role</p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => onEditRule?.(rule)}
+                      className="text-xs font-medium text-emerald-400 hover:text-emerald-300"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => onDeleteRule?.(rule)}
+                      disabled={deletingRuleId === rule.id}
+                      className="text-xs font-medium text-red-400 hover:text-red-300 disabled:opacity-60"
+                    >
+                      {deletingRuleId === rule.id ? 'Deleting…' : 'Delete'}
+                    </button>
+                  </div>
                 </div>
               </li>
             ))}

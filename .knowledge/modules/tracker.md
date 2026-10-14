@@ -4,10 +4,10 @@ title: src/features/tracker
 description: Reporting screen with four tabs (ownership, cycle-time, bottleneck, turnaround), period/filter controls, export, and estimated-turnaround override.
 resource: https://github.com/AgentMCPAgenticThree/life-cycle-frontend/tree/main/src/features/tracker
 tags: [frontend, tracker, reporting]
-generated: { by: sage-maintenance/claude-code, at: 2026-10-14T06:42:15Z }
+generated: { by: sage-maintenance/claude-code, at: 2026-10-14T12:33:45Z }
 sources:
   - id: cbm-graph
-    resource: codebase-memory-mcp project life-cycle-frontend @ 2a331598f5b32710821c162cc01f1bc7c536da11
+    resource: codebase-memory-mcp project life-cycle-frontend @ f7c53e07c639c02ca5973ae775bd63b8c6ccc08a
     title: Codebase knowledge graph
 status: stable
 ---
@@ -36,6 +36,17 @@ Backed by [`trackerService.js`](/modules/services.md)
 `POST /api/v1/tracker/export`,
 `PUT /api/v1/tracker/turnaround/{contractId}/estimated-override`,
 `GET`/`PUT /api/v1/tracker/bottleneck-thresholds`.
+
+### Export
+
+`useTrackerExport` treats a `TrackerExportResponse` with no `fileUrl` as a failure
+(it returns `{ ...response, success: false }` and sets `failureMessage`), and on
+success fetches the file itself through `downloadAndSave` from
+[`shared/utils/fileDownload.js`](/modules/shared.md#srcsharedutils) — `fileUrl` is an
+authenticated API route, so opening it in a tab lands on a blank SPA page. The saved
+name is `tracker-<tab>.<ext>` from `FORMAT_EXTENSIONS` (`Excel` → `xlsx`,
+`PDF` → `pdf`), used only when the response carries no `Content-Disposition`.
+`TrackerPage.handleExport` awaits it so `isExporting` spans the whole download.
 
 ### Editable stuck-flag thresholds
 

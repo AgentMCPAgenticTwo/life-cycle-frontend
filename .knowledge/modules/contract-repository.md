@@ -4,10 +4,10 @@ title: src/features/contract-repository
 description: Contract search/repository list, contract detail tabs (details, document, versions, activity log), and obligations/renewal workflows.
 resource: https://github.com/AgentMCPAgenticThree/life-cycle-frontend/tree/main/src/features/contract-repository
 tags: [frontend, contract-repository, obligations]
-generated: { by: sage-maintenance/claude-code, at: 2026-10-14T06:18:30Z }
+generated: { by: sage-maintenance/claude-code, at: 2026-10-14T12:33:45Z }
 sources:
   - id: cbm-graph
-    resource: codebase-memory-mcp project life-cycle-frontend @ 27d8f22b89f10e915476e7a907812638a1f1c6bd
+    resource: codebase-memory-mcp project life-cycle-frontend @ f7c53e07c639c02ca5973ae775bd63b8c6ccc08a
     title: Codebase knowledge graph
 status: stable
 ---
@@ -46,11 +46,20 @@ query down so matched text is highlighted in the results table.
 ## Hooks (`hooks/`)
 
 `useContractSearch.js`, `useContractDetail.js`, `useContractDocument.js`,
-`useDocumentDownload.js`, `useContractVersions.js`, `useActivityLog.js`,
+`useDocumentDownload.js` (see below), `useContractVersions.js`, `useActivityLog.js`,
 `useAssignFolderTag.js`, `useFolderTagOptions.js`, `useObligations.js`,
 `useCreateObligation.js` (top hotspot in the whole graph, 11 callers),
 `useUpdateObligation.js`, `useAcceptObligation.js`, `useRenewalPanel.js`,
 `useRenewContract.js`, `useAmendContract.js`, `useTerminateContract.js`.
+
+### Document download
+
+`useDocumentDownload.js` does not point an `<a href>` at the `fileUrl` returned by
+`getDocumentDownload` — that URL is an API route behind the auth header, so the SPA
+router answers it and the user sees a blank page. It calls `downloadAndSave` from
+[`src/shared/utils/fileDownload.js`](/modules/shared.md#srcsharedutils) instead,
+falling back to the last path segment (or `contract-document`) as the file name, and
+surfaces `RETRIEVAL_ERROR` on a rejected fetch while `isDownloading` gates the button.
 
 Backed by [`contractRepositoryService.js`](/modules/services.md) calling the
 `GET /api/v1/contracts`, `GET/PATCH /api/v1/contracts/{contractId}/obligations*`,

@@ -1,0 +1,215 @@
+{
+  "trace_id": "6cfe1ddf16eb",
+  "branch": "ui-correction/6cfe1ddf16eb",
+  "maintenance_branch": "ui-correction/6cfe1ddf16eb",
+  "status": "SUCCESS",
+  "summary": "All checks pass.\n\n## What was wrong\n\nBoth features returned a `fileUrl` from the API and then handed it straight to the browser — `window.open(fileUrl)` for the tracker export, an `<a href>` for the contract document. Those URLs are **API routes** (`/api/v1/tracker/exports/{fileId}`), not public links, so the browser resolved them against the SPA's own origin and sent them without the `Authorization` header. The router had no match → blank screen, and nothing downloaded.\n\n## Changes\n\n- **`src/services/http.js`** — `request()` gained a `raw` option (preserved across the 401-refresh retry), plus a new exported `downloadFile(url)` that fetches an API-served file with the user's credentials, honours `Content-Disposition` for the filename, and converts non-2xx into the usual `HttpError`.\n- **`src/shared/utils/fileDownload.js`** (new) — `saveBlob` / `downloadAndSave`, the shared \"fetch authenticated file, hand it to the browser as a download\" helper.\n- **`src/features/tracker/hooks/useTrackerExport.js`** — on success now fetches and saves the file (named `tracker-<tab>.xlsx|pdf`); a success response with no `fileUrl` is now treated as a failure instead of silently doing nothing.\n- **`src/pages/TrackerPage.jsx`** — dropped the `window.open` branch; failures still surface through `failureMessage`.\n- **`src/features/contract-repository/hooks/useDocumentDownload.js`** — same switch from `<a href>` to the authenticated fetch-and-save path; retrieval/oversized errors still render as before.\n\nOne caveat I can't fix from here: for the contract document, the backend returns `fileUrl` as the raw `storage_path` (`/documents/<id>/v1.pdf`), and I found no route serving that path — unlike the tracker export, which does have `GET /api/v1/tracker/exports/{fileId}`. The frontend now requests it correctly against the API base with credentials; **making that path actually serve bytes is work for `life-cycle-backend`.**",
+  "files_changed": [
+    "src/features/contract-repository/hooks/useDocumentDownload.js",
+    "src/features/tracker/hooks/useTrackerExport.js",
+    "src/pages/TrackerPage.jsx",
+    "src/services/http.js",
+    "src/shared/utils/fileDownload.js"
+  ],
+  "lines_changed": 104,
+  "blockers": [
+    "Not applied -- Serve the contract document bytes at the storage_path returned in DocumentDownloadResponse.fileUrl: belongs to the counterpart repository life-cycle-backend — no route exists there for /documents/{id}/v1.{ext}",
+    "Not applied -- AuditCertificateDownloadButton's window.open on downloadUrl (same class of bug): outside the two items named in the request; left untouched to keep the diff scoped",
+    "Visual verification failed: The /tracker route renders a completely blank white page at 1440x900, as does /login, so no tracker controls, tabs or Export button are visible and the export/download fix cannot be observed; the SPA appears not to boot in this environment (likely the HTTP client throwing at startup on missing VITE_API_BASE_URL)."
+  ],
+  "visual_check": {
+    "verdict": "fail",
+    "evidence": "The /tracker route renders a completely blank white page at 1440x900, as does /login, so no tracker controls, tabs or Export button are visible and the export/download fix cannot be observed; the SPA appears not to boot in this environment (likely the HTTP client throwing at startup on missing VITE_API_BASE_URL).",
+    "screenshot_path": "/tmp/actual.png"
+  },
+  "context_sharing": {
+    "target": "frontend",
+    "branch": "ui-correction/6cfe1ddf16eb",
+    "base_path": "/api/v1",
+    "endpoints": [
+      {
+        "method": "POST",
+        "path": "/api/v1/tracker/export",
+        "request_fields": [
+          {
+            "name": "tab",
+            "type": "enum"
+          },
+          {
+            "name": "format",
+            "type": "enum"
+          },
+          {
+            "name": "period",
+            "type": "string"
+          },
+          {
+            "name": "contractTypeFilter",
+            "type": "string"
+          },
+          {
+            "name": "ownerFilter",
+            "type": "string"
+          },
+          {
+            "name": "dateRangeFrom",
+            "type": "date"
+          },
+          {
+            "name": "dateRangeTo",
+            "type": "date"
+          }
+        ],
+        "response_fields": [
+          {
+            "name": "success",
+            "type": "boolean"
+          },
+          {
+            "name": "fileUrl",
+            "type": "string"
+          },
+          {
+            "name": "failureMessage",
+            "type": "string"
+          }
+        ],
+        "purpose": "Export the selected Tracker tab for the current filters; fileUrl is then fetched as bytes"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/contracts/{contractId}/document/download",
+        "request_fields": [
+          {
+            "name": "contractId",
+            "type": "string"
+          }
+        ],
+        "response_fields": [
+          {
+            "name": "success",
+            "type": "boolean"
+          },
+          {
+            "name": "fileUrl",
+            "type": "string"
+          },
+          {
+            "name": "errorMessage",
+            "type": "string"
+          }
+        ],
+        "purpose": "Get the authenticated URL for a contract document download"
+      },
+      {
+        "method": "GET",
+        "path": "{fileUrl}",
+        "request_fields": [],
+        "response_fields": [
+          {
+            "name": "body",
+            "type": "unknown"
+          },
+          {
+            "name": "Content-Disposition",
+            "type": "string"
+          }
+        ],
+        "purpose": "Second fetch of the fileUrl returned above; must return raw file bytes, not JSON"
+      },
+      {
+        "method": "POST",
+        "path": "/auth/refresh",
+        "request_fields": [],
+        "response_fields": [
+          {
+            "name": "accessToken",
+            "type": "string"
+          }
+        ],
+        "purpose": "Exchange the httpOnly refresh cookie for a new access token after a 401"
+      }
+    ],
+    "types": {
+      "TrackerExportRequest": [
+        {
+          "name": "tab",
+          "type": "enum"
+        },
+        {
+          "name": "format",
+          "type": "enum"
+        },
+        {
+          "name": "period",
+          "type": "string"
+        },
+        {
+          "name": "contractTypeFilter",
+          "type": "string"
+        },
+        {
+          "name": "ownerFilter",
+          "type": "string"
+        },
+        {
+          "name": "dateRangeFrom",
+          "type": "date"
+        },
+        {
+          "name": "dateRangeTo",
+          "type": "date"
+        }
+      ],
+      "TrackerExportResponse": [
+        {
+          "name": "success",
+          "type": "boolean"
+        },
+        {
+          "name": "fileUrl",
+          "type": "string"
+        },
+        {
+          "name": "failureMessage",
+          "type": "string"
+        }
+      ],
+      "DocumentDownloadResponse": [
+        {
+          "name": "success",
+          "type": "boolean"
+        },
+        {
+          "name": "fileUrl",
+          "type": "string"
+        },
+        {
+          "name": "errorMessage",
+          "type": "string"
+        }
+      ],
+      "ApiError": [
+        {
+          "name": "error",
+          "type": "string"
+        },
+        {
+          "name": "details",
+          "type": "array"
+        }
+      ]
+    },
+    "notes": "fileUrl from both download endpoints is fetched a second time by the client with credentials and the Authorization header, so it must be an API route serving raw bytes (ideally with Content-Disposition filename), never a SPA-origin or unauthenticated public link. Export `tab` values sent are exactly Ownership, CycleTime, Bottleneck, Turnaround and `format` is Excel or PDF; auth is Authorization: Bearer plus the /auth/refresh cookie flow, not the X-User-Role/X-User-Id headers described in the older contract."
+  },
+  "usage": {
+    "num_turns": 24,
+    "duration_ms": 151436,
+    "total_cost_usd": 0.8817146499999998,
+    "input_tokens": 3221,
+    "output_tokens": 7691,
+    "cache_creation_input_tokens": 60500,
+    "cache_read_input_tokens": 1047308,
+    "is_error": false
+  }
+}

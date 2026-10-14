@@ -1,7 +1,10 @@
 import { useCallback, useState } from 'react';
 import { exportTrackerTab } from '@/services/trackerService';
+import { downloadAndSave } from '@/shared/utils/fileDownload';
 
 const GENERIC_FAILURE_MESSAGE = 'Export failed. Please try again.';
+
+const FORMAT_EXTENSIONS = { Excel: 'xlsx', PDF: 'pdf' };
 
 /**
  * Triggers a Tracker export and surfaces failure without disturbing the
@@ -18,10 +21,14 @@ export function useTrackerExport() {
     setFailureMessage(null);
     try {
       const response = await exportTrackerTab(request);
-      if (!response.success) {
+      if (!response.success || !response.fileUrl) {
         setFailureMessage(response.failureMessage || GENERIC_FAILURE_MESSAGE);
-        return response;
+        return { ...response, success: false };
       }
+      // `fileUrl` is an authenticated API route, so the file is fetched with the
+      // user's credentials and saved — opening it in a tab lands on a blank page.
+      const extension = FORMAT_EXTENSIONS[request.format] || 'bin';
+      await downloadAndSave(response.fileUrl, `tracker-${String(request.tab).toLowerCase()}.${extension}`);
       return response;
     } catch {
       setFailureMessage(GENERIC_FAILURE_MESSAGE);

@@ -1,21 +1,32 @@
 ---
 type: Module
-title: src/shared/components
-description: The app shell (sidebar navigation + responsive layout) that wraps every authenticated route; no shared UI primitives exist yet.
-resource: https://github.com/AgentMCPAgenticThree/life-cycle-frontend/tree/main/src/shared/components
+title: src/shared
+description: The app shell (sidebar navigation + responsive layout) that wraps every authenticated route, plus the shared file-download util; no shared UI primitives exist yet.
+resource: https://github.com/AgentMCPAgenticThree/life-cycle-frontend/tree/main/src/shared
 tags: [frontend, shared, layout]
-generated: { by: sage-maintenance/claude-code, at: 2026-10-13T06:17:20Z }
+generated: { by: sage-maintenance/claude-code, at: 2026-10-14T12:33:45Z }
 sources:
   - id: cbm-graph
-    resource: codebase-memory-mcp project life-cycle-frontend @ 49e9748c4f7780464fab1d3fc10815d84e990e6f
+    resource: codebase-memory-mcp project life-cycle-frontend @ f7c53e07c639c02ca5973ae775bd63b8c6ccc08a
     title: Codebase knowledge graph
 status: stable
 ---
 
-## Files
+## Files (`components/`)
 
 - `AppLayout.jsx` — layout shell rendered by the `<Route element={<AppLayout />}>` wrapper group in [app-routing](/modules/app-routing.md). Holds `isSidebarOpen` state, renders `SidebarNav` plus a mobile-only hamburger header, and an `<Outlet />` for the matched page.
 - `SidebarNav.jsx` (+ `SidebarNav.test.jsx`) — persistent sidebar on `md+` screens, slide-in drawer below that breakpoint; takes `isOpen`/`onClose` from `AppLayout`.
+
+## `src/shared/utils`
+
+- `fileDownload.js` — the one place the app turns an API-served file into a browser
+  download. `saveBlob(blob, fileName)` creates an object URL, clicks a synthetic
+  `<a download>` and revokes the URL; `downloadAndSave(url, fallbackName)` wraps
+  `downloadFile` from [`services/http.js`](/modules/services.md#file-downloads) and
+  prefers the server's `Content-Disposition` name over `fallbackName`.
+  Used by [`useTrackerExport`](/modules/tracker.md) and
+  [`useDocumentDownload`](/modules/contract-repository.md). Any new "download this
+  file" path belongs here rather than in a `window.open` / `<a href>` at the call site.
 
 ## No `ui/` primitives
 

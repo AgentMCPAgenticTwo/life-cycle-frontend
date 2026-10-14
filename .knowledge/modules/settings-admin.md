@@ -4,10 +4,10 @@ title: src/features/settings-admin
 description: Tenant-admin screen -- five tabs (users, routing/approval rules, integrations, notifications, audit log) under /settings/admin.
 resource: https://github.com/AgentMCPAgenticThree/life-cycle-frontend/tree/main/src/features/settings-admin
 tags: [frontend, settings, admin]
-generated: { by: sage-maintenance/claude-code, at: 2026-10-13T06:17:20Z }
+generated: { by: sage-maintenance/claude-code, at: 2026-10-14T04:26:57Z }
 sources:
   - id: cbm-graph
-    resource: codebase-memory-mcp project life-cycle-frontend @ 49e9748c4f7780464fab1d3fc10815d84e990e6f
+    resource: codebase-memory-mcp project life-cycle-frontend @ a424f96a19e02af3710ecf5e28aaccb50f90ca52
     title: Codebase knowledge graph
 status: stable
 ---
@@ -21,6 +21,16 @@ not a `components/` subfolder, unlike other features).
 - Routing/approval tab: `RoutingApprovalTab.jsx`, `AddRuleForm.jsx`.
 - Integrations tab: `IntegrationsTab.jsx`, `IntegrationConnectForm.jsx` (+ `.test.jsx`).
 - Notifications tab: `NotificationsTab.jsx`.
+
+### Notifications tab error surface
+
+`NotificationsTab` takes four request-state props from `SettingsAdminPage` —
+`isLoading` / `error` + `onRetry` for the list fetch, and `updateError` for a
+failed toggle write. `handleToggleNotification` swallows the thrown `HttpError`
+so the page does not unmount; `useUpdateNotificationEvent` retains it and the
+page passes `updateNotificationEvent.error?.message` down as `updateError`,
+rendered as a `role="alert"` banner above the event list. `pendingEventName`
+disables only the toggles of the event currently being written.
 - Audit log tab: `AuditLogTab.jsx`, `AuditLogFilterPanel.jsx`.
 
 ## Hooks (`hooks/`)

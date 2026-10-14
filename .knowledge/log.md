@@ -1,5 +1,15 @@
 # Knowledge Update Log
 
+## 2026-10-14
+
+* **Update**: [settings-admin](/modules/settings-admin.md) — documented the
+  Notifications tab error surface (`updateError` prop, swallowed `HttpError` in
+  `handleToggleNotification`, `pendingEventName` scoping) after the UI
+  correction in `src/features/settings-admin/NotificationsTab.jsx` and
+  `src/pages/SettingsAdminPage.jsx` (mode `update`, trace `6971f6c6c93f`,
+  commit `a424f96a19e02af3710ecf5e28aaccb50f90ca52`). No structural change, so
+  overview, architecture and the index files were left untouched.
+
 ## 2026-10-13
 
 * **Creation**: Built the full `.knowledge/` bundle from scratch (mode `full`,

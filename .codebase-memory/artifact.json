@@ -1,12 +1,12 @@
 {
     "schema_version": 2,
-    "commit": "c582dcae148d28f5a54c80787bdce577d9cc5c1d",
-    "indexed_at": "2026-10-13T07:15:10Z",
+    "commit": "a424f96a19e02af3710ecf5e28aaccb50f90ca52",
+    "indexed_at": "2026-10-14T04:26:57Z",
     "project": "life-cycle-frontend",
-    "nodes": 3727,
-    "edges": 5460,
-    "original_size": 8454144,
-    "compressed_size": 1014105,
+    "nodes": 3793,
+    "edges": 5526,
+    "original_size": 8716288,
+    "compressed_size": 1019850,
     "compression_level": 9,
     "reconcile_basis": "git-clean-head"
 }

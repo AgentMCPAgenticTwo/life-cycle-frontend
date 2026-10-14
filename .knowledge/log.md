@@ -1,5 +1,15 @@
 # Knowledge Update Log
 
+## 2026-10-14
+
+* **Update**: No concept changes (mode `update`, trace `23e1e177bf33`, commit
+  `5077941b05237c9246ea5bc490bd1d251c4162cd`). The only changed file since the
+  last generation was `.github/workflows/ui-correction.yml`, a CI workflow
+  definition outside the indexed `src/` tree; `git diff` over `src` since commit
+  `49e9748c4f7780464fab1d3fc10815d84e990e6f` is empty. No module, architecture
+  or overview concept describes the CI workflows, so every concept file and
+  index was left untouched.
+
 ## 2026-10-13
 
 * **Creation**: Built the full `.knowledge/` bundle from scratch (mode `full`,

@@ -7,11 +7,10 @@ const STATUS_STYLES = {
 };
 
 function StatusBadge({ status, contractSent }) {
-  // Before the contract has been sent for signature, every signer's status
-  // is still the pre-send default ("Sent" in the SignerResponse enum, since
-  // the contract has no separate "not sent" literal) — show it as "Not Sent"
-  // until the contract actually transitions out of Approved.
-  const label = !contractSent && status === 'Sent' ? 'Not Sent' : status;
+  // A signer whose link has not gone out yet is "Pending" — before Send for
+  // Signature, or while waiting for an earlier signer in the order. Show it as
+  // "Not Sent"; Sent/Viewed/Signed/Declined are shown per signer as they are.
+  const label = status === 'Pending' || (!contractSent && status === 'Sent') ? 'Not Sent' : status;
   return (
     <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${STATUS_STYLES[status] || STATUS_STYLES.Sent}`}>
       {label}

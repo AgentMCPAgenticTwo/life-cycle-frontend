@@ -21,6 +21,9 @@ const STATUS_LABELS = {
   // emails the counterparty a secure link and OTP and flips the status — the tracker reflects it here.
   'With Counterparty': 'Sent to counterparty',
   Agreed: 'Agreed',
+  // An approver sent the contract back: it is In Negotiation again and can be re-submitted
+  // for review or marked Agreed once more.
+  'Sent Back': 'Sent back from approval',
 };
 
 export default function NegotiationTrackerPage() {

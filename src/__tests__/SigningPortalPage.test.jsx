@@ -128,7 +128,7 @@ describe('SigningPortalPage', () => {
     mockSession({ ...BASE_SESSION, otpVerified: true, signaturePadAvailable: true, declineAvailable: true });
     http.post.mockImplementation((path, body) => {
       if (path === `/api/v1/signing-sessions/${SESSION_ID}/decline`) {
-        return Promise.resolve({ signerId: BASE_SESSION.signerId, signerStatus: 'Declined', contractStatus: 'SignatureDeclined', reason: body.reason });
+        return Promise.resolve({ signerId: BASE_SESSION.signerId, signerStatus: 'Declined', contractStatus: 'Signature Declined', reason: body.reason });
       }
       return Promise.reject(new Error(`Unexpected post: ${path}`));
     });

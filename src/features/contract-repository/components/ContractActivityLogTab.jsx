@@ -8,6 +8,7 @@ const ACTION_LABELS = {
   Reject: 'Contract rejected',
   Sign: 'Contract signed',
   Tag: 'Folder/Tag updated',
+  STATUS_CHANGE: 'Status changed',
 };
 
 /**

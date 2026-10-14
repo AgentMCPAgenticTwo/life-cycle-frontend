@@ -21,6 +21,8 @@ const STATUS_OPTIONS = [
   'Pending Approval',
   'Pending Signature',
   'Executed',
+  'Rejected',
+  'Signature Declined',
 ];
 
 const FILTER_LABELS = {

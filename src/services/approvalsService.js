@@ -20,7 +20,7 @@ import { http } from '@/services/http';
  * @property {string} approvalMatrixStepLabel
  * @property {number} approvalMatrixStepNumber
  * @property {number} approvalMatrixTotalSteps
- * @property {'PendingApproval'|'Approved'|'Rejected'|'ReadyForSignature'} status
+ * @property {'PendingApproval'|'Approved'|'Rejected'|'SentBack'} status
  * @property {string} [comments]
  * @property {string} [delegateToUserId]
  * @property {string} [delegateToName]
@@ -48,10 +48,10 @@ import { http } from '@/services/http';
 /**
  * @typedef {Object} ApprovalActionResponse
  * @property {string} approvalId
- * @property {'PendingApproval'|'Approved'|'Rejected'|'ReadyForSignature'} status
+ * @property {'PendingApproval'|'Approved'|'Rejected'|'SentBack'} status
  * @property {string} approvalMatrixStepLabel
  * @property {number} approvalMatrixStepNumber
- * @property {'InNegotiation'|'PendingApproval'|'Approved'|'Rejected'|'ReadyForSignature'} contractStatus
+ * @property {'InNegotiation'|'PendingApproval'|'PendingSignature'|'Rejected'} contractStatus
  */
 
 /**
@@ -118,7 +118,7 @@ import { http } from '@/services/http';
  * @property {string} [deviationsFromStandard]
  * @property {number} [aiRiskScore]
  * @property {string} approvalMatrixStepLabel
- * @property {'PendingApproval'|'Approved'|'Rejected'|'ReadyForSignature'} status
+ * @property {'PendingApproval'|'Approved'|'Rejected'|'SentBack'} status
  */
 
 /**

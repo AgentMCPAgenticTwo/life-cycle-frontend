@@ -16,7 +16,9 @@ import { useAuth } from '@/shared/hooks/useAuth';
 // not yet added as a Signer are denied this screen entirely (UC7-BR-014).
 const ALLOWED_ROLES = ['CONTRACT_OWNER', 'LEGAL_REVIEWER', 'TENANT_ADMIN'];
 const EXECUTED_STATUS = 'Executed';
-const SENT_STATUSES = ['Sent', 'Executed'];
+// The contract stays "Pending Signature" after Send for Signature — Sent/Viewed/Signed/Declined
+// are per-signer only — so "has been sent" is read off the signers, who all start as Pending.
+const PRE_SEND_SIGNER_STATUS = 'Pending';
 
 export default function SignerListPage() {
   const { contractId } = useParams();
@@ -61,8 +63,8 @@ export default function SignerListPage() {
   const sendForSignatureEnabled = canManage && (data?.sendForSignatureEnabled ?? signers.length > 0);
   const signingOrderLocked = data?.signingOrderLocked ?? false;
   const contractStatus = contract?.status;
-  const contractSent = SENT_STATUSES.includes(contractStatus);
   const isExecuted = contractStatus === EXECUTED_STATUS;
+  const contractSent = isExecuted || signers.some((signer) => signer.signerStatus !== PRE_SEND_SIGNER_STATUS);
 
   function handleAddSigner(request) {
     setActionError(null);

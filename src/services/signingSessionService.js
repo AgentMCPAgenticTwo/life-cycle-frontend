@@ -47,7 +47,7 @@ import { http } from '@/services/http';
  * @typedef {Object} ApplySignatureResponse
  * @property {string} signerId
  * @property {'Signed'} signerStatus
- * @property {'Sent'|'Executed'} contractStatus
+ * @property {'Pending Signature'|'Executed'} contractStatus
  * @property {string|null} [nextSignerId]
  */
 
@@ -60,7 +60,7 @@ import { http } from '@/services/http';
  * @typedef {Object} DeclineSignatureResponse
  * @property {string} signerId
  * @property {'Declined'} signerStatus
- * @property {'SignatureDeclined'} contractStatus
+ * @property {'Signature Declined'} contractStatus
  * @property {string} reason
  */
 

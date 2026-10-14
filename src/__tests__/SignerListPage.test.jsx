@@ -16,7 +16,7 @@ const authState = vi.hoisted(() => ({ role: 'CONTRACT_OWNER', userId: '00000000-
 vi.mock('@/shared/hooks/useAuth', () => ({ useAuth: () => authState }));
 
 const CONTRACT_ID = '11111111-1111-1111-1111-111111111111';
-const CONTRACT = { id: CONTRACT_ID, contractName: 'Vendor Services Agreement', status: 'Approved' };
+const CONTRACT = { id: CONTRACT_ID, contractName: 'Vendor Services Agreement', status: 'Pending Signature' };
 const SETTINGS = { reminderFrequencyDays: 3, defaultSignatureProvider: 'In-built E-signature' };
 
 const SIGNER = {
@@ -28,7 +28,7 @@ const SIGNER = {
   signingOrder: 1,
   signatureMethod: 'In-built E-signature',
   reminderFrequencyDays: 3,
-  signerStatus: 'Sent',
+  signerStatus: 'Pending',
   signaturePadCompleted: false,
 };
 
@@ -74,6 +74,15 @@ describe('SignerListPage', () => {
     await waitFor(() => screen.getByText('Add Signers'));
     expect(screen.getByText(/No signers have been added yet/)).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Send for Signature' })).toHaveProperty('disabled', true);
+  });
+
+  it('shows the Signing Tracker once a signer has been sent, while the contract stays Pending Signature', async () => {
+    mockEndpoints({ signers: [{ ...SIGNER, signerStatus: 'Sent' }], sendForSignatureEnabled: false });
+    renderPage();
+
+    await waitFor(() => screen.getByText('Signing Tracker'));
+    expect(screen.getByText('Status: Pending Signature')).toBeTruthy();
+    expect(screen.getByText('Sent')).toBeTruthy();
   });
 
   it('renders signer rows and enables Send for Signature once a signer exists', async () => {

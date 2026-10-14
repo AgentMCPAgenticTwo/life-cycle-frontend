@@ -58,7 +58,7 @@ import { http } from '@/services/http';
 /**
  * @typedef {Object} SendForSignatureResponse
  * @property {string} contractId
- * @property {'Approved'|'Sent'|'SignatureConnectionFailed'} contractStatus
+ * @property {'Pending Signature'|'SignatureConnectionFailed'} contractStatus
  * @property {SignerResponse[]} signers
  * @property {string|null} [errorMessage]
  */

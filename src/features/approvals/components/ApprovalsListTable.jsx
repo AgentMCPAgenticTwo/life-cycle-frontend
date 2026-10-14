@@ -10,14 +10,14 @@ const STATUS_LABELS = {
   PendingApproval: 'Pending',
   Approved: 'Approved',
   Rejected: 'Rejected',
-  ReadyForSignature: 'Ready for Signature',
+  SentBack: 'Sent Back',
 };
 
 const STATUS_BADGE_CLASSES = {
   PendingApproval: 'bg-amber-500/20 text-amber-300',
   Approved: 'bg-emerald-500/20 text-emerald-300',
   Rejected: 'bg-red-500/20 text-red-300',
-  ReadyForSignature: 'bg-sky-500/20 text-sky-300',
+  SentBack: 'bg-neutral-700/60 text-neutral-300',
 };
 
 function riskTextColor(score) {

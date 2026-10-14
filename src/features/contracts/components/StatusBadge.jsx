@@ -4,6 +4,8 @@ const STATUS_STYLES = {
   'Pending Approval': 'bg-amber-500/20 text-amber-400',
   'Pending Signature': 'bg-cyan-500/20 text-cyan-300',
   Executed: 'bg-emerald-500/20 text-emerald-400',
+  Rejected: 'bg-red-500/20 text-red-400',
+  'Signature Declined': 'bg-red-500/20 text-red-400',
 };
 
 export default function StatusBadge({ status }) {

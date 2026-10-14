@@ -1,0 +1,1068 @@
+{
+  "trace_id": "e85937886fc6",
+  "branch": "ui-correction/e85937886fc6",
+  "maintenance_branch": "ui-correction/e85937886fc6",
+  "status": "SUCCESS",
+  "summary": "Lint, tests (145) and build all pass.\n\n**Item 14 — UC2 contract document generation.** The actual document generation (merge-field fill from the template, or taking the uploaded third-party file as-is, and storing it as Version 1) happens on the backend's `POST /api/v1/contracts`. In `src/pages/NewContractPage.jsx` the confirmation existed but was unreachable: `setSuccessMessage(...)` was immediately followed by `navigate()`, so the page unmounted before the banner rendered. The success banner now stays on screen showing \"Contract created successfully and saved as Draft\" plus which source produced Version 1 (template merge vs. uploaded third-party paper, no merge), with a **View Contract** button that performs the navigation.\n\n**Item 3 — UC5 re-check risk after external changes.** Re-scoring itself is backend work. Added `src/features/negotiation/components/RiskRecheckPanel.jsx`, rendered from `NegotiationTrackerPage` whenever the latest version's `source` is `External`. It uses only existing contract endpoints: `GET .../negotiation/compare` to identify the clauses the counterparty actually changed, and `GET .../clause-analysis` for the refreshed scores — listing a new risk score only for changed clauses and showing the updated overall score. When `analysisStatus === 'Failed'` it states that the external version is still saved and previous scores are unchanged, and offers a **Retry Risk Analysis** button wired to `POST .../retry-extraction`.\n\nReading taken: the smaller one — both items' generation/re-scoring logic belongs to the backend repository, so I implemented only the frontend surfacing of their results, inventing no new paths or fields.",
+  "files_changed": [
+    "src/features/negotiation/components/RiskRecheckPanel.jsx",
+    "src/pages/NegotiationTrackerPage.jsx",
+    "src/pages/NewContractPage.jsx"
+  ],
+  "lines_changed": 167,
+  "blockers": [
+    "Not applied -- Generating the merged document / storing the uploaded file as Version 1 (UC2): backend work — performed by POST /api/v1/contracts in the counterpart repository",
+    "Not applied -- Re-analysing only the changed clauses and recomputing the overall risk score (UC5): backend work — the frontend reads the result via the existing clause-analysis and compare endpoints",
+    "Visual verification failed: The dev server at :5199 renders a completely blank white page on /contracts/new (and on /login), even after a 4s wait, so neither the Version 1 document-generation confirmation on the New Contract screen nor the UC5 risk re-check panel is visible; the change could not be visually confirmed."
+  ],
+  "visual_check": {
+    "verdict": "fail",
+    "evidence": "The dev server at :5199 renders a completely blank white page on /contracts/new (and on /login), even after a 4s wait, so neither the Version 1 document-generation confirmation on the New Contract screen nor the UC5 risk re-check panel is visible; the change could not be visually confirmed.",
+    "screenshot_path": "/tmp/actual.png"
+  },
+  "context_sharing": {
+    "target": "frontend",
+    "branch": "ui-correction/e85937886fc6",
+    "base_path": "/api/v1",
+    "endpoints": [
+      {
+        "method": "GET",
+        "path": "/api/v1/lifecycle/contracts/{contractId}/negotiation",
+        "request_fields": [
+          {
+            "name": "contractId",
+            "type": "string"
+          }
+        ],
+        "response_fields": [
+          {
+            "name": "contractId",
+            "type": "string"
+          },
+          {
+            "name": "routingType",
+            "type": "enum"
+          },
+          {
+            "name": "internalReviewers",
+            "type": "array"
+          },
+          {
+            "name": "externalPartyName",
+            "type": "string"
+          },
+          {
+            "name": "externalPartyEmail",
+            "type": "string"
+          },
+          {
+            "name": "assignedDate",
+            "type": "date"
+          },
+          {
+            "name": "dueDate",
+            "type": "date"
+          },
+          {
+            "name": "negotiationStatus",
+            "type": "enum"
+          },
+          {
+            "name": "versionNumber",
+            "type": "number"
+          },
+          {
+            "name": "overdueFlag",
+            "type": "boolean"
+          },
+          {
+            "name": "versions",
+            "type": "array"
+          },
+          {
+            "name": "comments",
+            "type": "array"
+          }
+        ],
+        "purpose": "Load the negotiation tracker (status, reviewers, versions, comments)"
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/lifecycle/contracts/{contractId}/negotiation/routing",
+        "request_fields": [
+          {
+            "name": "routingType",
+            "type": "enum"
+          },
+          {
+            "name": "internalReviewers",
+            "type": "array"
+          },
+          {
+            "name": "externalPartyName",
+            "type": "string"
+          },
+          {
+            "name": "externalPartyEmail",
+            "type": "string"
+          },
+          {
+            "name": "assignedDate",
+            "type": "date"
+          },
+          {
+            "name": "dueDate",
+            "type": "date"
+          }
+        ],
+        "response_fields": [
+          {
+            "name": "contractId",
+            "type": "string"
+          },
+          {
+            "name": "routingType",
+            "type": "enum"
+          },
+          {
+            "name": "internalReviewers",
+            "type": "array"
+          },
+          {
+            "name": "externalPartyName",
+            "type": "string"
+          },
+          {
+            "name": "externalPartyEmail",
+            "type": "string"
+          },
+          {
+            "name": "assignedDate",
+            "type": "date"
+          },
+          {
+            "name": "dueDate",
+            "type": "date"
+          },
+          {
+            "name": "negotiationStatus",
+            "type": "enum"
+          },
+          {
+            "name": "versionNumber",
+            "type": "number"
+          }
+        ],
+        "purpose": "Submit routing configuration for Send for Review"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/lifecycle/contracts/{contractId}/negotiation/compare",
+        "request_fields": [
+          {
+            "name": "versionA",
+            "type": "number"
+          },
+          {
+            "name": "versionB",
+            "type": "number"
+          }
+        ],
+        "response_fields": [
+          {
+            "name": "versionA",
+            "type": "object"
+          },
+          {
+            "name": "versionB",
+            "type": "object"
+          },
+          {
+            "name": "differences",
+            "type": "array"
+          },
+          {
+            "name": "comments",
+            "type": "array"
+          },
+          {
+            "name": "negotiationStatus",
+            "type": "enum"
+          },
+          {
+            "name": "routingType",
+            "type": "enum"
+          },
+          {
+            "name": "internalReviewers",
+            "type": "array"
+          },
+          {
+            "name": "externalPartyName",
+            "type": "string"
+          },
+          {
+            "name": "externalPartyEmail",
+            "type": "string"
+          },
+          {
+            "name": "assignedDate",
+            "type": "date"
+          },
+          {
+            "name": "dueDate",
+            "type": "date"
+          }
+        ],
+        "purpose": "Diff two versions; drives which clauses get re-scored after an external redline"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/lifecycle/contracts/{contractId}/clause-analysis",
+        "request_fields": [
+          {
+            "name": "contractId",
+            "type": "string"
+          }
+        ],
+        "response_fields": [
+          {
+            "name": "contractId",
+            "type": "string"
+          },
+          {
+            "name": "fileFormatSupported",
+            "type": "boolean"
+          },
+          {
+            "name": "analysisStatus",
+            "type": "string"
+          },
+          {
+            "name": "clauses",
+            "type": "array"
+          },
+          {
+            "name": "overallContractRiskScore",
+            "type": "string"
+          },
+          {
+            "name": "metadata",
+            "type": "object"
+          },
+          {
+            "name": "proceedToNegotiationEnabled",
+            "type": "boolean"
+          },
+          {
+            "name": "askAiEnabled",
+            "type": "boolean"
+          }
+        ],
+        "purpose": "Fetch clause risk scores and overall contract risk score"
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/lifecycle/contracts/{contractId}/retry-extraction",
+        "request_fields": [
+          {
+            "name": "contractId",
+            "type": "string"
+          }
+        ],
+        "response_fields": [
+          {
+            "name": "contractId",
+            "type": "string"
+          },
+          {
+            "name": "fileFormatSupported",
+            "type": "boolean"
+          },
+          {
+            "name": "analysisStatus",
+            "type": "string"
+          },
+          {
+            "name": "clauses",
+            "type": "array"
+          },
+          {
+            "name": "overallContractRiskScore",
+            "type": "string"
+          },
+          {
+            "name": "metadata",
+            "type": "object"
+          },
+          {
+            "name": "proceedToNegotiationEnabled",
+            "type": "boolean"
+          },
+          {
+            "name": "askAiEnabled",
+            "type": "boolean"
+          }
+        ],
+        "purpose": "Retry AI re-analysis after analysisStatus === 'Failed'"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/templates",
+        "request_fields": [
+          {
+            "name": "contractType",
+            "type": "string"
+          },
+          {
+            "name": "industry",
+            "type": "string"
+          },
+          {
+            "name": "status",
+            "type": "string"
+          }
+        ],
+        "response_fields": [
+          {
+            "name": "items",
+            "type": "array"
+          }
+        ],
+        "purpose": "List active templates for the selected contract type/industry"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/users",
+        "request_fields": [
+          {
+            "name": "role",
+            "type": "string"
+          }
+        ],
+        "response_fields": [
+          {
+            "name": "items",
+            "type": "array"
+          }
+        ],
+        "purpose": "List users for the Contract Owner dropdown (role=CONTRACT_OWNER)"
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/counterparties",
+        "request_fields": [
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "email",
+            "type": "string"
+          },
+          {
+            "name": "company",
+            "type": "string"
+          },
+          {
+            "name": "address",
+            "type": "string"
+          },
+          {
+            "name": "gstTaxId",
+            "type": "string"
+          }
+        ],
+        "response_fields": [
+          {
+            "name": "id",
+            "type": "string"
+          },
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "email",
+            "type": "string"
+          },
+          {
+            "name": "company",
+            "type": "string"
+          },
+          {
+            "name": "address",
+            "type": "string"
+          },
+          {
+            "name": "gstTaxId",
+            "type": "string"
+          }
+        ],
+        "purpose": "Create a counterparty when none was selected from search"
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/contracts",
+        "request_fields": [
+          {
+            "name": "contractType",
+            "type": "string"
+          },
+          {
+            "name": "industry",
+            "type": "string"
+          },
+          {
+            "name": "templateId",
+            "type": "string"
+          },
+          {
+            "name": "thirdPartyPaperFileId",
+            "type": "string"
+          },
+          {
+            "name": "counterpartySearch",
+            "type": "string"
+          },
+          {
+            "name": "counterpartyId",
+            "type": "string"
+          },
+          {
+            "name": "counterpartyName",
+            "type": "string"
+          },
+          {
+            "name": "counterpartyEmail",
+            "type": "string"
+          },
+          {
+            "name": "counterpartyCompany",
+            "type": "string"
+          },
+          {
+            "name": "counterpartyAddress",
+            "type": "string"
+          },
+          {
+            "name": "counterpartyGstTaxId",
+            "type": "string"
+          },
+          {
+            "name": "contractOwnerId",
+            "type": "string"
+          },
+          {
+            "name": "contractValue",
+            "type": "number"
+          },
+          {
+            "name": "currency",
+            "type": "string"
+          },
+          {
+            "name": "startDate",
+            "type": "date"
+          },
+          {
+            "name": "endDate",
+            "type": "date"
+          },
+          {
+            "name": "renewalType",
+            "type": "string"
+          },
+          {
+            "name": "noticePeriod",
+            "type": "number"
+          },
+          {
+            "name": "dueDate",
+            "type": "date"
+          }
+        ],
+        "response_fields": [
+          {
+            "name": "id",
+            "type": "string"
+          },
+          {
+            "name": "contractName",
+            "type": "string"
+          },
+          {
+            "name": "status",
+            "type": "string"
+          }
+        ],
+        "purpose": "Create a contract saved as Draft"
+      }
+    ],
+    "types": {
+      "NegotiationTrackerResponse": [
+        {
+          "name": "contractId",
+          "type": "string"
+        },
+        {
+          "name": "routingType",
+          "type": "enum"
+        },
+        {
+          "name": "internalReviewers",
+          "type": "array"
+        },
+        {
+          "name": "externalPartyName",
+          "type": "string"
+        },
+        {
+          "name": "externalPartyEmail",
+          "type": "string"
+        },
+        {
+          "name": "assignedDate",
+          "type": "date"
+        },
+        {
+          "name": "dueDate",
+          "type": "date"
+        },
+        {
+          "name": "negotiationStatus",
+          "type": "enum"
+        },
+        {
+          "name": "versionNumber",
+          "type": "number"
+        },
+        {
+          "name": "overdueFlag",
+          "type": "boolean"
+        },
+        {
+          "name": "versions",
+          "type": "array"
+        },
+        {
+          "name": "comments",
+          "type": "array"
+        }
+      ],
+      "VersionSummaryResponse": [
+        {
+          "name": "versionNumber",
+          "type": "number"
+        },
+        {
+          "name": "createdAt",
+          "type": "date"
+        },
+        {
+          "name": "createdBy",
+          "type": "string"
+        },
+        {
+          "name": "source",
+          "type": "enum"
+        }
+      ],
+      "ReviewerResponse": [
+        {
+          "name": "reviewerId",
+          "type": "string"
+        },
+        {
+          "name": "reviewerName",
+          "type": "string"
+        },
+        {
+          "name": "role",
+          "type": "string"
+        },
+        {
+          "name": "isMandatory",
+          "type": "boolean"
+        },
+        {
+          "name": "reviewStatus",
+          "type": "enum"
+        },
+        {
+          "name": "submittedAt",
+          "type": "date"
+        },
+        {
+          "name": "sequenceOrder",
+          "type": "number"
+        }
+      ],
+      "CommentResponse": [
+        {
+          "name": "commentId",
+          "type": "string"
+        },
+        {
+          "name": "clauseId",
+          "type": "string"
+        },
+        {
+          "name": "commentText",
+          "type": "string"
+        },
+        {
+          "name": "authorName",
+          "type": "string"
+        },
+        {
+          "name": "createdAt",
+          "type": "date"
+        },
+        {
+          "name": "versionNumber",
+          "type": "number"
+        }
+      ],
+      "RoutingRequest": [
+        {
+          "name": "routingType",
+          "type": "enum"
+        },
+        {
+          "name": "internalReviewers",
+          "type": "array"
+        },
+        {
+          "name": "externalPartyName",
+          "type": "string"
+        },
+        {
+          "name": "externalPartyEmail",
+          "type": "string"
+        },
+        {
+          "name": "assignedDate",
+          "type": "date"
+        },
+        {
+          "name": "dueDate",
+          "type": "date"
+        }
+      ],
+      "RoutingResponse": [
+        {
+          "name": "contractId",
+          "type": "string"
+        },
+        {
+          "name": "routingType",
+          "type": "enum"
+        },
+        {
+          "name": "internalReviewers",
+          "type": "array"
+        },
+        {
+          "name": "externalPartyName",
+          "type": "string"
+        },
+        {
+          "name": "externalPartyEmail",
+          "type": "string"
+        },
+        {
+          "name": "assignedDate",
+          "type": "date"
+        },
+        {
+          "name": "dueDate",
+          "type": "date"
+        },
+        {
+          "name": "negotiationStatus",
+          "type": "enum"
+        },
+        {
+          "name": "versionNumber",
+          "type": "number"
+        }
+      ],
+      "CompareVersionsResponse": [
+        {
+          "name": "versionA",
+          "type": "object"
+        },
+        {
+          "name": "versionB",
+          "type": "object"
+        },
+        {
+          "name": "differences",
+          "type": "array"
+        },
+        {
+          "name": "comments",
+          "type": "array"
+        },
+        {
+          "name": "negotiationStatus",
+          "type": "enum"
+        },
+        {
+          "name": "routingType",
+          "type": "enum"
+        },
+        {
+          "name": "internalReviewers",
+          "type": "array"
+        },
+        {
+          "name": "externalPartyName",
+          "type": "string"
+        },
+        {
+          "name": "externalPartyEmail",
+          "type": "string"
+        },
+        {
+          "name": "assignedDate",
+          "type": "date"
+        },
+        {
+          "name": "dueDate",
+          "type": "date"
+        }
+      ],
+      "ClauseDiffResponse": [
+        {
+          "name": "clauseId",
+          "type": "string"
+        },
+        {
+          "name": "clauseCategory",
+          "type": "string"
+        },
+        {
+          "name": "textA",
+          "type": "string"
+        },
+        {
+          "name": "textB",
+          "type": "string"
+        },
+        {
+          "name": "changeType",
+          "type": "enum"
+        }
+      ],
+      "ClauseAnalysisResponse": [
+        {
+          "name": "contractId",
+          "type": "string"
+        },
+        {
+          "name": "fileFormatSupported",
+          "type": "boolean"
+        },
+        {
+          "name": "analysisStatus",
+          "type": "string"
+        },
+        {
+          "name": "clauses",
+          "type": "array"
+        },
+        {
+          "name": "overallContractRiskScore",
+          "type": "string"
+        },
+        {
+          "name": "metadata",
+          "type": "object"
+        },
+        {
+          "name": "proceedToNegotiationEnabled",
+          "type": "boolean"
+        },
+        {
+          "name": "askAiEnabled",
+          "type": "boolean"
+        }
+      ],
+      "ClauseResponse": [
+        {
+          "name": "clauseId",
+          "type": "string"
+        },
+        {
+          "name": "clauseText",
+          "type": "string"
+        },
+        {
+          "name": "clauseCategory",
+          "type": "string"
+        },
+        {
+          "name": "libraryMatchStatus",
+          "type": "string"
+        },
+        {
+          "name": "riskScore",
+          "type": "string"
+        },
+        {
+          "name": "aiExplanation",
+          "type": "string"
+        },
+        {
+          "name": "suggestedText",
+          "type": "string"
+        },
+        {
+          "name": "status",
+          "type": "string"
+        },
+        {
+          "name": "isMandatory",
+          "type": "boolean"
+        },
+        {
+          "name": "mandatoryClauseFlag",
+          "type": "boolean"
+        },
+        {
+          "name": "mandatoryClauseFlagLabel",
+          "type": "string"
+        },
+        {
+          "name": "version",
+          "type": "number"
+        },
+        {
+          "name": "updatedAt",
+          "type": "date"
+        },
+        {
+          "name": "updatedBy",
+          "type": "string"
+        }
+      ],
+      "CreateContractRequest": [
+        {
+          "name": "contractType",
+          "type": "string"
+        },
+        {
+          "name": "industry",
+          "type": "string"
+        },
+        {
+          "name": "templateId",
+          "type": "string"
+        },
+        {
+          "name": "thirdPartyPaperFileId",
+          "type": "string"
+        },
+        {
+          "name": "counterpartySearch",
+          "type": "string"
+        },
+        {
+          "name": "counterpartyId",
+          "type": "string"
+        },
+        {
+          "name": "counterpartyName",
+          "type": "string"
+        },
+        {
+          "name": "counterpartyEmail",
+          "type": "string"
+        },
+        {
+          "name": "counterpartyCompany",
+          "type": "string"
+        },
+        {
+          "name": "counterpartyAddress",
+          "type": "string"
+        },
+        {
+          "name": "counterpartyGstTaxId",
+          "type": "string"
+        },
+        {
+          "name": "contractOwnerId",
+          "type": "string"
+        },
+        {
+          "name": "contractValue",
+          "type": "number"
+        },
+        {
+          "name": "currency",
+          "type": "string"
+        },
+        {
+          "name": "startDate",
+          "type": "date"
+        },
+        {
+          "name": "endDate",
+          "type": "date"
+        },
+        {
+          "name": "renewalType",
+          "type": "string"
+        },
+        {
+          "name": "noticePeriod",
+          "type": "number"
+        },
+        {
+          "name": "dueDate",
+          "type": "date"
+        }
+      ],
+      "ContractResponse": [
+        {
+          "name": "id",
+          "type": "string"
+        },
+        {
+          "name": "contractName",
+          "type": "string"
+        },
+        {
+          "name": "status",
+          "type": "string"
+        }
+      ],
+      "CreateCounterpartyRequest": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "email",
+          "type": "string"
+        },
+        {
+          "name": "company",
+          "type": "string"
+        },
+        {
+          "name": "address",
+          "type": "string"
+        },
+        {
+          "name": "gstTaxId",
+          "type": "string"
+        }
+      ],
+      "CounterpartyResponse": [
+        {
+          "name": "id",
+          "type": "string"
+        },
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "email",
+          "type": "string"
+        },
+        {
+          "name": "company",
+          "type": "string"
+        },
+        {
+          "name": "address",
+          "type": "string"
+        },
+        {
+          "name": "gstTaxId",
+          "type": "string"
+        }
+      ],
+      "TemplateListResponse": [
+        {
+          "name": "items",
+          "type": "array"
+        }
+      ],
+      "TemplateResponse": [
+        {
+          "name": "id",
+          "type": "string"
+        },
+        {
+          "name": "templateName",
+          "type": "string"
+        },
+        {
+          "name": "templateCategory",
+          "type": "string"
+        },
+        {
+          "name": "documentFormat",
+          "type": "string"
+        },
+        {
+          "name": "templateBody",
+          "type": "string"
+        },
+        {
+          "name": "status",
+          "type": "string"
+        },
+        {
+          "name": "lastModifiedBy",
+          "type": "string"
+        },
+        {
+          "name": "lastModifiedDate",
+          "type": "date"
+        }
+      ],
+      "UserOptionListResponse": [
+        {
+          "name": "items",
+          "type": "array"
+        }
+      ],
+      "UserOptionResponse": [
+        {
+          "name": "id",
+          "type": "string"
+        },
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "email",
+          "type": "string"
+        },
+        {
+          "name": "role",
+          "type": "string"
+        }
+      ]
+    },
+    "notes": "The UC5 risk re-check is built entirely from existing endpoints — there is no dedicated re-check endpoint; the UI diffs versions via GET .../negotiation/compare (versionA/versionB query params, which the module contract does not document) and reads scores from GET .../clause-analysis, treating analysisStatus === 'Failed' as 're-analysis failed' and POST .../retry-extraction as the retry. It depends on VersionSummaryResponse.source being exactly 'External'/'Internal' and ClauseDiffResponse.clauseId being populated and matching ClauseResponse.clauseId, otherwise no clause shows as re-scored. GET /api/v1/lifecycle/contracts/{contractId}/negotiation must return 404 (not 200 with empty body) when routing has not been configured yet."
+  },
+  "usage": {
+    "num_turns": 24,
+    "duration_ms": 232387,
+    "total_cost_usd": 1.2539082499999998,
+    "input_tokens": 3219,
+    "output_tokens": 10260,
+    "cache_creation_input_tokens": 74389,
+    "cache_read_input_tokens": 1471125,
+    "is_error": false
+  }
+}

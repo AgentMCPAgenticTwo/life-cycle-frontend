@@ -59,6 +59,7 @@ export default function NewContractPage() {
   const [fieldErrors, setFieldErrors] = useState({});
   const [formError, setFormError] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
+  const [createdContract, setCreatedContract] = useState(null);
 
   const assignedDate = useMemo(() => new Date(), []);
   const assignedDateIso = useMemo(() => toIsoDate(toDisplayDate(assignedDate)), [assignedDate]);
@@ -160,6 +161,7 @@ export default function NewContractPage() {
 
   async function handleSave() {
     setSuccessMessage(null);
+    setCreatedContract(null);
     const { errors, message } = validate();
     setFieldErrors(errors);
     setFormError(message);
@@ -205,10 +207,19 @@ export default function NewContractPage() {
         noticePeriod: formData.noticePeriod ? Number(formData.noticePeriod) : undefined,
         dueDate: toIsoDate(formData.dueDate),
       });
+      // UC2-MF-002: the document is generated on save — merge fields filled from
+      // the selected template, or the uploaded third party paper taken as-is —
+      // and stored as Version 1. Surface which source produced Version 1 so the
+      // confirmation is visible before leaving the form.
+      const generatedFrom = formData.thirdPartyPaperFileId
+        ? `Uploaded third party paper "${uploadedFile?.fileName || 'document'}" saved as Version 1 without merge.`
+        : `Document generated from template "${
+            templates?.items?.find((t) => t.id === formData.templateId)?.templateName || 'selected template'
+          }" with merge fields filled and saved as Version 1.`;
       setSuccessMessage('Contract created successfully and saved as Draft');
+      setCreatedContract({ id: response.id, generatedFrom });
       reset();
       setUploadedFile(null);
-      navigate(`/contracts/${response.id}`);
     } catch (err) {
       setFormError(err.message || 'Unable to create contract. Please try again.');
     }
@@ -265,8 +276,20 @@ export default function NewContractPage() {
 
       <main className="flex flex-col gap-6 px-8 py-6">
         {successMessage && (
-          <div role="status" className="rounded-lg border border-emerald-600/40 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-300">
-            {successMessage}
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-emerald-600/40 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-300">
+            <div role="status">
+              <p className="font-medium">{successMessage}</p>
+              {createdContract && <p className="mt-0.5 text-xs text-emerald-200/80">{createdContract.generatedFrom}</p>}
+            </div>
+            {createdContract && (
+              <button
+                type="button"
+                onClick={() => navigate(`/contracts/${createdContract.id}`)}
+                className="rounded-md bg-emerald-500 px-3 py-1.5 text-xs font-semibold text-neutral-950 hover:bg-emerald-400"
+              >
+                View Contract
+              </button>
+            )}
           </div>
         )}
 

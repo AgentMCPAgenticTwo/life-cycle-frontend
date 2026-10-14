@@ -153,6 +153,8 @@ export default function SettingsAdminPage() {
       await updateNotificationEvent.updateEvent(eventName, toggles);
       setSuccessMessage('Notification settings updated');
       await notificationsResult.refetch();
+    } catch {
+      // The hook retains the HttpError; NotificationsTab renders it inline.
     } finally {
       setPendingEventName(null);
     }
@@ -263,6 +265,7 @@ export default function SettingsAdminPage() {
             onRetry={notificationsResult.refetch}
             onToggle={handleToggleNotification}
             pendingEventName={pendingEventName}
+            updateError={updateNotificationEvent.error?.message}
           />
         )}
 

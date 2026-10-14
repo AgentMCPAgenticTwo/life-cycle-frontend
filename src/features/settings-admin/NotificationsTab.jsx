@@ -3,7 +3,15 @@
  * toggles default On until a Tenant Admin explicitly turns one off; toggling
  * one never affects the other.
  */
-export default function NotificationsTab({ events, isLoading, error, onRetry, onToggle, pendingEventName }) {
+export default function NotificationsTab({
+  events,
+  isLoading,
+  error,
+  onRetry,
+  onToggle,
+  pendingEventName,
+  updateError,
+}) {
   return (
     <section className="rounded-xl border border-neutral-800 bg-neutral-900/60 p-6">
       <div>
@@ -12,7 +20,16 @@ export default function NotificationsTab({ events, isLoading, error, onRetry, on
       </div>
 
       <div className="mt-5">
-        {isLoading && <p className="text-sm text-neutral-500">Loading notification settings…</p>}
+        {updateError && (
+          <div
+            role="alert"
+            className="mb-4 rounded-lg border border-red-600/40 bg-red-500/10 px-4 py-3 text-sm text-red-300"
+          >
+            {updateError}
+          </div>
+        )}
+
+        {isLoading &&<p className="text-sm text-neutral-500">Loading notification settings…</p>}
 
         {!isLoading && error && (
           <div role="alert" className="rounded-lg border border-red-600/40 bg-red-500/10 px-4 py-3 text-sm text-red-300">

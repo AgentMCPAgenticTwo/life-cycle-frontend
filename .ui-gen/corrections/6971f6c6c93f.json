@@ -1,0 +1,602 @@
+{
+  "trace_id": "6971f6c6c93f",
+  "branch": "ui-correction/6971f6c6c93f",
+  "maintenance_branch": "ui-correction/6971f6c6c93f",
+  "status": "SUCCESS",
+  "summary": "The notification *sending* service (emailing/in-app alerts on approve, reject, send back, ready for signature, signing link, decline, executed, new user invite; gating on the Settings toggle; logging email failures without failing the action) is backend work and lives in the other repository — there is nothing to stub for it here.\n\nOn this side, the Settings > Notifications tab that owns those toggles already existed and is wired to the real `GET/PUT /api/v1/settings/notifications` endpoints, so I left it in place. The one real gap was that a failed toggle update threw an unhandled rejection and showed the user nothing; `SettingsAdminPage` now catches it and `NotificationsTab` renders the API's error message inline. Lint, build and all 145 tests pass.\n\nReading taken: the frontend's share of this item is the toggle configuration UI, so I only corrected its error surfacing rather than inventing client-side notification dispatch.",
+  "files_changed": [
+    "src/features/settings-admin/NotificationsTab.jsx",
+    "src/pages/SettingsAdminPage.jsx"
+  ],
+  "lines_changed": 24,
+  "blockers": [
+    "Not applied -- Single service sending all emails and in-app alerts for approve/reject/send back/ready for signature/signing link/decline/executed/new user invite: backend responsibility — lives in the separate API repository",
+    "Not applied -- Gate each send on the event's toggle being ON in Settings > Notifications: backend enforcement; the frontend already exposes the toggles via GET/PUT /api/v1/settings/notifications",
+    "Not applied -- Email failure does not fail the action and is logged: backend responsibility",
+    "Not applied -- Settings > Notifications tab with Email/In-App toggles: already true in this repository",
+    "Visual verification failed: The app renders completely blank at every route tried on the dev server (/settings/admin, /settings-admin-page, and even /login), so the Notifications tab with Email/In-App toggles is not visible at all; nothing about the instruction could be confirmed on screen."
+  ],
+  "visual_check": {
+    "verdict": "fail",
+    "evidence": "The app renders completely blank at every route tried on the dev server (/settings/admin, /settings-admin-page, and even /login), so the Notifications tab with Email/In-App toggles is not visible at all; nothing about the instruction could be confirmed on screen.",
+    "screenshot_path": "/tmp/actual.png"
+  },
+  "context_sharing": {
+    "target": "frontend",
+    "branch": "ui-correction/6971f6c6c93f",
+    "base_path": "/api/v1/settings",
+    "endpoints": [
+      {
+        "method": "GET",
+        "path": "/api/v1/settings/notifications",
+        "request_fields": [],
+        "response_fields": [
+          {
+            "name": "eventName",
+            "type": "string"
+          },
+          {
+            "name": "emailToggle",
+            "type": "boolean"
+          },
+          {
+            "name": "inAppToggle",
+            "type": "boolean"
+          }
+        ],
+        "purpose": "List notification events with Email/In-App toggles (returns a bare array)"
+      },
+      {
+        "method": "PUT",
+        "path": "/api/v1/settings/notifications/{eventName}",
+        "request_fields": [
+          {
+            "name": "emailToggle",
+            "type": "boolean"
+          },
+          {
+            "name": "inAppToggle",
+            "type": "boolean"
+          }
+        ],
+        "response_fields": [
+          {
+            "name": "eventName",
+            "type": "string"
+          },
+          {
+            "name": "emailToggle",
+            "type": "boolean"
+          },
+          {
+            "name": "inAppToggle",
+            "type": "boolean"
+          }
+        ],
+        "purpose": "Update one event's Email and/or In-App toggle"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/settings/users",
+        "request_fields": [],
+        "response_fields": [
+          {
+            "name": "items",
+            "type": "array"
+          },
+          {
+            "name": "totalCount",
+            "type": "number"
+          },
+          {
+            "name": "page",
+            "type": "number"
+          },
+          {
+            "name": "pageSize",
+            "type": "number"
+          }
+        ],
+        "purpose": "List tenant users"
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/settings/users",
+        "request_fields": [
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "email",
+            "type": "string"
+          },
+          {
+            "name": "role",
+            "type": "string"
+          },
+          {
+            "name": "initialPassword",
+            "type": "string"
+          }
+        ],
+        "response_fields": [
+          {
+            "name": "id",
+            "type": "string"
+          },
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "email",
+            "type": "string"
+          },
+          {
+            "name": "role",
+            "type": "string"
+          },
+          {
+            "name": "status",
+            "type": "string"
+          },
+          {
+            "name": "lastLogin",
+            "type": "date"
+          },
+          {
+            "name": "temporaryPassword",
+            "type": "string"
+          }
+        ],
+        "purpose": "Create a user; returns a one-time temporaryPassword"
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/settings/users/{userId}/reset-password",
+        "request_fields": [],
+        "response_fields": [
+          {
+            "name": "temporaryPassword",
+            "type": "string"
+          }
+        ],
+        "purpose": "Reset a user's password and return the new temporary password"
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/v1/settings/users/{userId}/status",
+        "request_fields": [
+          {
+            "name": "status",
+            "type": "enum"
+          }
+        ],
+        "response_fields": [
+          {
+            "name": "id",
+            "type": "string"
+          },
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "email",
+            "type": "string"
+          },
+          {
+            "name": "role",
+            "type": "string"
+          },
+          {
+            "name": "status",
+            "type": "string"
+          },
+          {
+            "name": "lastLogin",
+            "type": "date"
+          }
+        ],
+        "purpose": "Deactivate or reactivate a user"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/settings/approval-rules",
+        "request_fields": [],
+        "response_fields": [
+          {
+            "name": "items",
+            "type": "array"
+          },
+          {
+            "name": "totalCount",
+            "type": "number"
+          },
+          {
+            "name": "page",
+            "type": "number"
+          },
+          {
+            "name": "pageSize",
+            "type": "number"
+          }
+        ],
+        "purpose": "List approval matrix rules"
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/settings/approval-rules",
+        "request_fields": [
+          {
+            "name": "contractType",
+            "type": "string"
+          },
+          {
+            "name": "valueThreshold",
+            "type": "number"
+          },
+          {
+            "name": "approverRole",
+            "type": "string"
+          }
+        ],
+        "response_fields": [
+          {
+            "name": "id",
+            "type": "string"
+          },
+          {
+            "name": "contractType",
+            "type": "string"
+          },
+          {
+            "name": "valueThreshold",
+            "type": "number"
+          },
+          {
+            "name": "approverRole",
+            "type": "string"
+          }
+        ],
+        "purpose": "Create an approval rule"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/settings/integrations",
+        "request_fields": [],
+        "response_fields": [
+          {
+            "name": "integrationName",
+            "type": "string"
+          },
+          {
+            "name": "connectionStatus",
+            "type": "string"
+          },
+          {
+            "name": "maskedCredential",
+            "type": "string"
+          }
+        ],
+        "purpose": "List integration cards (bare array)"
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/settings/integrations/{integrationName}/connect",
+        "request_fields": [
+          {
+            "name": "credentials",
+            "type": "object"
+          }
+        ],
+        "response_fields": [
+          {
+            "name": "integrationName",
+            "type": "string"
+          },
+          {
+            "name": "connectionStatus",
+            "type": "string"
+          },
+          {
+            "name": "maskedCredential",
+            "type": "string"
+          }
+        ],
+        "purpose": "Connect an integration with credentials"
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/settings/integrations/{integrationName}/disconnect",
+        "request_fields": [],
+        "response_fields": [
+          {
+            "name": "integrationName",
+            "type": "string"
+          },
+          {
+            "name": "connectionStatus",
+            "type": "string"
+          },
+          {
+            "name": "maskedCredential",
+            "type": "string"
+          }
+        ],
+        "purpose": "Disconnect an integration"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/settings/audit-log",
+        "request_fields": [
+          {
+            "name": "filterDateRangeFrom",
+            "type": "date"
+          },
+          {
+            "name": "filterDateRangeTo",
+            "type": "date"
+          },
+          {
+            "name": "userFilter",
+            "type": "string"
+          },
+          {
+            "name": "actionTypeFilter",
+            "type": "string"
+          },
+          {
+            "name": "page",
+            "type": "number"
+          },
+          {
+            "name": "pageSize",
+            "type": "number"
+          }
+        ],
+        "response_fields": [
+          {
+            "name": "items",
+            "type": "array"
+          },
+          {
+            "name": "totalCount",
+            "type": "number"
+          },
+          {
+            "name": "page",
+            "type": "number"
+          },
+          {
+            "name": "pageSize",
+            "type": "number"
+          }
+        ],
+        "purpose": "Read-only audit log entries, filtered by date range"
+      }
+    ],
+    "types": {
+      "NotificationEventResponse": [
+        {
+          "name": "eventName",
+          "type": "string"
+        },
+        {
+          "name": "emailToggle",
+          "type": "boolean"
+        },
+        {
+          "name": "inAppToggle",
+          "type": "boolean"
+        }
+      ],
+      "UpdateNotificationEventRequest": [
+        {
+          "name": "emailToggle",
+          "type": "boolean"
+        },
+        {
+          "name": "inAppToggle",
+          "type": "boolean"
+        }
+      ],
+      "UserListItemResponse": [
+        {
+          "name": "id",
+          "type": "string"
+        },
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "email",
+          "type": "string"
+        },
+        {
+          "name": "role",
+          "type": "string"
+        },
+        {
+          "name": "status",
+          "type": "string"
+        },
+        {
+          "name": "lastLogin",
+          "type": "date"
+        }
+      ],
+      "CreateUserRequest": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "email",
+          "type": "string"
+        },
+        {
+          "name": "role",
+          "type": "string"
+        },
+        {
+          "name": "initialPassword",
+          "type": "string"
+        }
+      ],
+      "CreateUserResponse": [
+        {
+          "name": "id",
+          "type": "string"
+        },
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "email",
+          "type": "string"
+        },
+        {
+          "name": "role",
+          "type": "string"
+        },
+        {
+          "name": "status",
+          "type": "string"
+        },
+        {
+          "name": "lastLogin",
+          "type": "date"
+        },
+        {
+          "name": "temporaryPassword",
+          "type": "string"
+        }
+      ],
+      "UpdateUserStatusRequest": [
+        {
+          "name": "status",
+          "type": "enum"
+        }
+      ],
+      "ApprovalRuleResponse": [
+        {
+          "name": "id",
+          "type": "string"
+        },
+        {
+          "name": "contractType",
+          "type": "string"
+        },
+        {
+          "name": "valueThreshold",
+          "type": "number"
+        },
+        {
+          "name": "approverRole",
+          "type": "string"
+        }
+      ],
+      "CreateApprovalRuleRequest": [
+        {
+          "name": "contractType",
+          "type": "string"
+        },
+        {
+          "name": "valueThreshold",
+          "type": "number"
+        },
+        {
+          "name": "approverRole",
+          "type": "string"
+        }
+      ],
+      "IntegrationResponse": [
+        {
+          "name": "integrationName",
+          "type": "string"
+        },
+        {
+          "name": "connectionStatus",
+          "type": "string"
+        },
+        {
+          "name": "maskedCredential",
+          "type": "string"
+        }
+      ],
+      "ConnectIntegrationRequest": [
+        {
+          "name": "credentials",
+          "type": "object"
+        }
+      ],
+      "AuditLogQueryParams": [
+        {
+          "name": "filterDateRangeFrom",
+          "type": "date"
+        },
+        {
+          "name": "filterDateRangeTo",
+          "type": "date"
+        },
+        {
+          "name": "userFilter",
+          "type": "string"
+        },
+        {
+          "name": "actionTypeFilter",
+          "type": "string"
+        },
+        {
+          "name": "page",
+          "type": "number"
+        },
+        {
+          "name": "pageSize",
+          "type": "number"
+        }
+      ],
+      "AuditLogEntryResponse": [
+        {
+          "name": "id",
+          "type": "string"
+        },
+        {
+          "name": "logDateTime",
+          "type": "date"
+        },
+        {
+          "name": "logUser",
+          "type": "string"
+        },
+        {
+          "name": "logAction",
+          "type": "string"
+        },
+        {
+          "name": "logEntity",
+          "type": "string"
+        },
+        {
+          "name": "details",
+          "type": "string"
+        }
+      ]
+    },
+    "notes": "GET /settings/notifications and GET /settings/integrations return bare arrays, not paged envelopes, while /settings/users, /settings/approval-rules and /settings/audit-log return {items,totalCount,page,pageSize}. The PUT toggle endpoint accepts a partial body (only the toggle that changed) and the UI sends exactly one of emailToggle/inAppToggle per call. Two endpoints exist beyond the module contract: POST /api/v1/settings/users/{userId}/reset-password and the CreateUserRequest.initialPassword / CreateUserResponse.temporaryPassword fields; UpdateUserStatusRequest.status is one of 'Invited' | 'Active' | 'Deactivated'. The page never calls /settings/users/{userId}/status query params or any tracker endpoints."
+  },
+  "usage": {
+    "num_turns": 16,
+    "duration_ms": 95567,
+    "total_cost_usd": 0.4439134,
+    "input_tokens": 3082,
+    "output_tokens": 3586,
+    "cache_creation_input_tokens": 30103,
+    "cache_read_input_tokens": 663798,
+    "is_error": false
+  }
+}

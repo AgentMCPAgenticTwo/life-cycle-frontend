@@ -13,6 +13,8 @@ import { useCreateUser } from '@/features/settings-admin/hooks/useCreateUser';
 import { useResetPassword } from '@/features/settings-admin/hooks/useResetPassword';
 import { useApprovalRules } from '@/features/settings-admin/hooks/useApprovalRules';
 import { useCreateApprovalRule } from '@/features/settings-admin/hooks/useCreateApprovalRule';
+import { useUpdateApprovalRule } from '@/features/settings-admin/hooks/useUpdateApprovalRule';
+import { useDeleteApprovalRule } from '@/features/settings-admin/hooks/useDeleteApprovalRule';
 import { useIntegrations } from '@/features/settings-admin/hooks/useIntegrations';
 import { useConnectIntegration } from '@/features/settings-admin/hooks/useConnectIntegration';
 import { useDisconnectIntegration } from '@/features/settings-admin/hooks/useDisconnectIntegration';
@@ -61,6 +63,9 @@ export default function SettingsAdminPage() {
   const [addUserError, setAddUserError] = useState(null);
   const [showAddRule, setShowAddRule] = useState(false);
   const [addRuleError, setAddRuleError] = useState(null);
+  const [editingRule, setEditingRule] = useState(null);
+  const [deletingRuleId, setDeletingRuleId] = useState(null);
+  const [ruleActionError, setRuleActionError] = useState(null);
   const [auditFilter, setAuditFilter] = useState({});
 
   const usersResult = useTenantUsers();
@@ -69,6 +74,8 @@ export default function SettingsAdminPage() {
   const [temporaryPasswordInfo, setTemporaryPasswordInfo] = useState(null);
   const rulesResult = useApprovalRules();
   const createRule = useCreateApprovalRule();
+  const updateRule = useUpdateApprovalRule();
+  const deleteRule = useDeleteApprovalRule();
   const integrationsResult = useIntegrations();
   const connectIntegration = useConnectIntegration();
   const disconnectIntegration = useDisconnectIntegration();
@@ -116,12 +123,33 @@ export default function SettingsAdminPage() {
   async function handleAddRule(request) {
     setAddRuleError(null);
     try {
-      await createRule.createRule(request);
+      if (editingRule) {
+        await updateRule.updateRule(editingRule.id, request);
+        setSuccessMessage('Approval rule updated successfully');
+      } else {
+        await createRule.createRule(request);
+        setSuccessMessage('Approval rule added successfully');
+      }
       setShowAddRule(false);
-      setSuccessMessage('Approval rule added successfully');
+      setEditingRule(null);
       await rulesResult.refetch();
     } catch (err) {
       setAddRuleError(err.message || 'Unable to save this rule. Please try again.');
+    }
+  }
+
+  async function handleDeleteRule(rule) {
+    setDeletingRuleId(rule.id);
+    setRuleActionError(null);
+    try {
+      await deleteRule.removeRule(rule.id);
+      // Approvals already in progress keep their routing; only future routing changes.
+      setSuccessMessage('Approval rule deleted. Approvals already in progress are unaffected.');
+      await rulesResult.refetch();
+    } catch (err) {
+      setRuleActionError(err.message || 'Unable to delete this rule. Please try again.');
+    } finally {
+      setDeletingRuleId(null);
     }
   }
 
@@ -199,6 +227,12 @@ export default function SettingsAdminPage() {
           </div>
         )}
 
+        {ruleActionError && (
+          <div role="alert" className="rounded-lg border border-red-600/40 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+            {ruleActionError}
+          </div>
+        )}
+
         <div className="flex gap-2 border-b border-neutral-800">
           {TABS.map((tab) => (
             <button
@@ -239,8 +273,16 @@ export default function SettingsAdminPage() {
             onRetry={rulesResult.refetch}
             onAddRule={() => {
               setAddRuleError(null);
+              setEditingRule(null);
               setShowAddRule(true);
             }}
+            onEditRule={(rule) => {
+              setAddRuleError(null);
+              setEditingRule(rule);
+              setShowAddRule(true);
+            }}
+            onDeleteRule={handleDeleteRule}
+            deletingRuleId={deletingRuleId}
           />
         )}
 
@@ -291,9 +333,15 @@ export default function SettingsAdminPage() {
 
       {showAddRule && (
         <AddRuleForm
+          key={editingRule?.id || 'new'}
+          initialRule={editingRule}
+          existingRules={rulesResult.data || []}
           onSubmit={handleAddRule}
-          onCancel={() => setShowAddRule(false)}
-          isSubmitting={createRule.isLoading}
+          onCancel={() => {
+            setShowAddRule(false);
+            setEditingRule(null);
+          }}
+          isSubmitting={createRule.isLoading || updateRule.isLoading}
           error={addRuleError}
         />
       )}

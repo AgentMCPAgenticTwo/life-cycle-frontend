@@ -3,21 +3,37 @@ import { useState } from 'react';
 const CONTRACT_TYPE_OPTIONS = ['Product', 'Service'];
 const APPROVER_ROLE_OPTIONS = ['Approver', 'Legal Reviewer', 'Tenant Admin'];
 const MISSING_FIELDS_MESSAGE = 'Please complete all required fields';
+const DUPLICATE_RULE_MESSAGE = 'A rule for this Contract Type and Value Threshold already exists';
 
 /**
  * Add Rule form (UC11-MF-001 / UC11-FV-002). Contract Type and Approver Role
  * are mandatory dropdowns; Value Threshold must be a non-negative number.
  * Duplicate Contract Type + Value Threshold combinations (UC11-BR-004) are
- * rejected server-side and surfaced via the `error` prop.
+ * rejected server-side and surfaced via the `error` prop, and pre-empted
+ * client-side against `existingRules`. Passing `initialRule` switches the form
+ * to editing that rule.
  */
-export default function AddRuleForm({ onSubmit, onCancel, isSubmitting = false, error = null }) {
-  const [contractType, setContractType] = useState('');
-  const [valueThreshold, setValueThreshold] = useState('');
-  const [approverRole, setApproverRole] = useState('');
+export default function AddRuleForm({
+  onSubmit,
+  onCancel,
+  isSubmitting = false,
+  error = null,
+  initialRule = null,
+  existingRules = [],
+}) {
+  const [contractType, setContractType] = useState(initialRule?.contractType || '');
+  const [valueThreshold, setValueThreshold] = useState(
+    initialRule && initialRule.valueThreshold != null ? String(initialRule.valueThreshold) : ''
+  );
+  const [approverRole, setApproverRole] = useState(initialRule?.approverRole || '');
   const [fieldErrors, setFieldErrors] = useState({});
+  const [duplicateError, setDuplicateError] = useState(null);
+
+  const isEditing = Boolean(initialRule?.id);
 
   function handleSubmit(e) {
     e.preventDefault();
+    setDuplicateError(null);
     const nextErrors = {};
     if (!contractType) nextErrors.contractType = true;
     if (!approverRole) nextErrors.approverRole = true;
@@ -31,6 +47,19 @@ export default function AddRuleForm({ onSubmit, onCancel, isSubmitting = false, 
       setFieldErrors(nextErrors);
       return;
     }
+
+    const isDuplicate = existingRules.some(
+      (rule) =>
+        rule.id !== initialRule?.id &&
+        rule.contractType === contractType &&
+        Number(rule.valueThreshold) === numericThreshold
+    );
+    if (isDuplicate) {
+      setFieldErrors({ contractType: true, valueThreshold: true });
+      setDuplicateError(DUPLICATE_RULE_MESSAGE);
+      return;
+    }
+
     setFieldErrors({});
     onSubmit({ contractType, valueThreshold: numericThreshold, approverRole });
   }
@@ -42,7 +71,9 @@ export default function AddRuleForm({ onSubmit, onCancel, isSubmitting = false, 
       <form onSubmit={handleSubmit} className="w-full max-w-lg rounded-xl border border-neutral-800 bg-neutral-900 shadow-2xl">
         <div className="border-b border-neutral-800 px-6 py-4">
           <h2 className="text-base font-semibold text-neutral-100">Rule Details</h2>
-          <p className="mt-1 text-xs text-neutral-500">All fields are required to add a new rule</p>
+          <p className="mt-1 text-xs text-neutral-500">
+            {isEditing ? 'All fields are required to save this rule' : 'All fields are required to add a new rule'}
+          </p>
         </div>
 
         <div className="flex flex-col gap-4 px-6 py-5">
@@ -113,7 +144,7 @@ export default function AddRuleForm({ onSubmit, onCancel, isSubmitting = false, 
 
           {hasFieldErrors && (
             <p role="alert" className="text-xs text-red-300">
-              {MISSING_FIELDS_MESSAGE}
+              {duplicateError || MISSING_FIELDS_MESSAGE}
             </p>
           )}
           {error && (
@@ -137,7 +168,7 @@ export default function AddRuleForm({ onSubmit, onCancel, isSubmitting = false, 
             disabled={isSubmitting}
             className="rounded-md bg-emerald-500 px-4 py-2 text-sm font-semibold text-neutral-950 hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {isSubmitting ? 'Saving…' : 'Save Role'}
+            {isSubmitting ? 'Saving…' : isEditing ? 'Save Changes' : 'Save Role'}
           </button>
         </div>
       </form>

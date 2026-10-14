@@ -4,10 +4,10 @@ title: src/features/settings-admin
 description: Tenant-admin screen -- five tabs (users, routing/approval rules, integrations, notifications, audit log) under /settings/admin.
 resource: https://github.com/AgentMCPAgenticThree/life-cycle-frontend/tree/main/src/features/settings-admin
 tags: [frontend, settings, admin]
-generated: { by: sage-maintenance/claude-code, at: 2026-10-14T04:55:25Z }
+generated: { by: sage-maintenance/claude-code, at: 2026-10-14T06:42:15Z }
 sources:
   - id: cbm-graph
-    resource: codebase-memory-mcp project life-cycle-frontend @ 2980c74caa4fa3952f31f5cbaeff19b40c6dd55c
+    resource: codebase-memory-mcp project life-cycle-frontend @ 2a331598f5b32710821c162cc01f1bc7c536da11
     title: Codebase knowledge graph
 status: stable
 ---
@@ -18,10 +18,25 @@ not a `components/` subfolder, unlike other features).
 ## Components
 
 - Users tab: `UserManagementTab.jsx`, `AddUserForm.jsx`, `UserStatusActionControl.jsx` (+ `.test.jsx`).
-- Routing/approval tab: `RoutingApprovalTab.jsx`, `AddRuleForm.jsx`.
+- Routing/approval tab: `RoutingApprovalTab.jsx`, `AddRuleForm.jsx` (see below).
 - Integrations tab: `IntegrationsTab.jsx`, `IntegrationConnectForm.jsx` (+ `.test.jsx`).
 - Notifications tab: `NotificationsTab.jsx`.
 - Audit log tab: `AuditLogTab.jsx`, `AuditLogFilterPanel.jsx`.
+
+### Routing/approval tab — rules are editable and deletable
+
+`RoutingApprovalTab` takes `onEditRule` / `onDeleteRule` / `deletingRuleId`
+alongside `onAddRule`, so each row of the approval matrix carries edit and
+delete actions (`deletingRuleId` disables only the row being written).
+`AddRuleForm` doubles as the edit form: passing `initialRule` seeds
+`contractType` / `valueThreshold` / `approverRole` and sets `isEditing`, while
+`existingRules` lets `handleSubmit` pre-empt the duplicate Contract Type +
+Value Threshold combination (`DUPLICATE_RULE_MESSAGE`, UC11-BR-004) that the
+backend also rejects. `formatThreshold` renders `valueThreshold` as currency,
+falling back to `—` for a non-number.
+
+`SettingsAdminPage` wires all four: `useApprovalRules`, `useCreateApprovalRule`,
+`useUpdateApprovalRule`, `useDeleteApprovalRule`.
 
 ### Notifications tab error surface
 
@@ -44,14 +59,18 @@ audit surfaces state the guarantee identically.
 ## Hooks (`hooks/`)
 
 `useTenantUsers.js`, `useCreateUser.js`, `useUpdateUserStatus.js`,
-`useApprovalRules.js`, `useCreateApprovalRule.js`, `useIntegrations.js`,
+`useApprovalRules.js`, `useCreateApprovalRule.js`, `useUpdateApprovalRule.js`,
+`useDeleteApprovalRule.js`, `useIntegrations.js`,
 `useConnectIntegration.js`, `useDisconnectIntegration.js`,
 `useNotificationEvents.js`, `useUpdateNotificationEvent.js`, `useAuditLog.js`.
 
 Backed by [`settingsUsersService.js`](/modules/services.md),
 `settingsApprovalRulesService.js`, `settingsIntegrationsService.js`,
 `settingsNotificationsService.js`, `settingsAuditLogService.js` calling the
-`/api/v1/settings/users*`, `/api/v1/settings/approval-rules`,
+`/api/v1/settings/users*`, `/api/v1/settings/approval-rules` (plus
+`PUT`/`DELETE /api/v1/settings/approval-rules/{ruleId}` via
+`updateApprovalRule` / `deleteApprovalRule`; approvals already in progress keep
+the routing they were created with — the backend owns that guarantee),
 `/api/v1/settings/integrations/{integrationName}/connect|disconnect`,
 `/api/v1/settings/notifications/{eventName}`, `/api/v1/settings/audit-log`
 endpoints.

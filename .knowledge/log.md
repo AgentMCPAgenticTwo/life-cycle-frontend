@@ -2,6 +2,23 @@
 
 ## 2026-10-14
 
+* **Update**: [settings-admin](/modules/settings-admin.md), [tracker](/modules/tracker.md),
+  [templates](/modules/templates.md) — documented three new surfaces: editable/deletable
+  approval rules (`updateApprovalRule` / `deleteApprovalRule` in
+  `src/services/settingsApprovalRulesService.js`, `useUpdateApprovalRule.js` /
+  `useDeleteApprovalRule.js`, the `onEditRule` / `onDeleteRule` / `deletingRuleId`
+  props on `RoutingApprovalTab.jsx` and `AddRuleForm.jsx`'s `initialRule` edit
+  mode wired from `src/pages/SettingsAdminPage.jsx`); Tenant-Admin editing of the
+  stuck-flag thresholds (`updateBottleneckThresholds` in
+  `src/services/trackerService.js`, `saveThresholds` / `canEdit` / `isSaving` in
+  `useBottleneckThresholds.js`, and `BottleneckTab.jsx`'s draft +
+  `INVALID_THRESHOLD_MESSAGE` validation); and template file upload in
+  `src/features/templates/components/TemplateEditor.jsx`
+  (`handleTemplateFileChange`, `EXTENSION_TO_FORMAT`, `MAX_TEMPLATE_FILE_BYTES`,
+  `MAX_NAME_LENGTH`). Mode `update`, trace `facb87b33e16`, commit
+  `2a331598f5b32710821c162cc01f1bc7c536da11`. No files, directories or routes were
+  added, so overview, architecture and the index files were left untouched.
+
 * **Update**: [contract-repository](/modules/contract-repository.md) — recorded the
   new `src/features/contract-repository/components/HighlightedText.jsx`
   (`HighlightedText` + local `escapeRegExp`), which wraps search-term matches in

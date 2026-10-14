@@ -4,10 +4,10 @@ title: src/features/templates
 description: Template and clause library -- editing, versioning, activate/deactivate lifecycle for both templates and clauses.
 resource: https://github.com/AgentMCPAgenticThree/life-cycle-frontend/tree/main/src/features/templates
 tags: [frontend, templates, clauses]
-generated: { by: sage-maintenance/claude-code, at: 2026-10-13T06:17:20Z }
+generated: { by: sage-maintenance/claude-code, at: 2026-10-14T06:42:15Z }
 sources:
   - id: cbm-graph
-    resource: codebase-memory-mcp project life-cycle-frontend @ 49e9748c4f7780464fab1d3fc10815d84e990e6f
+    resource: codebase-memory-mcp project life-cycle-frontend @ 2a331598f5b32710821c162cc01f1bc7c536da11
     title: Codebase knowledge graph
 status: stable
 ---
@@ -17,6 +17,18 @@ status: stable
 `TemplatesTab.jsx`, `ClauseLibraryTab.jsx`, `TemplateEditor.jsx`,
 `ClauseEditor.jsx`, `VersionHistoryModal.jsx`, `RiskLevelBadge.jsx`,
 `LibraryStatusBadge.jsx`.
+
+### Template file upload (UC3)
+
+`TemplateEditor.handleTemplateFileChange` accepts a template document and
+derives `documentFormat` from the extension via `EXTENSION_TO_FORMAT`,
+rejecting anything else with `UNSUPPORTED_FORMAT_MESSAGE` and anything over
+`MAX_TEMPLATE_FILE_BYTES` with `OVERSIZED_FILE_MESSAGE`; both clear the picked
+file and surface through local `fileError` state. The input is reset after each
+pick so re-selecting the same file re-validates. `validate` additionally caps
+`templateName` at `MAX_NAME_LENGTH`. The file itself is metadata-only here —
+`handleSave` still submits the four `templateName` / `templateCategory` /
+`documentFormat` / `templateBody` fields.
 
 ## Hooks (`hooks/`)
 

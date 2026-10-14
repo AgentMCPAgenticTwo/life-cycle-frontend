@@ -75,3 +75,12 @@ export function overrideEstimatedTurnaround(contractId, request) {
 export function getBottleneckThresholds() {
   return http.get('/api/v1/tracker/bottleneck-thresholds');
 }
+
+/**
+ * Saves the tenant-configured stuck-flag thresholds per stage.
+ * @param {{stage: string, thresholdDays: number}[]} thresholds
+ * @returns {Promise<{stage: string, thresholdDays: number}[]>}
+ */
+export function updateBottleneckThresholds(thresholds) {
+  return http.put('/api/v1/tracker/bottleneck-thresholds', thresholds);
+}

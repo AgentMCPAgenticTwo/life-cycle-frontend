@@ -100,7 +100,8 @@ describe('NegotiationTrackerPage', () => {
 
     await waitFor(() => expect(screen.getByRole('heading', { name: 'Negotiation Tracker' })).toBeTruthy());
 
-    expect(screen.getByText('Awaiting External Party review')).toBeTruthy();
+    expect(screen.getByText('Sent to counterparty')).toBeTruthy();
+    expect(screen.getByText(/secure link and one-time passcode were emailed/)).toBeTruthy();
     expect(screen.getAllByText(/Priya Nair/).length).toBeGreaterThan(0);
     expect(screen.getByText(/Arjun Mehta/)).toBeTruthy();
     expect(screen.getByText(/v6 — External submission/)).toBeTruthy();

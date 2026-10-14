@@ -17,7 +17,9 @@ const VIEW_ALLOWED_ROLES = ['CONTRACT_OWNER', 'LEGAL_REVIEWER', 'APPROVER', 'TEN
 
 const STATUS_LABELS = {
   'With Internal': 'With Internal Reviewers',
-  'With Counterparty': 'Awaiting External Party review',
+  // UC5: once the last (sequential) or every (parallel) internal reviewer submits, the backend
+  // emails the counterparty a secure link and OTP and flips the status — the tracker reflects it here.
+  'With Counterparty': 'Sent to counterparty',
   Agreed: 'Agreed',
 };
 
@@ -108,6 +110,12 @@ export default function NegotiationTrackerPage() {
 
   const dueDatePassed = data.dueDate && new Date(data.dueDate).getTime() < Date.now();
 
+  // UC5: reminders stop once every reviewer has submitted or the contract is marked Agreed.
+  const remindersStopped =
+    data.negotiationStatus === 'Agreed' ||
+    (Boolean(data.internalReviewers?.length) &&
+      data.internalReviewers.every((reviewer) => reviewer.reviewStatus === 'Submitted'));
+
   // UC5: the latest version coming from the counterparty triggers a risk re-check
   // of the clauses they changed.
   const latestVersion = [...(data.versions || [])].sort((a, b) => b.versionNumber - a.versionNumber)[0];
@@ -164,6 +172,12 @@ export default function NegotiationTrackerPage() {
           <p className="mt-1 text-sm text-sky-100">
             Current Version: v{data.versionNumber} · auto-incremented on each redline submission
           </p>
+          {data.negotiationStatus === 'With Counterparty' && (
+            <p className="mt-1 text-xs text-sky-200">
+              A secure link and one-time passcode were emailed to {data.externalPartyName} (
+              {data.externalPartyEmail}). The passcode is never displayed here.
+            </p>
+          )}
           <div className="mt-4 flex flex-wrap gap-2">
             <span className="rounded-full bg-white/15 px-3 py-1 text-xs font-medium text-white">
               Due {new Date(data.dueDate).toLocaleDateString()}
@@ -243,7 +257,11 @@ export default function NegotiationTrackerPage() {
               <p className="text-sm text-neutral-200">{new Date(data.dueDate).toLocaleDateString()}</p>
 
               <div className="mt-4">
-                <SendReminderButton contractId={contractId} dueDate={data.dueDate} />
+                <SendReminderButton
+                  contractId={contractId}
+                  dueDate={data.dueDate}
+                  stopped={remindersStopped}
+                />
               </div>
 
               <div className="mt-3">
@@ -253,7 +271,9 @@ export default function NegotiationTrackerPage() {
                   onAgreed={refetch}
                 />
               </div>
-              {!dueDatePassed && <p className="mt-2 text-[11px] text-neutral-600">Reminder enabled only once overdue.</p>}
+              {!dueDatePassed && !remindersStopped && (
+                <p className="mt-2 text-[11px] text-neutral-600">Reminder enabled only once overdue.</p>
+              )}
             </div>
           </div>
         </div>

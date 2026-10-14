@@ -98,7 +98,8 @@ export default function TrackerPage() {
   };
 
   async function handleExport(format = 'Excel') {
-    const response = await exportTab({
+    // The hook saves the file itself; failures surface through `failureMessage`.
+    await exportTab({
       tab: tabKeyToExportTab[activeTab],
       format,
       period: queryParams.period,
@@ -107,9 +108,6 @@ export default function TrackerPage() {
       dateRangeFrom: queryParams.dateRangeFrom,
       dateRangeTo: queryParams.dateRangeTo,
     });
-    if (response.success && response.fileUrl) {
-      window.open(response.fileUrl, '_blank', 'noopener,noreferrer');
-    }
   }
 
   async function handleOverride(contractId, request) {

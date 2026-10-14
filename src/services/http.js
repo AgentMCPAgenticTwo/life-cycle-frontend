@@ -63,7 +63,7 @@ export function refreshSession() {
   return refreshPromise;
 }
 
-async function request(path, init = {}, { skipAuthRetry = false } = {}) {
+async function request(path, init = {}, { skipAuthRetry = false, raw = false } = {}) {
   const isForm = init.body instanceof FormData;
   const { accessToken } = useAuthStore.getState();
 
@@ -81,7 +81,7 @@ async function request(path, init = {}, { skipAuthRetry = false } = {}) {
   if (response.status === 401 && !skipAuthRetry && !path.startsWith(AUTH_PATH_PREFIX)) {
     try {
       await refreshSession();
-      return await request(path, init, { skipAuthRetry: true });
+      return await request(path, init, { skipAuthRetry: true, raw });
     } catch {
       useAuthStore.getState().clearSession();
       if (typeof window !== 'undefined') {
@@ -101,8 +101,43 @@ async function request(path, init = {}, { skipAuthRetry = false } = {}) {
     throw new HttpError(response.status, body);
   }
 
+  if (raw) return response;
   if (response.status === 204) return undefined;
   return await response.json();
+}
+
+const FILENAME_PATTERN = /filename\*?=(?:UTF-8'')?"?([^";]+)"?/i;
+
+/**
+ * Fetches a file the API serves as bytes (export files, contract documents).
+ *
+ * These URLs are API routes behind the same `Authorization` header as every other
+ * call, so they cannot be handed to `window.open` or an `<a href>`: the browser
+ * would request them against the SPA's own origin without a token and land on a
+ * blank router miss. We fetch them here instead and hand back a blob.
+ *
+ * @param {string} url absolute URL, or a path relative to the API base URL
+ * @returns {Promise<{ blob: Blob, fileName: string|null }>}
+ */
+export async function downloadFile(url) {
+  const isAbsolute = /^https?:\/\//i.test(url);
+  const response = isAbsolute
+    ? await fetch(url, { credentials: 'include' })
+    : await request(url.startsWith('/') ? url : `/${url}`, {}, { raw: true });
+
+  if (!response.ok) {
+    let body = { error: `HTTP ${response.status}`, details: [] };
+    try {
+      body = await response.json();
+    } catch {
+      // Non-JSON error body; keep the status-based message.
+    }
+    throw new HttpError(response.status, body);
+  }
+
+  const disposition = response.headers.get('Content-Disposition') || '';
+  const match = FILENAME_PATTERN.exec(disposition);
+  return { blob: await response.blob(), fileName: match ? decodeURIComponent(match[1]) : null };
 }
 
 export const http = {

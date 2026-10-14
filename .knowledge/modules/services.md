@@ -4,10 +4,10 @@ title: src/services
 description: One typed client module per REST resource group, all built on the shared HTTP client (http.js) that attaches auth headers and normalizes errors.
 resource: https://github.com/AgentMCPAgenticThree/life-cycle-frontend/tree/main/src/services
 tags: [frontend, services, api]
-generated: { by: sage-maintenance/claude-code, at: 2026-10-13T06:17:20Z }
+generated: { by: sage-maintenance/claude-code, at: 2026-10-14T12:33:45Z }
 sources:
   - id: cbm-graph
-    resource: codebase-memory-mcp project life-cycle-frontend @ 49e9748c4f7780464fab1d3fc10815d84e990e6f
+    resource: codebase-memory-mcp project life-cycle-frontend @ f7c53e07c639c02ca5973ae775bd63b8c6ccc08a
     title: Codebase knowledge graph
 status: stable
 ---
@@ -20,6 +20,20 @@ graph — see [architecture.md](/architecture.md#hotspots). Per `CLAUDE.md`:
 reads `VITE_API_BASE_URL` (throws at startup if unset), attaches `X-User-Role`
 and `X-User-Id` to every call, and converts non-2xx responses into a thrown
 `HttpError` carrying `{ error, details }`.
+
+`request` also handles the 401 → `refreshSession` → retry path, and takes a
+`raw` option that returns the `Response` untouched instead of parsing JSON.
+
+### File downloads
+
+`downloadFile(url)` is the JSON-free escape hatch built on that `raw` option. It
+accepts an absolute URL (plain `fetch` with `credentials: 'include'`) or an
+API-relative path (`request(..., { raw: true })`, so the auth header is attached and
+the 401 retry still applies), throws the usual `HttpError` on a non-2xx, and returns
+`{ blob, fileName }` with `fileName` parsed out of `Content-Disposition` via
+`FILENAME_PATTERN`. Callers go through
+[`shared/utils/fileDownload.js`](/modules/shared.md#srcsharedutils) rather than
+calling this directly.
 
 ## Resource modules (21 total)
 

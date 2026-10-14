@@ -2,6 +2,20 @@
 
 ## 2026-10-14
 
+* **Update**: [shared](/modules/shared.md), [services](/modules/services.md),
+  [tracker](/modules/tracker.md), [contract-repository](/modules/contract-repository.md),
+  [common-tasks](/playbooks/common-tasks.md) —
+  documented the authenticated file-download path added by the tracker-export fix: the new
+  `src/shared/utils/fileDownload.js` (`saveBlob`, `downloadAndSave`), `downloadFile` and the
+  `raw` request option in `src/services/http.js`, `useTrackerExport.js`'s
+  `FORMAT_EXTENSIONS` plus its missing-`fileUrl`-is-a-failure rule with
+  `TrackerPage.handleExport` awaiting it, and `useDocumentDownload.js` switching from an
+  `<a href>` to `downloadAndSave`. The [shared](/modules/shared.md) concept now covers
+  `src/shared` rather than only `src/shared/components`, so `modules/index.md` was
+  retitled to match. Mode `update`, trace `6cfe1ddf16eb`, commit
+  `f7c53e07c639c02ca5973ae775bd63b8c6ccc08a`. No routes or directories beyond
+  `src/shared/utils` were added, so overview and architecture were left untouched.
+
 * **Update**: [settings-admin](/modules/settings-admin.md), [tracker](/modules/tracker.md),
   [templates](/modules/templates.md) — documented three new surfaces: editable/deletable
   approval rules (`updateApprovalRule` / `deleteApprovalRule` in

@@ -1,4 +1,13 @@
 import { useState } from 'react';
+import { useReviewerOptions } from '@/features/negotiation/hooks/useReviewerOptions';
+
+const ROLE_LABELS = {
+  TENANT_ADMIN: 'Tenant Admin',
+  CONTRACT_OWNER: 'Contract Owner',
+  LEGAL_REVIEWER: 'Legal Reviewer',
+  APPROVER: 'Approver',
+  SIGNER: 'Signer',
+};
 
 const ROUTING_TYPES = [
   {
@@ -21,7 +30,9 @@ function todayIso() {
  */
 export default function RoutingPanel({ onSubmit, onCancel, isLoading, canAccess }) {
   const [routingType, setRoutingType] = useState('Parallel');
-  const [internalReviewersText, setInternalReviewersText] = useState('');
+  // Reviewer user ids, in the order picked — the order Sequential routing notifies them in.
+  const [internalReviewers, setInternalReviewers] = useState([]);
+  const reviewerOptions = useReviewerOptions();
   const [externalPartyName, setExternalPartyName] = useState('');
   const [externalPartyEmail, setExternalPartyEmail] = useState('');
   const [assignedDate, setAssignedDate] = useState(todayIso());
@@ -37,10 +48,13 @@ export default function RoutingPanel({ onSubmit, onCancel, isLoading, canAccess 
     );
   }
 
-  const internalReviewers = internalReviewersText
-    .split('\n')
-    .map((s) => s.trim())
-    .filter(Boolean);
+  const users = reviewerOptions.data?.items ?? [];
+
+  function toggleReviewer(userId) {
+    setInternalReviewers((prev) =>
+      prev.includes(userId) ? prev.filter((id) => id !== userId) : [...prev, userId]
+    );
+  }
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -48,6 +62,18 @@ export default function RoutingPanel({ onSubmit, onCancel, isLoading, canAccess 
     const hasExternalParty = Boolean(externalPartyName.trim()) && Boolean(externalPartyEmail.trim());
     if (!hasReviewer && !hasExternalParty) {
       setFormError('Please select at least one internal reviewer or external party before sending');
+      return;
+    }
+    if (!hasReviewer) {
+      setFormError('Please select at least one internal reviewer.');
+      return;
+    }
+    if (!hasExternalParty) {
+      setFormError('External Party Name and Email are required.');
+      return;
+    }
+    if (!assignedDate || !dueDate) {
+      setFormError('Assigned Date and Due Date are required.');
       return;
     }
     if (dueDate && assignedDate && dueDate <= assignedDate) {
@@ -108,18 +134,68 @@ export default function RoutingPanel({ onSubmit, onCancel, isLoading, canAccess 
       </div>
 
       <div className="mt-5">
-        <label htmlFor="internal-reviewers" className="text-sm font-medium text-neutral-200">
+        <span id="internal-reviewers-label" className="text-sm font-medium text-neutral-200">
           Internal Reviewers *
-        </label>
-        <textarea
-          id="internal-reviewers"
-          rows={4}
-          value={internalReviewersText}
-          onChange={(e) => setInternalReviewersText(e.target.value)}
-          placeholder={'Ritu Shenoy (Legal Counsel)\nArjun Mehta (Procurement Lead)'}
-          className="mt-1 w-full rounded-md border border-neutral-700 bg-neutral-950 px-3 py-2 text-sm text-neutral-100 placeholder:text-neutral-600"
-        />
-        <p className="mt-1 text-xs text-neutral-500">Multi-select from tenant user list</p>
+        </span>
+        <div
+          role="group"
+          aria-labelledby="internal-reviewers-label"
+          className="mt-1 max-h-56 overflow-y-auto rounded-md border border-neutral-700 bg-neutral-950"
+        >
+          {reviewerOptions.isLoading && <p className="px-3 py-3 text-sm text-neutral-500">Loading users…</p>}
+          {reviewerOptions.error && (
+            <div role="alert" className="flex items-center justify-between gap-3 px-3 py-3 text-sm text-red-300">
+              <span>{reviewerOptions.error.message || 'Unable to load users.'}</span>
+              <button
+                type="button"
+                onClick={reviewerOptions.refetch}
+                className="text-xs font-medium text-emerald-400 hover:text-emerald-300"
+              >
+                Retry
+              </button>
+            </div>
+          )}
+          {!reviewerOptions.isLoading && !reviewerOptions.error && users.length === 0 && (
+            <p className="px-3 py-3 text-sm text-neutral-500">No users found in this tenant.</p>
+          )}
+          {!reviewerOptions.isLoading &&
+            !reviewerOptions.error &&
+            users.map((user) => {
+              const order = internalReviewers.indexOf(user.id);
+              const checked = order !== -1;
+              return (
+                <label
+                  key={user.id}
+                  className={`flex cursor-pointer items-center gap-3 border-b border-neutral-800 px-3 py-2 last:border-b-0 ${
+                    checked ? 'bg-emerald-500/10' : 'hover:bg-neutral-900'
+                  }`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={checked}
+                    onChange={() => toggleReviewer(user.id)}
+                    className="h-4 w-4 accent-emerald-500"
+                  />
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-sm text-neutral-100">{user.name}</span>
+                    <span className="block truncate text-xs text-neutral-500">
+                      {ROLE_LABELS[user.role] || user.role} · {user.email}
+                    </span>
+                  </span>
+                  {checked && routingType === 'Sequential' && (
+                    <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-[11px] font-medium text-emerald-300">
+                      #{order + 1}
+                    </span>
+                  )}
+                </label>
+              );
+            })}
+        </div>
+        <p className="mt-1 text-xs text-neutral-500">
+          {internalReviewers.length
+            ? `${internalReviewers.length} selected${routingType === 'Sequential' ? ' — reviewed in the order selected' : ''}`
+            : 'Multi-select from tenant user list'}
+        </p>
       </div>
 
       <div className="mt-6">

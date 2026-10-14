@@ -181,6 +181,14 @@ export default function NegotiationTrackerPage() {
               {data.externalPartyEmail}). The passcode is never displayed here.
             </p>
           )}
+          {data.negotiationStatus === 'Agreed' && (
+            <p role="status" className="mt-2 text-sm text-emerald-200">
+              Negotiation agreed — the contract is now Pending Approval and the first approver has been notified.{' '}
+              <Link to="/approvals" className="font-semibold text-emerald-300 underline hover:text-emerald-200">
+                View Approvals
+              </Link>
+            </p>
+          )}
           <div className="mt-4 flex flex-wrap gap-2">
             <span className="rounded-full bg-white/15 px-3 py-1 text-xs font-medium text-white">
               Due {new Date(data.dueDate).toLocaleDateString()}
@@ -270,7 +278,7 @@ export default function NegotiationTrackerPage() {
               <div className="mt-3">
                 <MarkAgreedButton
                   contractId={contractId}
-                  visible={isLegalReviewer}
+                  visible={isLegalReviewer && data.negotiationStatus !== 'Agreed'}
                   onAgreed={refetch}
                 />
               </div>

@@ -41,6 +41,7 @@ export default function ClauseAnalysisPage() {
   const [proceedError, setProceedError] = useState(null);
   const [proceedResult, setProceedResult] = useState(null);
   const [showAuditLog, setShowAuditLog] = useState(false);
+  const negotiationPath = `/contracts/${contractId}/negotiation`;
 
   const { data, isLoading, error, refetch, setData } = useClauseAnalysis(contractId);
   const acceptSuggestionMutation = useAcceptSuggestion(contractId);
@@ -214,13 +215,21 @@ export default function ClauseAnalysisPage() {
                 {retryMutation.isLoading ? 'Refreshing…' : 'Refresh Analysis'}
               </button>
             )}
-            {!isTenantAdmin && (
-              <ProceedToNegotiationButton
-                enabled={data.proceedToNegotiationEnabled}
-                isLoading={proceedMutation.isLoading}
-                onProceed={handleProceed}
-              />
-            )}
+            {!isTenantAdmin &&
+              (proceedResult ? (
+                <Link
+                  to={negotiationPath}
+                  className="rounded-md bg-emerald-500 px-4 py-2 text-sm font-semibold text-neutral-950 hover:bg-emerald-400"
+                >
+                  Go to Negotiation →
+                </Link>
+              ) : (
+                <ProceedToNegotiationButton
+                  enabled={data.proceedToNegotiationEnabled}
+                  isLoading={proceedMutation.isLoading}
+                  onProceed={handleProceed}
+                />
+              ))}
           </div>
         </div>
       </header>
@@ -237,8 +246,20 @@ export default function ClauseAnalysisPage() {
           </div>
         )}
         {proceedResult && (
-          <div role="status" className="rounded-lg border border-emerald-600/40 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-300">
-            Contract routed to Negotiation &amp; Routing. Status: {proceedResult.negotiationStatus}
+          <div
+            role="status"
+            className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-emerald-600/40 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-300"
+          >
+            <span>
+              Clause analysis complete. Status: {proceedResult.negotiationStatus}. Next, send the contract for
+              review on the Negotiation screen.
+            </span>
+            <Link
+              to={negotiationPath}
+              className="rounded-md bg-emerald-500 px-3 py-1.5 text-xs font-semibold text-neutral-950 hover:bg-emerald-400"
+            >
+              Go to Negotiation →
+            </Link>
           </div>
         )}
 

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import NegotiationTrackerPage from '@/pages/NegotiationTrackerPage';
 import { http, HttpError } from '@/services/http';
@@ -94,6 +94,35 @@ describe('NegotiationTrackerPage', () => {
     expect(http.post).not.toHaveBeenCalled();
   });
 
+  it('submits the selected tenant users as internal reviewers by id', async () => {
+    const REVIEWER_ID = '55555555-5555-5555-5555-555555555555';
+    http.get.mockImplementation((path) => {
+      if (path === '/api/v1/users') {
+        return Promise.resolve({
+          items: [{ id: REVIEWER_ID, name: 'Ritu Shenoy', email: 'ritu@acme.test', role: 'LEGAL_REVIEWER' }],
+        });
+      }
+      return Promise.reject(new HttpError(404, { error: 'Not routed', details: [] }));
+    });
+    http.post.mockResolvedValue({});
+    renderPage();
+
+    const reviewer = await screen.findByRole('checkbox', { name: /Ritu Shenoy/ });
+    fireEvent.click(reviewer);
+    fireEvent.change(screen.getByLabelText(/External Party Name/i), { target: { value: 'Sanjay Kulkarni' } });
+    fireEvent.change(screen.getByLabelText(/External Party Email/i), { target: { value: 'sanjay@nimbus.test' } });
+    fireEvent.change(screen.getByLabelText(/Assigned Date/i), { target: { value: '2026-10-14' } });
+    fireEvent.change(screen.getByLabelText(/Due Date/i), { target: { value: '2026-10-21' } });
+    fireEvent.click(screen.getByRole('button', { name: /Submit for Review/i }));
+
+    await waitFor(() =>
+      expect(http.post).toHaveBeenCalledWith(
+        `/api/v1/lifecycle/contracts/${CONTRACT_ID}/negotiation/routing`,
+        expect.objectContaining({ internalReviewers: [REVIEWER_ID], externalPartyName: 'Sanjay Kulkarni' })
+      )
+    );
+  });
+
   it('renders the tracker with reviewers and version history once routed', async () => {
     http.get.mockResolvedValue(TRACKER);
     renderPage();
@@ -123,6 +152,36 @@ describe('NegotiationTrackerPage', () => {
 
     await waitFor(() => expect(screen.getByRole('heading', { name: 'Negotiation Tracker' })).toBeTruthy());
     expect(screen.getByRole('button', { name: /Mark as Agreed/i })).toBeTruthy();
+  });
+
+  it('marks Agreed after confirmation and shows the contract moved to Pending Approval', async () => {
+    authState.role = 'LEGAL_REVIEWER';
+    http.get.mockResolvedValueOnce(TRACKER).mockResolvedValue({ ...TRACKER, negotiationStatus: 'Agreed' });
+    http.post.mockResolvedValue({ negotiationStatus: 'Agreed' });
+    renderPage();
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Mark as Agreed' }));
+    expect(http.post).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole('button', { name: 'Yes, Mark as Agreed' }));
+
+    await waitFor(() =>
+      expect(http.post).toHaveBeenCalledWith(`/api/v1/lifecycle/contracts/${CONTRACT_ID}/negotiation/mark-agreed`)
+    );
+    await waitFor(() => expect(screen.getByText(/the contract is now Pending Approval/)).toBeTruthy());
+    expect(screen.queryByRole('button', { name: /Mark as Agreed/i })).toBeNull();
+  });
+
+  it('shows the no-approval-rule message when Mark as Agreed is rejected', async () => {
+    authState.role = 'LEGAL_REVIEWER';
+    http.get.mockResolvedValue(TRACKER);
+    const message = 'No approval rule found for this contract type and value. Please contact your Tenant Admin.';
+    http.post.mockRejectedValue(new HttpError(409, { error: message, details: [message] }));
+    renderPage();
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Mark as Agreed' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Yes, Mark as Agreed' }));
+
+    await waitFor(() => expect(screen.getByText(message)).toBeTruthy());
   });
 
   it('hides Mark as Agreed for roles other than Legal Reviewer', async () => {

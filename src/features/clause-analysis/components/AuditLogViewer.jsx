@@ -21,6 +21,9 @@ export default function AuditLogViewer({ contractId, onClose }) {
             Close
           </button>
         </div>
+        <p role="note" className="mt-2 text-xs text-neutral-400">
+          Audit log entries cannot be modified or deleted.
+        </p>
 
         {isLoading && <p className="mt-6 text-sm text-neutral-500">Loading audit log…</p>}
         {error && <p className="mt-6 text-sm text-red-400">{error.message}</p>}

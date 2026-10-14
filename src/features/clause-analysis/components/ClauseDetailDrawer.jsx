@@ -27,6 +27,7 @@ export default function ClauseDetailDrawer({
   onReject,
 }) {
   const [editing, setEditing] = useState(false);
+  const [mandatoryBlockMessage, setMandatoryBlockMessage] = useState(null);
 
   if (!clause) return null;
   const matchClass = MATCH_STATUS_STYLES[clause.libraryMatchStatus] || 'bg-neutral-700/60 text-neutral-300';
@@ -85,7 +86,16 @@ export default function ClauseDetailDrawer({
         {canReject && (
           <button
             type="button"
-            onClick={() => onReject(clause.clauseId)}
+            onClick={() => {
+              // A mandatory clause can never be removed from the contract
+              // (UC3-BR / UC4-BR-006) — block before calling the API.
+              if (clause.isMandatory) {
+                setMandatoryBlockMessage('This clause is mandatory and cannot be removed from the contract.');
+                return;
+              }
+              setMandatoryBlockMessage(null);
+              onReject(clause.clauseId);
+            }}
             disabled={isRejecting}
             className="inline-flex items-center gap-1.5 rounded-md border border-red-700/60 px-3 py-1.5 text-sm font-medium text-red-400 hover:border-red-500 disabled:cursor-not-allowed disabled:opacity-50"
           >
@@ -93,6 +103,12 @@ export default function ClauseDetailDrawer({
           </button>
         )}
       </div>
+
+      {mandatoryBlockMessage && (
+        <p role="alert" className="mt-3 text-sm text-red-300">
+          {mandatoryBlockMessage}
+        </p>
+      )}
 
       {canEdit && editing && (
         <div className="mt-4">

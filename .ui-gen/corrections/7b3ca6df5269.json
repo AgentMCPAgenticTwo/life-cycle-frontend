@@ -1,0 +1,791 @@
+{
+  "trace_id": "7b3ca6df5269",
+  "branch": "ui-correction/7b3ca6df5269",
+  "maintenance_branch": "ui-correction/7b3ca6df5269",
+  "status": "SUCCESS",
+  "summary": "All checks pass (lint, build, 145 tests).\n\n**What I changed here**\n\n1. **Concurrent redline conflict (UC5)** — the `useSubmitReview` hook (which already detects the backend's 409) had no UI consumer. Added `src/features/negotiation/components/RedlineSubmitPanel.jsx` and mounted it on `NegotiationTrackerPage` for reviewers/owners while the negotiation isn't Agreed. A successful submit clears the box and reports the new version; a 409 renders \"A newer version was submitted while you were editing. Please refresh and reapply your changes.\" with a Refresh action that refetches the tracker. Keeping *both* versions on conflict is backend behaviour — left to that side.\n\n2. **Mandatory clause can't be removed (UC3)** — `ClauseDetailDrawer` now blocks the Reject (remove) action when `clause.isMandatory` and shows \"This clause is mandatory and cannot be removed from the contract.\"; optional clauses reject as before.\n\n3. **Audit log immutability (UC11)** — no edit/delete affordance existed, but the rule wasn't stated. Added the notice \"Audit log entries cannot be modified or deleted.\" to the Settings `AuditLogTab` and to the clause-analysis `AuditLogViewer`. API- and database-level enforcement belongs to the backend repository.\n\nReading taken: the smaller one — each item is a message/guard on the existing screens, not a new feature area.",
+  "files_changed": [
+    "src/features/clause-analysis/components/AuditLogViewer.jsx",
+    "src/features/clause-analysis/components/ClauseDetailDrawer.jsx",
+    "src/features/negotiation/components/RedlineSubmitPanel.jsx",
+    "src/features/settings-admin/AuditLogTab.jsx",
+    "src/pages/NegotiationTrackerPage.jsx"
+  ],
+  "lines_changed": 120,
+  "blockers": [
+    "Not applied -- UC5: persisting both versions when a conflict occurs: backend behaviour — belongs to the counterpart repository",
+    "Not applied -- UC11: blocking audit-log edit/delete in the API and the database: backend/database enforcement — belongs to the counterpart repository",
+    "Not applied -- UC11: removing edit/delete controls from the audit log UI: already true — no edit or delete affordance exists in either audit log component",
+    "Visual verification failed: The app at http://localhost:5199 renders a completely blank white page on both / and /settings/admin (4s wait), so none of the changed UI — the RedlineSubmitPanel conflict notice, the mandatory-clause block in ClauseDetailDrawer, or the audit-log immutability notice — is visible; the dev server appears to fail at startup (no VITE_API_BASE_URL / .env.local present)."
+  ],
+  "visual_check": {
+    "verdict": "fail",
+    "evidence": "The app at http://localhost:5199 renders a completely blank white page on both / and /settings/admin (4s wait), so none of the changed UI — the RedlineSubmitPanel conflict notice, the mandatory-clause block in ClauseDetailDrawer, or the audit-log immutability notice — is visible; the dev server appears to fail at startup (no VITE_API_BASE_URL / .env.local present).",
+    "screenshot_path": "/tmp/actual.png"
+  },
+  "context_sharing": {
+    "target": "frontend",
+    "branch": "ui-correction/7b3ca6df5269",
+    "base_path": "/api/v1",
+    "endpoints": [
+      {
+        "method": "GET",
+        "path": "/api/v1/lifecycle/contracts/{contractId}/audit-log",
+        "request_fields": [
+          {
+            "name": "contractId",
+            "type": "string"
+          },
+          {
+            "name": "page",
+            "type": "number"
+          },
+          {
+            "name": "pageSize",
+            "type": "number"
+          }
+        ],
+        "response_fields": [
+          {
+            "name": "items",
+            "type": "array"
+          },
+          {
+            "name": "page",
+            "type": "number"
+          },
+          {
+            "name": "pageSize",
+            "type": "number"
+          },
+          {
+            "name": "totalCount",
+            "type": "number"
+          }
+        ],
+        "purpose": "Paged immutable clause-analysis audit trail shown in AuditLogViewer"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/lifecycle/contracts/{contractId}/negotiation",
+        "request_fields": [
+          {
+            "name": "contractId",
+            "type": "string"
+          }
+        ],
+        "response_fields": [
+          {
+            "name": "contractId",
+            "type": "string"
+          },
+          {
+            "name": "routingType",
+            "type": "enum"
+          },
+          {
+            "name": "internalReviewers",
+            "type": "array"
+          },
+          {
+            "name": "externalPartyName",
+            "type": "string"
+          },
+          {
+            "name": "externalPartyEmail",
+            "type": "string"
+          },
+          {
+            "name": "assignedDate",
+            "type": "date"
+          },
+          {
+            "name": "dueDate",
+            "type": "date"
+          },
+          {
+            "name": "negotiationStatus",
+            "type": "enum"
+          },
+          {
+            "name": "versionNumber",
+            "type": "number"
+          },
+          {
+            "name": "overdueFlag",
+            "type": "boolean"
+          },
+          {
+            "name": "versions",
+            "type": "array"
+          },
+          {
+            "name": "comments",
+            "type": "array"
+          }
+        ],
+        "purpose": "Load negotiation tracker; 404 means not yet routed"
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/lifecycle/contracts/{contractId}/negotiation/routing",
+        "request_fields": [
+          {
+            "name": "routingType",
+            "type": "enum"
+          },
+          {
+            "name": "internalReviewers",
+            "type": "array"
+          },
+          {
+            "name": "externalPartyName",
+            "type": "string"
+          },
+          {
+            "name": "externalPartyEmail",
+            "type": "string"
+          },
+          {
+            "name": "assignedDate",
+            "type": "date"
+          },
+          {
+            "name": "dueDate",
+            "type": "date"
+          }
+        ],
+        "response_fields": [
+          {
+            "name": "contractId",
+            "type": "string"
+          },
+          {
+            "name": "routingType",
+            "type": "enum"
+          },
+          {
+            "name": "internalReviewers",
+            "type": "array"
+          },
+          {
+            "name": "externalPartyName",
+            "type": "string"
+          },
+          {
+            "name": "externalPartyEmail",
+            "type": "string"
+          },
+          {
+            "name": "assignedDate",
+            "type": "date"
+          },
+          {
+            "name": "dueDate",
+            "type": "date"
+          },
+          {
+            "name": "negotiationStatus",
+            "type": "enum"
+          },
+          {
+            "name": "versionNumber",
+            "type": "number"
+          }
+        ],
+        "purpose": "Submit routing configuration (Send for Review)"
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/lifecycle/contracts/{contractId}/negotiation/reviews",
+        "request_fields": [
+          {
+            "name": "commentText",
+            "type": "string"
+          },
+          {
+            "name": "redlineText",
+            "type": "string"
+          }
+        ],
+        "response_fields": [
+          {
+            "name": "versionNumber",
+            "type": "number"
+          },
+          {
+            "name": "negotiationStatus",
+            "type": "enum"
+          }
+        ],
+        "purpose": "Internal reviewer redline submission; 409 signals a version conflict"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/lifecycle/contracts/{contractId}/negotiation/compare",
+        "request_fields": [
+          {
+            "name": "versionA",
+            "type": "number"
+          },
+          {
+            "name": "versionB",
+            "type": "number"
+          }
+        ],
+        "response_fields": [
+          {
+            "name": "versionA",
+            "type": "object"
+          },
+          {
+            "name": "versionB",
+            "type": "object"
+          },
+          {
+            "name": "differences",
+            "type": "array"
+          },
+          {
+            "name": "comments",
+            "type": "array"
+          },
+          {
+            "name": "negotiationStatus",
+            "type": "enum"
+          },
+          {
+            "name": "routingType",
+            "type": "enum"
+          },
+          {
+            "name": "internalReviewers",
+            "type": "array"
+          },
+          {
+            "name": "externalPartyName",
+            "type": "string"
+          },
+          {
+            "name": "externalPartyEmail",
+            "type": "string"
+          },
+          {
+            "name": "assignedDate",
+            "type": "date"
+          },
+          {
+            "name": "dueDate",
+            "type": "date"
+          }
+        ],
+        "purpose": "Compare two contract versions (opened from the tracker page)"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/settings/audit-log",
+        "request_fields": [
+          {
+            "name": "filterDateRangeFrom",
+            "type": "date"
+          },
+          {
+            "name": "filterDateRangeTo",
+            "type": "date"
+          },
+          {
+            "name": "userFilter",
+            "type": "string"
+          },
+          {
+            "name": "actionTypeFilter",
+            "type": "string"
+          },
+          {
+            "name": "page",
+            "type": "number"
+          },
+          {
+            "name": "pageSize",
+            "type": "number"
+          }
+        ],
+        "response_fields": [
+          {
+            "name": "items",
+            "type": "array"
+          },
+          {
+            "name": "totalCount",
+            "type": "number"
+          },
+          {
+            "name": "page",
+            "type": "number"
+          },
+          {
+            "name": "pageSize",
+            "type": "number"
+          }
+        ],
+        "purpose": "Read-only tenant audit log table, newest first"
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/lifecycle/contracts/{contractId}/clauses/{clauseId}/accept-suggestion",
+        "request_fields": [
+          {
+            "name": "contractId",
+            "type": "string"
+          },
+          {
+            "name": "clauseId",
+            "type": "string"
+          }
+        ],
+        "response_fields": [
+          {
+            "name": "clauseId",
+            "type": "string"
+          },
+          {
+            "name": "clauseText",
+            "type": "string"
+          },
+          {
+            "name": "status",
+            "type": "string"
+          },
+          {
+            "name": "version",
+            "type": "number"
+          }
+        ],
+        "purpose": "Accept AI suggested text for a clause from ClauseDetailDrawer"
+      },
+      {
+        "method": "PUT",
+        "path": "/api/v1/lifecycle/contracts/{contractId}/clauses/{clauseId}",
+        "request_fields": [
+          {
+            "name": "clauseText",
+            "type": "string"
+          },
+          {
+            "name": "expectedVersion",
+            "type": "number"
+          }
+        ],
+        "response_fields": [
+          {
+            "name": "clauseId",
+            "type": "string"
+          },
+          {
+            "name": "clauseText",
+            "type": "string"
+          },
+          {
+            "name": "status",
+            "type": "string"
+          },
+          {
+            "name": "version",
+            "type": "number"
+          }
+        ],
+        "purpose": "Manual clause edit with optimistic concurrency"
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/lifecycle/contracts/{contractId}/clauses/{clauseId}/reject",
+        "request_fields": [
+          {
+            "name": "reason",
+            "type": "string"
+          }
+        ],
+        "response_fields": [
+          {
+            "name": "clauseId",
+            "type": "string"
+          },
+          {
+            "name": "status",
+            "type": "string"
+          },
+          {
+            "name": "version",
+            "type": "number"
+          }
+        ],
+        "purpose": "Reject a clause (blocked client-side when isMandatory)"
+      }
+    ],
+    "types": {
+      "PagedAuditLogResponse": [
+        {
+          "name": "items",
+          "type": "array"
+        },
+        {
+          "name": "page",
+          "type": "number"
+        },
+        {
+          "name": "pageSize",
+          "type": "number"
+        },
+        {
+          "name": "totalCount",
+          "type": "number"
+        }
+      ],
+      "AuditLogEntryResponse": [
+        {
+          "name": "id",
+          "type": "string"
+        },
+        {
+          "name": "userId",
+          "type": "string"
+        },
+        {
+          "name": "userName",
+          "type": "string"
+        },
+        {
+          "name": "timestamp",
+          "type": "date"
+        },
+        {
+          "name": "clauseId",
+          "type": "string"
+        },
+        {
+          "name": "actionType",
+          "type": "string"
+        },
+        {
+          "name": "fieldName",
+          "type": "string"
+        },
+        {
+          "name": "beforeText",
+          "type": "string"
+        },
+        {
+          "name": "afterText",
+          "type": "string"
+        }
+      ],
+      "SettingsAuditLogEntryResponse": [
+        {
+          "name": "id",
+          "type": "string"
+        },
+        {
+          "name": "logDateTime",
+          "type": "date"
+        },
+        {
+          "name": "logUser",
+          "type": "string"
+        },
+        {
+          "name": "logAction",
+          "type": "string"
+        },
+        {
+          "name": "logEntity",
+          "type": "string"
+        },
+        {
+          "name": "details",
+          "type": "string"
+        }
+      ],
+      "AuditLogQueryParams": [
+        {
+          "name": "filterDateRangeFrom",
+          "type": "date"
+        },
+        {
+          "name": "filterDateRangeTo",
+          "type": "date"
+        },
+        {
+          "name": "userFilter",
+          "type": "string"
+        },
+        {
+          "name": "actionTypeFilter",
+          "type": "string"
+        },
+        {
+          "name": "page",
+          "type": "number"
+        },
+        {
+          "name": "pageSize",
+          "type": "number"
+        }
+      ],
+      "ClauseResponse": [
+        {
+          "name": "clauseId",
+          "type": "string"
+        },
+        {
+          "name": "clauseText",
+          "type": "string"
+        },
+        {
+          "name": "clauseCategory",
+          "type": "string"
+        },
+        {
+          "name": "libraryMatchStatus",
+          "type": "enum"
+        },
+        {
+          "name": "riskScore",
+          "type": "string"
+        },
+        {
+          "name": "aiExplanation",
+          "type": "string"
+        },
+        {
+          "name": "suggestedText",
+          "type": "string"
+        },
+        {
+          "name": "status",
+          "type": "string"
+        },
+        {
+          "name": "isMandatory",
+          "type": "boolean"
+        },
+        {
+          "name": "mandatoryClauseFlag",
+          "type": "boolean"
+        },
+        {
+          "name": "mandatoryClauseFlagLabel",
+          "type": "string"
+        },
+        {
+          "name": "version",
+          "type": "number"
+        },
+        {
+          "name": "updatedAt",
+          "type": "date"
+        },
+        {
+          "name": "updatedBy",
+          "type": "string"
+        }
+      ],
+      "EditClauseRequest": [
+        {
+          "name": "clauseText",
+          "type": "string"
+        },
+        {
+          "name": "expectedVersion",
+          "type": "number"
+        }
+      ],
+      "RejectClauseRequest": [
+        {
+          "name": "reason",
+          "type": "string"
+        }
+      ],
+      "NegotiationTrackerResponse": [
+        {
+          "name": "contractId",
+          "type": "string"
+        },
+        {
+          "name": "routingType",
+          "type": "enum"
+        },
+        {
+          "name": "internalReviewers",
+          "type": "array"
+        },
+        {
+          "name": "externalPartyName",
+          "type": "string"
+        },
+        {
+          "name": "externalPartyEmail",
+          "type": "string"
+        },
+        {
+          "name": "assignedDate",
+          "type": "date"
+        },
+        {
+          "name": "dueDate",
+          "type": "date"
+        },
+        {
+          "name": "negotiationStatus",
+          "type": "enum"
+        },
+        {
+          "name": "versionNumber",
+          "type": "number"
+        },
+        {
+          "name": "overdueFlag",
+          "type": "boolean"
+        },
+        {
+          "name": "versions",
+          "type": "array"
+        },
+        {
+          "name": "comments",
+          "type": "array"
+        }
+      ],
+      "ReviewerResponse": [
+        {
+          "name": "reviewerId",
+          "type": "string"
+        },
+        {
+          "name": "reviewerName",
+          "type": "string"
+        },
+        {
+          "name": "role",
+          "type": "string"
+        },
+        {
+          "name": "isMandatory",
+          "type": "boolean"
+        },
+        {
+          "name": "reviewStatus",
+          "type": "enum"
+        },
+        {
+          "name": "submittedAt",
+          "type": "date"
+        },
+        {
+          "name": "sequenceOrder",
+          "type": "number"
+        }
+      ],
+      "VersionSummaryResponse": [
+        {
+          "name": "versionNumber",
+          "type": "number"
+        },
+        {
+          "name": "createdAt",
+          "type": "date"
+        },
+        {
+          "name": "createdBy",
+          "type": "string"
+        },
+        {
+          "name": "source",
+          "type": "enum"
+        }
+      ],
+      "CommentResponse": [
+        {
+          "name": "commentId",
+          "type": "string"
+        },
+        {
+          "name": "clauseId",
+          "type": "string"
+        },
+        {
+          "name": "commentText",
+          "type": "string"
+        },
+        {
+          "name": "authorName",
+          "type": "string"
+        },
+        {
+          "name": "createdAt",
+          "type": "date"
+        },
+        {
+          "name": "versionNumber",
+          "type": "number"
+        }
+      ],
+      "RoutingRequest": [
+        {
+          "name": "routingType",
+          "type": "enum"
+        },
+        {
+          "name": "internalReviewers",
+          "type": "array"
+        },
+        {
+          "name": "externalPartyName",
+          "type": "string"
+        },
+        {
+          "name": "externalPartyEmail",
+          "type": "string"
+        },
+        {
+          "name": "assignedDate",
+          "type": "date"
+        },
+        {
+          "name": "dueDate",
+          "type": "date"
+        }
+      ],
+      "SubmitReviewRequest": [
+        {
+          "name": "commentText",
+          "type": "string"
+        },
+        {
+          "name": "redlineText",
+          "type": "string"
+        }
+      ],
+      "SubmitReviewResponse": [
+        {
+          "name": "versionNumber",
+          "type": "number"
+        },
+        {
+          "name": "negotiationStatus",
+          "type": "enum"
+        }
+      ]
+    },
+    "notes": "Two distinct audit-log contracts exist and must not be conflated: /api/v1/lifecycle/contracts/{contractId}/audit-log returns a paged envelope with userName/timestamp/actionType/fieldName/beforeText/afterText, while /api/v1/settings/audit-log returns entries with logDateTime/logUser/logAction/logEntity/details. The tracker GET must return 404 (not an empty body) when no routing exists, and POST .../negotiation/reviews must return 409 on a stale-version redline submission — the UI branches on exactly those status codes; enum values used are routingType Sequential|Parallel, negotiationStatus 'With Internal'|'With Counterparty'|'Agreed', version source Internal|External, libraryMatchStatus Standard|Deviated|Missing|Non-standard, and clause status 'AI-Suggested' gates the Accept control."
+  },
+  "usage": {
+    "num_turns": 24,
+    "duration_ms": 193724,
+    "total_cost_usd": 0.8096297500000001,
+    "input_tokens": 3217,
+    "output_tokens": 7488,
+    "cache_creation_input_tokens": 44189,
+    "cache_read_input_tokens": 976194,
+    "is_error": false
+  }
+}

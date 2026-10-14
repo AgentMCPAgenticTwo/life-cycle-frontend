@@ -1,0 +1,403 @@
+{
+  "trace_id": "369f75682fd7",
+  "branch": "ui-correction/369f75682fd7",
+  "maintenance_branch": "ui-correction/369f75682fd7",
+  "status": "SUCCESS",
+  "summary": "Already present. Done.\n\nSummary — I took the smaller reading: all three items are email/scheduler behaviours that belong to the backend, so in this repo I made the UI reflect them.\n\n- **Auto Send to Counterparty (UC5):** `NegotiationTrackerPage` now labels the `With Counterparty` status **\"Sent to counterparty\"** and shows that a secure link and one-time passcode were emailed to the external party — no OTP is rendered (the `GenerateExternalLinkResponse`/`VerifyOtp` DTOs never carry one, so that condition already held).\n- **Reviewer Reminders (UC5):** the manual \"Send Reminder\" control already existed; it now stops (disabled, with an explanatory hint) once every internal reviewer has submitted or the contract is Agreed, and the copy notes the daily automatic reminder to reviewer and owner.\n- **Signature reminder interval (UC7):** already configurable on `EsignatureSettingsPage` (`reminderFrequencyDays`) — left as is.\n- Updated `NegotiationTrackerPage.test.jsx` for the new label. lint, build and all 145 tests pass.\n\nLeft for the backend repo: actually sending the emails — auto-generating/emailing the counterparty link + OTP when the last/all reviewers submit, the daily overdue reviewer/owner reminders, the recurring signature reminders, and the once-only 90/60/30-day renewal alerts.",
+  "files_changed": [
+    "src/__tests__/NegotiationTrackerPage.test.jsx",
+    "src/features/negotiation/components/SendReminderButton.jsx",
+    "src/pages/NegotiationTrackerPage.jsx"
+  ],
+  "lines_changed": 49,
+  "blockers": [
+    "Not applied -- Emailing the secure link and OTP automatically when the last/all reviewers submit: backend behaviour; frontend only reflects the resulting status",
+    "Not applied -- Daily automatic reviewer/owner overdue reminder emails: backend scheduler",
+    "Not applied -- Recurring signature reminder emails every X days until sign/decline/withdraw: backend scheduler; the X-days setting already exists on EsignatureSettingsPage",
+    "Not applied -- Renewal alerts at 90/60/30 days, each sent once: backend scheduler",
+    "Not applied -- Reminder Frequency (days) setting: already true of the code",
+    "Visual verification failed: The negotiation tracker route (/contracts/<uuid>/negotiation) rendered a completely blank white 1440x900 page — no status label, no 'Sent to counterparty' banner, and no Send Reminder control were visible, so the instruction could not be visually confirmed."
+  ],
+  "visual_check": {
+    "verdict": "fail",
+    "evidence": "The negotiation tracker route (/contracts/<uuid>/negotiation) rendered a completely blank white 1440x900 page — no status label, no 'Sent to counterparty' banner, and no Send Reminder control were visible, so the instruction could not be visually confirmed.",
+    "screenshot_path": "/tmp/actual.png"
+  },
+  "context_sharing": {
+    "target": "frontend",
+    "branch": "ui-correction/369f75682fd7",
+    "base_path": "/api/v1/lifecycle",
+    "endpoints": [
+      {
+        "method": "GET",
+        "path": "/api/v1/lifecycle/contracts/{contractId}/negotiation",
+        "request_fields": [
+          {
+            "name": "contractId",
+            "type": "string"
+          }
+        ],
+        "response_fields": [
+          {
+            "name": "contractId",
+            "type": "string"
+          },
+          {
+            "name": "routingType",
+            "type": "enum"
+          },
+          {
+            "name": "internalReviewers",
+            "type": "array"
+          },
+          {
+            "name": "externalPartyName",
+            "type": "string"
+          },
+          {
+            "name": "externalPartyEmail",
+            "type": "string"
+          },
+          {
+            "name": "assignedDate",
+            "type": "date"
+          },
+          {
+            "name": "dueDate",
+            "type": "date"
+          },
+          {
+            "name": "negotiationStatus",
+            "type": "enum"
+          },
+          {
+            "name": "versionNumber",
+            "type": "number"
+          },
+          {
+            "name": "overdueFlag",
+            "type": "boolean"
+          },
+          {
+            "name": "versions",
+            "type": "array"
+          },
+          {
+            "name": "comments",
+            "type": "array"
+          }
+        ],
+        "purpose": "Load the negotiation tracker; 404 means not yet routed and shows the Routing Panel"
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/lifecycle/contracts/{contractId}/negotiation/routing",
+        "request_fields": [
+          {
+            "name": "routingType",
+            "type": "enum"
+          },
+          {
+            "name": "internalReviewers",
+            "type": "array"
+          },
+          {
+            "name": "externalPartyName",
+            "type": "string"
+          },
+          {
+            "name": "externalPartyEmail",
+            "type": "string"
+          },
+          {
+            "name": "assignedDate",
+            "type": "date"
+          },
+          {
+            "name": "dueDate",
+            "type": "date"
+          }
+        ],
+        "response_fields": [
+          {
+            "name": "contractId",
+            "type": "string"
+          },
+          {
+            "name": "routingType",
+            "type": "enum"
+          },
+          {
+            "name": "internalReviewers",
+            "type": "array"
+          },
+          {
+            "name": "externalPartyName",
+            "type": "string"
+          },
+          {
+            "name": "externalPartyEmail",
+            "type": "string"
+          },
+          {
+            "name": "assignedDate",
+            "type": "date"
+          },
+          {
+            "name": "dueDate",
+            "type": "date"
+          },
+          {
+            "name": "negotiationStatus",
+            "type": "enum"
+          },
+          {
+            "name": "versionNumber",
+            "type": "number"
+          }
+        ],
+        "purpose": "Submit routing configuration from the Routing Panel"
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/lifecycle/contracts/{contractId}/negotiation/reminder",
+        "request_fields": [
+          {
+            "name": "contractId",
+            "type": "string"
+          }
+        ],
+        "response_fields": [
+          {
+            "name": "sentTo",
+            "type": "string"
+          },
+          {
+            "name": "sentAt",
+            "type": "date"
+          },
+          {
+            "name": "reminderType",
+            "type": "enum"
+          }
+        ],
+        "purpose": "Send a manual reminder to an overdue reviewer; no request body"
+      }
+    ],
+    "types": {
+      "NegotiationTrackerResponse": [
+        {
+          "name": "contractId",
+          "type": "string"
+        },
+        {
+          "name": "routingType",
+          "type": "enum"
+        },
+        {
+          "name": "internalReviewers",
+          "type": "array"
+        },
+        {
+          "name": "externalPartyName",
+          "type": "string"
+        },
+        {
+          "name": "externalPartyEmail",
+          "type": "string"
+        },
+        {
+          "name": "assignedDate",
+          "type": "date"
+        },
+        {
+          "name": "dueDate",
+          "type": "date"
+        },
+        {
+          "name": "negotiationStatus",
+          "type": "enum"
+        },
+        {
+          "name": "versionNumber",
+          "type": "number"
+        },
+        {
+          "name": "overdueFlag",
+          "type": "boolean"
+        },
+        {
+          "name": "versions",
+          "type": "array"
+        },
+        {
+          "name": "comments",
+          "type": "array"
+        }
+      ],
+      "ReviewerResponse": [
+        {
+          "name": "reviewerId",
+          "type": "string"
+        },
+        {
+          "name": "reviewerName",
+          "type": "string"
+        },
+        {
+          "name": "role",
+          "type": "string"
+        },
+        {
+          "name": "isMandatory",
+          "type": "boolean"
+        },
+        {
+          "name": "reviewStatus",
+          "type": "enum"
+        },
+        {
+          "name": "submittedAt",
+          "type": "date"
+        },
+        {
+          "name": "sequenceOrder",
+          "type": "number"
+        }
+      ],
+      "VersionSummaryResponse": [
+        {
+          "name": "versionNumber",
+          "type": "number"
+        },
+        {
+          "name": "createdAt",
+          "type": "date"
+        },
+        {
+          "name": "createdBy",
+          "type": "string"
+        },
+        {
+          "name": "source",
+          "type": "enum"
+        }
+      ],
+      "CommentResponse": [
+        {
+          "name": "commentId",
+          "type": "string"
+        },
+        {
+          "name": "clauseId",
+          "type": "string"
+        },
+        {
+          "name": "commentText",
+          "type": "string"
+        },
+        {
+          "name": "authorName",
+          "type": "string"
+        },
+        {
+          "name": "createdAt",
+          "type": "date"
+        },
+        {
+          "name": "versionNumber",
+          "type": "number"
+        }
+      ],
+      "RoutingRequest": [
+        {
+          "name": "routingType",
+          "type": "enum"
+        },
+        {
+          "name": "internalReviewers",
+          "type": "array"
+        },
+        {
+          "name": "externalPartyName",
+          "type": "string"
+        },
+        {
+          "name": "externalPartyEmail",
+          "type": "string"
+        },
+        {
+          "name": "assignedDate",
+          "type": "date"
+        },
+        {
+          "name": "dueDate",
+          "type": "date"
+        }
+      ],
+      "RoutingResponse": [
+        {
+          "name": "contractId",
+          "type": "string"
+        },
+        {
+          "name": "routingType",
+          "type": "enum"
+        },
+        {
+          "name": "internalReviewers",
+          "type": "array"
+        },
+        {
+          "name": "externalPartyName",
+          "type": "string"
+        },
+        {
+          "name": "externalPartyEmail",
+          "type": "string"
+        },
+        {
+          "name": "assignedDate",
+          "type": "date"
+        },
+        {
+          "name": "dueDate",
+          "type": "date"
+        },
+        {
+          "name": "negotiationStatus",
+          "type": "enum"
+        },
+        {
+          "name": "versionNumber",
+          "type": "number"
+        }
+      ],
+      "ReminderResponse": [
+        {
+          "name": "sentTo",
+          "type": "string"
+        },
+        {
+          "name": "sentAt",
+          "type": "date"
+        },
+        {
+          "name": "reminderType",
+          "type": "enum"
+        }
+      ]
+    },
+    "notes": "routingType is 'Sequential'|'Parallel'; negotiationStatus is 'With Internal'|'With Counterparty'|'Agreed'; reviewStatus is 'Pending'|'Submitted'|'Overdue'; VersionSummaryResponse.source is 'Internal'|'External' — the page branches on these exact strings, so any casing or wording change silently breaks status labels, the reminder-stopped rule, and the external-version risk re-check. GET negotiation must return 404 (not 200 with empty data) when a contract has not been routed, since that is what triggers the Routing Panel."
+  },
+  "usage": {
+    "num_turns": 31,
+    "duration_ms": 161302,
+    "total_cost_usd": 0.8915441999999997,
+    "input_tokens": 3368,
+    "output_tokens": 8732,
+    "cache_creation_input_tokens": 45943,
+    "cache_read_input_tokens": 1578444,
+    "is_error": false
+  }
+}

@@ -4,10 +4,10 @@ title: src/features/negotiation
 description: Negotiation tracker -- reviewer routing, comments, mark-agreed/reminder actions, version comparison, and the OTP-gated external review flow for third-party reviewers.
 resource: https://github.com/AgentMCPAgenticThree/life-cycle-frontend/tree/main/src/features/negotiation
 tags: [frontend, negotiation, external-review]
-generated: { by: sage-maintenance/claude-code, at: 2026-10-14T05:27:12Z }
+generated: { by: sage-maintenance/claude-code, at: 2026-10-14T05:53:34Z }
 sources:
   - id: cbm-graph
-    resource: codebase-memory-mcp project life-cycle-frontend @ 901976f229bbcc1750ffec78c46e6fc09a4d0882
+    resource: codebase-memory-mcp project life-cycle-frontend @ 924f2b68e7fdf30975f868885890e229379e455d
     title: Codebase knowledge graph
 status: stable
 ---
@@ -57,6 +57,32 @@ Mounted by `NegotiationTrackerPage.jsx` only while
 `data.negotiationStatus !== 'Agreed'` and the viewer is a legal reviewer or may
 route; `onSubmitted` is the tracker's `refetch`, so a successful submit or a
 post-conflict refresh reloads the tracker at the newer version.
+
+### Auto-send to counterparty and reminder stop (UC5)
+
+The handoff to the counterparty is a backend action; the tracker only reflects
+it. `NegotiationTrackerPage.jsx` maps `data.negotiationStatus` through
+`STATUS_LABELS`, where `'With Counterparty'` reads **"Sent to counterparty"**,
+and while that status holds the header adds a note that a secure link and
+one-time passcode were emailed to `data.externalPartyName` /
+`data.externalPartyEmail` — the passcode itself is never rendered. The
+counterparty then enters it on `OtpVerificationForm.jsx`
+(`/negotiation/external/:linkToken`).
+
+Reminders stop at the end of the review round. The page computes
+`remindersStopped` from `data.negotiationStatus === 'Agreed'` or every
+`data.internalReviewers` entry having `reviewStatus === 'Submitted'`, and passes
+it to `SendReminderButton.jsx` as the `stopped` prop.
+
+| `SendReminderButton` state | Rendered |
+|---|---|
+| `stopped` | button disabled; title and helper text both read "Reminders stopped — review submitted or contract agreed" |
+| not stopped, `dueDate` in the future | button disabled; title "Enabled only when Due Date has passed", helper text notes the daily automatic reminder to reviewer and owner |
+| not stopped, `dueDate` passed | button enabled; `handleClick` calls `useSendReminder` and shows `role="status"` "Reminder sent to {sentTo}" |
+
+The page's own "Reminder enabled only once overdue." hint renders only when
+`!dueDatePassed && !remindersStopped`, so it does not contradict the stopped
+state.
 
 ## Hooks (`hooks/`)
 

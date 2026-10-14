@@ -2,6 +2,18 @@
 
 ## 2026-10-14
 
+* **Update**: [negotiation](/modules/negotiation.md) — documented the UC5
+  auto-send-to-counterparty surface in `src/pages/NegotiationTrackerPage.jsx`
+  (the `'With Counterparty'` → "Sent to counterparty" `STATUS_LABELS` entry and
+  the secure-link/OTP header note driven by `externalPartyName` /
+  `externalPartyEmail`) and the new `stopped` prop on
+  `src/features/negotiation/components/SendReminderButton.jsx`, with the page's
+  `remindersStopped` derivation from `negotiationStatus === 'Agreed'` or all
+  `internalReviewers` being `Submitted`. Mode `update`, trace `369f75682fd7`,
+  commit `924f2b68e7fdf30975f868885890e229379e455d`. No files, directories or
+  routes were added, so overview, architecture and the index files were left
+  untouched.
+
 * **Update**: [negotiation](/modules/negotiation.md) — documented the new
   `src/features/negotiation/components/RiskRecheckPanel.jsx` (UC5 re-check of
   risk on counterparty redlines: `useCompareVersions` + `useClauseAnalysis` +

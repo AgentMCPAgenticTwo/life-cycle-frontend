@@ -3,6 +3,21 @@
 ## 2026-10-14
 
 * **Update**: [negotiation](/modules/negotiation.md) — documented the new
+  `src/features/negotiation/components/RiskRecheckPanel.jsx` (UC5 re-check of
+  risk on counterparty redlines: `useCompareVersions` + `useClauseAnalysis` +
+  `useRetryExtraction`, its four render states and the retry-on-failed-analysis
+  surface) and its conditional mount in `src/pages/NegotiationTrackerPage.jsx`
+  when the highest `data.versions` entry has `source === 'External'`.
+  [contracts](/modules/contracts.md) — recorded the UC2 document-generation
+  confirmation in `src/pages/NewContractPage.jsx`: `handleSave` now keeps the
+  user on the form, sets `createdContract` with a template-vs-third-party-paper
+  `generatedFrom` message, and defers navigation to a **View Contract** button.
+  Mode `update`, trace `e85937886fc6`, commit
+  `901976f229bbcc1750ffec78c46e6fc09a4d0882`. The new component sits inside an
+  already-documented directory, so overview, architecture and the index files
+  were left untouched.
+
+* **Update**: [negotiation](/modules/negotiation.md) — documented the new
   `src/features/negotiation/components/RedlineSubmitPanel.jsx` and the
   concurrent-redline-conflict surface (409 → `conflict` + Refresh, non-409 →
   `error`) it renders from `useSubmitReview`, plus its conditional mount in

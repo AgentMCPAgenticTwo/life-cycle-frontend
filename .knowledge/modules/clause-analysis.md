@@ -4,10 +4,10 @@ title: src/features/clause-analysis
 description: AI-assisted clause extraction/review screen -- per-clause accept/reject/edit, risk scoring, metadata editing, Ask-AI, and extraction-failure/conflict handling.
 resource: https://github.com/AgentMCPAgenticThree/life-cycle-frontend/tree/main/src/features/clause-analysis
 tags: [frontend, clause-analysis, ai]
-generated: { by: sage-maintenance/claude-code, at: 2026-10-13T06:17:20Z }
+generated: { by: sage-maintenance/claude-code, at: 2026-10-14T04:55:25Z }
 sources:
   - id: cbm-graph
-    resource: codebase-memory-mcp project life-cycle-frontend @ 49e9748c4f7780464fab1d3fc10815d84e990e6f
+    resource: codebase-memory-mcp project life-cycle-frontend @ 2980c74caa4fa3952f31f5cbaeff19b40c6dd55c
     title: Codebase knowledge graph
 status: stable
 ---
@@ -20,6 +20,17 @@ status: stable
 `UnsupportedFileBlocker.jsx`, `AIExtractionFailureBanner.jsx`,
 `AccessDeniedBanner.jsx`, `ConcurrentEditConflictModal.jsx`,
 `ProceedToNegotiationButton.jsx`, `AuditLogViewer.jsx`.
+
+Two guardrails live in the components rather than in a hook:
+
+* `ClauseDetailDrawer.jsx` — the Reject button checks `clause.isMandatory`
+  first and sets local `mandatoryBlockMessage` ("This clause is mandatory and
+  cannot be removed from the contract.", `role="alert"`) instead of calling
+  `onReject`, so a mandatory clause never reaches `POST .../reject`
+  (UC3-BR / UC4-BR-006).
+* `AuditLogViewer.jsx` — carries a `role="note"` immutability line ("Audit log
+  entries cannot be modified or deleted."), matching the same notice in
+  [settings-admin](/modules/settings-admin.md)'s `AuditLogTab.jsx`.
 
 ## Hooks (`hooks/`)
 

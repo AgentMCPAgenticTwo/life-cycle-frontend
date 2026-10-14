@@ -22,6 +22,9 @@ export default function AuditLogTab({ entries, isLoading, error, onRetry, onAppl
       <div>
         <h2 className="text-base font-semibold text-neutral-100">Audit Log</h2>
         <p className="mt-1 text-xs text-neutral-500">Read-only record of system activity, newest first</p>
+        <p role="note" className="mt-2 text-xs text-neutral-400">
+          Audit log entries cannot be modified or deleted.
+        </p>
       </div>
 
       <div className="mt-4">

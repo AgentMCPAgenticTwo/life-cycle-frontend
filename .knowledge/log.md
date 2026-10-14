@@ -2,6 +2,20 @@
 
 ## 2026-10-14
 
+* **Update**: [negotiation](/modules/negotiation.md) — documented the new
+  `src/features/negotiation/components/RedlineSubmitPanel.jsx` and the
+  concurrent-redline-conflict surface (409 → `conflict` + Refresh, non-409 →
+  `error`) it renders from `useSubmitReview`, plus its conditional mount in
+  `src/pages/NegotiationTrackerPage.jsx`.
+  [clause-analysis](/modules/clause-analysis.md) — recorded the mandatory-clause
+  reject guard in `ClauseDetailDrawer.jsx` and the audit-log immutability note in
+  `AuditLogViewer.jsx`. [settings-admin](/modules/settings-admin.md) — added the
+  Audit log tab section with the matching immutability note in `AuditLogTab.jsx`
+  and un-stranded the audit-log component bullet. Mode `update`, trace
+  `7b3ca6df5269`, commit `2980c74caa4fa3952f31f5cbaeff19b40c6dd55c`. The new
+  component sits inside an already-documented directory, so overview,
+  architecture and the index files were left untouched.
+
 * **Update**: [settings-admin](/modules/settings-admin.md) — documented the
   Notifications tab error surface (`updateError` prop, swallowed `HttpError` in
   `handleToggleNotification`, `pendingEventName` scoping) after the UI

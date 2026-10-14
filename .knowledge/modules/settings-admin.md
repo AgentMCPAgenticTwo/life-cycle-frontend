@@ -4,10 +4,10 @@ title: src/features/settings-admin
 description: Tenant-admin screen -- five tabs (users, routing/approval rules, integrations, notifications, audit log) under /settings/admin.
 resource: https://github.com/AgentMCPAgenticThree/life-cycle-frontend/tree/main/src/features/settings-admin
 tags: [frontend, settings, admin]
-generated: { by: sage-maintenance/claude-code, at: 2026-10-14T04:26:57Z }
+generated: { by: sage-maintenance/claude-code, at: 2026-10-14T04:55:25Z }
 sources:
   - id: cbm-graph
-    resource: codebase-memory-mcp project life-cycle-frontend @ a424f96a19e02af3710ecf5e28aaccb50f90ca52
+    resource: codebase-memory-mcp project life-cycle-frontend @ 2980c74caa4fa3952f31f5cbaeff19b40c6dd55c
     title: Codebase knowledge graph
 status: stable
 ---
@@ -21,6 +21,7 @@ not a `components/` subfolder, unlike other features).
 - Routing/approval tab: `RoutingApprovalTab.jsx`, `AddRuleForm.jsx`.
 - Integrations tab: `IntegrationsTab.jsx`, `IntegrationConnectForm.jsx` (+ `.test.jsx`).
 - Notifications tab: `NotificationsTab.jsx`.
+- Audit log tab: `AuditLogTab.jsx`, `AuditLogFilterPanel.jsx`.
 
 ### Notifications tab error surface
 
@@ -31,7 +32,14 @@ so the page does not unmount; `useUpdateNotificationEvent` retains it and the
 page passes `updateNotificationEvent.error?.message` down as `updateError`,
 rendered as a `role="alert"` banner above the event list. `pendingEventName`
 disables only the toggles of the event currently being written.
-- Audit log tab: `AuditLogTab.jsx`, `AuditLogFilterPanel.jsx`.
+
+### Audit log tab
+
+`AuditLogTab.jsx` renders the read-only, newest-first table plus a `role="note"`
+immutability line ("Audit log entries cannot be modified or deleted.") under the
+"Read-only record of system activity" subtitle. The same notice appears in
+[clause-analysis](/modules/clause-analysis.md)'s `AuditLogViewer.jsx`, so both
+audit surfaces state the guarantee identically.
 
 ## Hooks (`hooks/`)
 

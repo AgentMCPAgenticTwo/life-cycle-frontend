@@ -4,6 +4,7 @@ import { useAuth } from '@/shared/hooks/useAuth';
 import RoutingPanel from '@/features/negotiation/components/RoutingPanel';
 import ReviewerList from '@/features/negotiation/components/ReviewerList';
 import CommentBoxPanel from '@/features/negotiation/components/CommentBoxPanel';
+import RedlineSubmitPanel from '@/features/negotiation/components/RedlineSubmitPanel';
 import MarkAgreedButton from '@/features/negotiation/components/MarkAgreedButton';
 import SendReminderButton from '@/features/negotiation/components/SendReminderButton';
 import CompareVersionsModal from '@/features/negotiation/components/CompareVersionsModal';
@@ -216,6 +217,14 @@ export default function NegotiationTrackerPage() {
           </div>
 
           <div className="flex flex-col gap-6">
+            {data.negotiationStatus !== 'Agreed' && (isLegalReviewer || canRoute) && (
+              <RedlineSubmitPanel
+                contractId={contractId}
+                currentVersion={data.versionNumber}
+                onSubmitted={refetch}
+              />
+            )}
+
             <CommentBoxPanel contractId={contractId} />
 
             <div className="rounded-xl border border-neutral-800 bg-neutral-900 p-5">

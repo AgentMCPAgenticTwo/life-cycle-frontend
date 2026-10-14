@@ -2,6 +2,15 @@
 
 ## 2026-10-14
 
+* **Update**: [contract-repository](/modules/contract-repository.md) — recorded the
+  new `src/features/contract-repository/components/HighlightedText.jsx`
+  (`HighlightedText` + local `escapeRegExp`), which wraps search-term matches in
+  `<mark>` and is called only from `ContractListTable.jsx`.
+* **Update**: [tracker](/modules/tracker.md) — noted the `FORMATS` constant in
+  `src/features/tracker/TrackerExportButton.jsx` fixing export formats to
+  `Excel` and `PDF`. Mode `update`, trace `001e8afcd865`, commit
+  `27d8f22b89f10e915476e7a907812638a1f1c6bd`.
+
 * **Update**: [negotiation](/modules/negotiation.md) — documented the UC5
   auto-send-to-counterparty surface in `src/pages/NegotiationTrackerPage.jsx`
   (the `'With Counterparty'` → "Sent to counterparty" `STATUS_LABELS` entry and

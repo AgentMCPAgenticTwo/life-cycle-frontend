@@ -4,10 +4,10 @@ title: src/features/contract-repository
 description: Contract search/repository list, contract detail tabs (details, document, versions, activity log), and obligations/renewal workflows.
 resource: https://github.com/AgentMCPAgenticThree/life-cycle-frontend/tree/main/src/features/contract-repository
 tags: [frontend, contract-repository, obligations]
-generated: { by: sage-maintenance/claude-code, at: 2026-10-13T06:17:20Z }
+generated: { by: sage-maintenance/claude-code, at: 2026-10-14T06:18:30Z }
 sources:
   - id: cbm-graph
-    resource: codebase-memory-mcp project life-cycle-frontend @ 49e9748c4f7780464fab1d3fc10815d84e990e6f
+    resource: codebase-memory-mcp project life-cycle-frontend @ 27d8f22b89f10e915476e7a907812638a1f1c6bd
     title: Codebase knowledge graph
 status: stable
 ---
@@ -18,7 +18,13 @@ Largest feature directory (64 files). Split across three sub-areas:
 
 `SearchFilterPanel.jsx`, `ContractListTable.jsx`, `NoResultsMessage.jsx`,
 `EmptyRepositoryState.jsx`, `IndexingInProgressBanner.jsx`,
-`AccessDeniedView.jsx` (+ `.test.jsx`), `AddFolderTagDialog.jsx`, `StatusBadge.jsx`.
+`AccessDeniedView.jsx` (+ `.test.jsx`), `AddFolderTagDialog.jsx`, `StatusBadge.jsx`,
+`HighlightedText.jsx`.
+
+`HighlightedText.jsx` exports `HighlightedText` plus a local `escapeRegExp` helper;
+it splits a cell value on the active search term and wraps matches in `<mark>`.
+Its only caller is `ContractListTable.jsx`, which passes the repository search
+query down so matched text is highlighted in the results table.
 
 ## Contract detail tabs
 

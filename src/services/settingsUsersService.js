@@ -19,6 +19,13 @@ import { http } from '@/services/http';
  * @property {string} name
  * @property {string} email
  * @property {string} role
+ * @property {string} [initialPassword] - leave empty to have the backend auto-generate one
+ */
+
+/**
+ * @typedef {UserListItemResponse & {temporaryPassword?: string}} CreateUserResponse
+ * temporaryPassword is only ever present on this one response — the backend
+ * never returns it again on later reads, so it must be shown to the admin now.
  */
 
 /** @returns {Promise<{items: UserListItemResponse[], totalCount: number, page: number, pageSize: number}>} */
@@ -28,10 +35,18 @@ export function listTenantUsers() {
 
 /**
  * @param {CreateUserRequest} request
- * @returns {Promise<UserListItemResponse>}
+ * @returns {Promise<CreateUserResponse>}
  */
 export function createUser(request) {
   return http.post('/api/v1/settings/users', request);
+}
+
+/**
+ * @param {string} userId
+ * @returns {Promise<{temporaryPassword: string}>}
+ */
+export function resetUserPassword(userId) {
+  return http.post(`/api/v1/settings/users/${userId}/reset-password`);
 }
 
 /**

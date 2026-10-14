@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useEsignatureSettings } from '@/features/esignature/hooks/useEsignatureSettings';
 import { useUpdateEsignatureSettings } from '@/features/esignature/hooks/useUpdateEsignatureSettings';
-import { authHeaders } from '@/services/http';
+import { useAuth } from '@/shared/hooks/useAuth';
 
 // GET/PUT /api/v1/esignature-settings are TENANT_ADMIN-only (see module
 // contract); every other role is denied this screen outright.
@@ -13,7 +13,7 @@ const DEFAULT_REMINDER_FREQUENCY_DAYS = 3;
 const SIGNATURE_PROVIDERS = ['In-built E-signature', 'DocuSign', 'Adobe Sign', 'Aadhaar eSign'];
 
 export default function EsignatureSettingsPage() {
-  const role = authHeaders.role;
+  const { role } = useAuth();
   const isAllowed = ALLOWED_ROLES.includes(role);
 
   const { data, isLoading, error, refetch } = useEsignatureSettings();

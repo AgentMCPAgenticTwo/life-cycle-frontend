@@ -18,7 +18,7 @@ import { useDeactivateClause } from '@/features/templates/hooks/useDeactivateCla
 import { useReactivateClause } from '@/features/templates/hooks/useReactivateClause';
 import { useClauseVersions } from '@/features/templates/hooks/useClauseVersions';
 import { useTemplateLibraryStore } from '@/store/templateLibrarySlice';
-import { authHeaders } from '@/services/http';
+import { useAuth } from '@/shared/hooks/useAuth';
 
 // AF-002/BR-004/BR-010: only Tenant Admin and Legal Reviewer may reach this
 // screen at all. BR-009 denies Contract Owner direct navigation here even
@@ -32,7 +32,7 @@ const ALLOWED_ROLES = ['TENANT_ADMIN', 'LEGAL_REVIEWER'];
 const DEACTIVATE_ROLES = ['TENANT_ADMIN'];
 
 export default function TemplateClauseLibraryPage() {
-  const role = authHeaders.role;
+  const { role } = useAuth();
   const isAllowed = ALLOWED_ROLES.includes(role);
   const canDeactivate = DEACTIVATE_ROLES.includes(role);
 

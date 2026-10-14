@@ -2,16 +2,18 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import SignerListPage from '@/pages/SignerListPage';
-import { http, authHeaders } from '@/services/http';
+import { http } from '@/services/http';
 
 vi.mock('@/services/http', async () => {
   const actual = await vi.importActual('@/services/http');
   return {
     ...actual,
     http: { get: vi.fn(), post: vi.fn(), put: vi.fn(), del: vi.fn() },
-    authHeaders: { role: 'CONTRACT_OWNER', userId: '00000000-0000-0000-0000-000000000001' },
   };
 });
+
+const authState = vi.hoisted(() => ({ role: 'CONTRACT_OWNER', userId: '00000000-0000-0000-0000-000000000001' }));
+vi.mock('@/shared/hooks/useAuth', () => ({ useAuth: () => authState }));
 
 const CONTRACT_ID = '11111111-1111-1111-1111-111111111111';
 const CONTRACT = { id: CONTRACT_ID, contractName: 'Vendor Services Agreement', status: 'Approved' };
@@ -53,12 +55,12 @@ function renderPage() {
 
 beforeEach(() => {
   vi.clearAllMocks();
-  authHeaders.role = 'CONTRACT_OWNER';
+  authState.role = 'CONTRACT_OWNER';
 });
 
 describe('SignerListPage', () => {
   it('blocks access for an Approver', async () => {
-    authHeaders.role = 'APPROVER';
+    authState.role = 'APPROVER';
     mockEndpoints();
     renderPage();
 

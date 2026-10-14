@@ -13,7 +13,7 @@ import { useTurnaroundTab } from '@/features/tracker/hooks/useTurnaroundTab';
 import { useTrackerExport } from '@/features/tracker/hooks/useTrackerExport';
 import { useEstimatedTurnaroundOverride } from '@/features/tracker/hooks/useEstimatedTurnaroundOverride';
 import { useTrackerFiltersStore } from '@/store/trackerFiltersSlice';
-import { authHeaders } from '@/services/http';
+import { useAuth } from '@/shared/hooks/useAuth';
 
 // UC10-AF-002 / UC10-BR-012: only these roles may view the Tracker.
 const ALLOWED_ROLES = ['TENANT_ADMIN', 'CONTRACT_OWNER', 'LEGAL_REVIEWER', 'APPROVER'];
@@ -33,7 +33,8 @@ const PERIOD_WINDOW_LABEL = {
 
 export default function TrackerPage() {
   const navigate = useNavigate();
-  const isAllowed = ALLOWED_ROLES.includes(authHeaders.role);
+  const { role, userId } = useAuth();
+  const isAllowed = ALLOWED_ROLES.includes(role);
 
   useEffect(() => {
     if (!isAllowed) {
@@ -114,7 +115,7 @@ export default function TrackerPage() {
   async function handleOverride(contractId, request) {
     await override(contractId, {
       ...request,
-      overriddenBy: authHeaders.userId,
+      overriddenBy: userId,
       overrideTimestamp: new Date().toISOString(),
     });
     await turnaroundResult.refetch();

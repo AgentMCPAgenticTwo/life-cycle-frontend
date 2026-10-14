@@ -9,7 +9,7 @@ import { useAddSigner } from '@/features/esignature/hooks/useAddSigner';
 import { useSendForSignature } from '@/features/esignature/hooks/useSendForSignature';
 import { useEsignatureSettings } from '@/features/esignature/hooks/useEsignatureSettings';
 import { getContract } from '@/services/contractsService';
-import { authHeaders } from '@/services/http';
+import { useAuth } from '@/shared/hooks/useAuth';
 
 // GET /contracts/{id}/signers is only visible to CONTRACT_OWNER, LEGAL_REVIEWER
 // and TENANT_ADMIN (see module contract); Approvers and any External Party
@@ -20,7 +20,7 @@ const SENT_STATUSES = ['Sent', 'Executed'];
 
 export default function SignerListPage() {
   const { contractId } = useParams();
-  const role = authHeaders.role;
+  const { role } = useAuth();
   const isAllowed = ALLOWED_ROLES.includes(role);
   const canManage = role === 'CONTRACT_OWNER';
 

@@ -10,7 +10,8 @@ import { useHighRiskContracts } from '@/features/dashboard/hooks/useHighRiskCont
 import { useDashboardFilterOptions } from '@/features/dashboard/hooks/useDashboardFilterOptions';
 import { useDashboardFilterStore } from '@/store/dashboardFilterSlice';
 import { useContractDetail } from '@/features/contracts/hooks/useContractDetail';
-import { authHeaders, HttpError } from '@/services/http';
+import { HttpError } from '@/services/http';
+import { useAuth } from '@/shared/hooks/useAuth';
 
 // High Risk Contracts panel is withheld from Signers (UC1-BR-013 / UC1-FV-003).
 const HIDE_HIGH_RISK_FOR_ROLES = ['SIGNER'];
@@ -23,6 +24,7 @@ function toIsoDateString(date) {
 
 export default function DashboardPage() {
   const navigate = useNavigate();
+  const { role } = useAuth();
   const [accessMessage, setAccessMessage] = useState(null);
   const [sessionExpired, setSessionExpired] = useState(false);
 
@@ -45,7 +47,7 @@ export default function DashboardPage() {
   const { data: tasks, isLoading: tasksLoading, error: tasksError, refetch: refetchTasks } =
     useMyTasks(appliedFilters);
 
-  const showHighRisk = !HIDE_HIGH_RISK_FOR_ROLES.includes(authHeaders.role);
+  const showHighRisk = !HIDE_HIGH_RISK_FOR_ROLES.includes(role);
   const highRiskResult = useHighRiskContracts(appliedFilters, !showHighRisk);
   const { fetchContract } = useContractDetail();
 

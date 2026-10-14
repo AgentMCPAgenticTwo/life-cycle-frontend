@@ -23,7 +23,7 @@ function formatLastLogin(value) {
  * exactly Name, Email, Role, Status, Last Login — no other user-table column
  * is shown, per UC11-GC-001.
  */
-export default function UserManagementTab({ users, isLoading, error, onRetry, onAddUser, onStatusChanged }) {
+export default function UserManagementTab({ users, isLoading, error, onRetry, onAddUser, onStatusChanged, onResetPassword }) {
   return (
     <section className="rounded-xl border border-neutral-800 bg-neutral-900/60 p-6">
       <div className="flex items-center justify-between">
@@ -87,7 +87,18 @@ export default function UserManagementTab({ users, isLoading, error, onRetry, on
                   </td>
                   <td className="py-3 text-neutral-400">{formatLastLogin(user.lastLogin)}</td>
                   <td className="py-3 text-right">
-                    <UserStatusActionControl user={user} users={users} onStatusChanged={onStatusChanged} />
+                    <div className="flex items-center justify-end gap-2">
+                      {user.status !== 'Invited' && (
+                        <button
+                          type="button"
+                          onClick={() => onResetPassword?.(user)}
+                          className="rounded-md border border-neutral-700 px-3 py-1.5 text-sm font-medium text-neutral-200 hover:border-neutral-500"
+                        >
+                          Reset Password
+                        </button>
+                      )}
+                      <UserStatusActionControl user={user} users={users} onStatusChanged={onStatusChanged} />
+                    </div>
                   </td>
                 </tr>
               ))}

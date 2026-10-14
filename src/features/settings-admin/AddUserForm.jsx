@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { generateStrongPassword, isPasswordStrongEnough, PASSWORD_RULE_MESSAGE } from '@/shared/utils/password';
 
 const ROLE_OPTIONS = ['Tenant Admin', 'Legal Reviewer', 'Contract Owner', 'Approver', 'External Party', 'Signer'];
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -8,12 +9,15 @@ const MISSING_FIELDS_MESSAGE = 'Please complete all required fields';
  * Add User form (UC11-MF-001 / UC11-FV-001). Validates User Name, User Email
  * (format + mandatory) and User Role client-side before calling onSubmit;
  * server-side duplicate-email rejection (UC11-AF-002 / UC11-BR-002) is
- * surfaced via the `error` prop rather than re-derived here.
+ * surfaced via the `error` prop rather than re-derived here. Initial Password
+ * is optional — leaving it empty has the backend auto-generate one.
  */
 export default function AddUserForm({ onSubmit, onCancel, isSubmitting = false, error = null }) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [role, setRole] = useState('');
+  const [initialPassword, setInitialPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [fieldErrors, setFieldErrors] = useState({});
 
   function handleSubmit(e) {
@@ -24,13 +28,19 @@ export default function AddUserForm({ onSubmit, onCancel, isSubmitting = false, 
     if (!trimmedName) nextErrors.name = true;
     if (!trimmedEmail || !EMAIL_PATTERN.test(trimmedEmail)) nextErrors.email = true;
     if (!role) nextErrors.role = true;
+    if (initialPassword && !isPasswordStrongEnough(initialPassword)) nextErrors.initialPassword = true;
 
     if (Object.keys(nextErrors).length > 0) {
       setFieldErrors(nextErrors);
       return;
     }
     setFieldErrors({});
-    onSubmit({ name: trimmedName, email: trimmedEmail, role });
+    onSubmit({
+      name: trimmedName,
+      email: trimmedEmail,
+      role,
+      ...(initialPassword ? { initialPassword } : {}),
+    });
   }
 
   const hasFieldErrors = Object.keys(fieldErrors).length > 0;
@@ -101,6 +111,50 @@ export default function AddUserForm({ onSubmit, onCancel, isSubmitting = false, 
               ))}
             </select>
             <p className="mt-1 text-xs text-neutral-500">{ROLE_OPTIONS.join(', ')}</p>
+          </div>
+
+          <div>
+            <label htmlFor="add-user-initial-password" className="text-sm font-medium text-neutral-200">
+              Initial Password
+            </label>
+            <div className="mt-1 flex gap-2">
+              <input
+                id="add-user-initial-password"
+                type={showPassword ? 'text' : 'password'}
+                value={initialPassword}
+                onChange={(e) => setInitialPassword(e.target.value)}
+                disabled={isSubmitting}
+                placeholder="Leave empty to auto-generate"
+                className={`w-full rounded-md border bg-neutral-950 px-3 py-2 text-sm text-neutral-100 ${
+                  fieldErrors.initialPassword ? 'border-red-500' : 'border-neutral-700'
+                }`}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((v) => !v)}
+                disabled={isSubmitting}
+                className="shrink-0 rounded-md border border-neutral-700 px-3 py-2 text-xs font-medium text-neutral-200 hover:border-neutral-500"
+              >
+                {showPassword ? 'Hide' : 'Show'}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setInitialPassword(generateStrongPassword());
+                  setShowPassword(true);
+                }}
+                disabled={isSubmitting}
+                className="shrink-0 rounded-md border border-neutral-700 px-3 py-2 text-xs font-medium text-neutral-200 hover:border-neutral-500"
+              >
+                Generate
+              </button>
+            </div>
+            <p className="mt-1 text-xs text-neutral-500">{PASSWORD_RULE_MESSAGE}</p>
+            {fieldErrors.initialPassword && (
+              <p role="alert" className="mt-1 text-xs text-red-300">
+                {PASSWORD_RULE_MESSAGE}
+              </p>
+            )}
           </div>
 
           {hasFieldErrors && (

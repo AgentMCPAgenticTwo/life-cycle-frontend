@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import TemplateClauseLibraryPage from '@/pages/TemplateClauseLibraryPage';
-import { http, authHeaders } from '@/services/http';
+import { http } from '@/services/http';
 import { useTemplateLibraryStore } from '@/store/templateLibrarySlice';
 
 vi.mock('@/services/http', async () => {
@@ -10,9 +10,11 @@ vi.mock('@/services/http', async () => {
   return {
     ...actual,
     http: { get: vi.fn(), post: vi.fn(), put: vi.fn(), del: vi.fn() },
-    authHeaders: { role: 'TENANT_ADMIN', userId: '00000000-0000-0000-0000-000000000001' },
   };
 });
+
+const authState = vi.hoisted(() => ({ role: 'TENANT_ADMIN', userId: '00000000-0000-0000-0000-000000000001' }));
+vi.mock('@/shared/hooks/useAuth', () => ({ useAuth: () => authState }));
 
 const TEMPLATE = {
   id: '11111111-1111-1111-1111-111111111111',
@@ -57,7 +59,7 @@ function renderPage() {
 
 beforeEach(() => {
   vi.clearAllMocks();
-  authHeaders.role = 'TENANT_ADMIN';
+  authState.role = 'TENANT_ADMIN';
   useTemplateLibraryStore.getState().clearSelection();
   useTemplateLibraryStore.setState({ activeTab: 'templates' });
 });
@@ -84,7 +86,7 @@ describe('TemplateClauseLibraryPage', () => {
   });
 
   it('blocks access for an unauthorized role', () => {
-    authHeaders.role = 'APPROVER';
+    authState.role = 'APPROVER';
     mockEndpoints();
     renderPage();
 

@@ -9,7 +9,8 @@ import ContractDocumentTab from '@/features/contract-repository/components/Contr
 import ContractVersionsTab from '@/features/contract-repository/components/ContractVersionsTab';
 import ContractActivityLogTab from '@/features/contract-repository/components/ContractActivityLogTab';
 import AddFolderTagDialog from '@/features/contract-repository/components/AddFolderTagDialog';
-import { authHeaders, HttpError } from '@/services/http';
+import { HttpError } from '@/services/http';
+import { useAuth } from '@/shared/hooks/useAuth';
 import { formatCurrency, formatDate, formatRelativeTime } from '@/features/contract-repository/utils/format';
 
 const TAB_ORDER = ['Details', 'Document', 'Versions', 'Clauses', 'Approvals', 'Signatures', 'Obligations', 'Activity Log'];
@@ -51,12 +52,13 @@ function ExternalTabPanel({ tab, contractId }) {
 
 export default function ContractDetailPage() {
   const { contractId } = useParams();
+  const { role } = useAuth();
   const { data: contract, isLoading, error, refetch } = useContractDetail(contractId);
   const { data: versions } = useContractVersions(contractId);
   const { data: activity, totalCount: activityCount } = useActivityLog(contractId);
   const [activeTab, setActiveTab] = useState('Details');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const canManageFolderTags = FOLDER_TAG_MANAGER_ROLES.includes(authHeaders.role);
+  const canManageFolderTags = FOLDER_TAG_MANAGER_ROLES.includes(role);
 
   if (isLoading) {
     return (

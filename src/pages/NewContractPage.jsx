@@ -9,7 +9,7 @@ import { useContractOwners } from '@/features/contracts/hooks/useContractOwners'
 import { useCreateCounterparty } from '@/features/contracts/hooks/useCreateCounterparty';
 import { useCreateContract } from '@/features/contracts/hooks/useCreateContract';
 import { useContractDraftStore } from '@/store/contractDraftSlice';
-import { authHeaders } from '@/services/http';
+import { useAuth } from '@/shared/hooks/useAuth';
 
 const MANDATORY_FIELD_LABELS = {
   contractType: 'Contract Type',
@@ -50,6 +50,7 @@ function toDisplayDate(date) {
  */
 export default function NewContractPage() {
   const navigate = useNavigate();
+  const { userId } = useAuth();
   const formData = useContractDraftStore((s) => s.formData);
   const setField = useContractDraftStore((s) => s.setField);
   const reset = useContractDraftStore((s) => s.reset);
@@ -74,7 +75,7 @@ export default function NewContractPage() {
   // Contract Owner defaults to the logged-in user, reassignable from the
   // dropdown by any Contract Owner or Tenant Admin (UC2-BR-003 / UC2-BR-012).
   useEffect(() => {
-    if (!formData.contractOwnerId) setField('contractOwnerId', authHeaders.userId);
+    if (!formData.contractOwnerId) setField('contractOwnerId', userId);
   }, []);
 
   const noActiveTemplates =

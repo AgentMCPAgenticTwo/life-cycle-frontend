@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { authHeaders } from '@/services/http';
+import { useAuth } from '@/shared/hooks/useAuth';
 import ClauseListPanel from '@/features/clause-analysis/components/ClauseListPanel';
 import ClauseDetailDrawer from '@/features/clause-analysis/components/ClauseDetailDrawer';
 import OverallRiskScoreLabel from '@/features/clause-analysis/components/OverallRiskScoreLabel';
@@ -24,7 +24,7 @@ const VIEW_ROLES = ['LEGAL_REVIEWER', 'CONTRACT_OWNER', 'TENANT_ADMIN'];
 
 export default function ClauseAnalysisPage() {
   const { contractId } = useParams();
-  const role = authHeaders.role;
+  const { role } = useAuth();
   const isAllowed = VIEW_ROLES.includes(role);
   const isLegalReviewer = role === 'LEGAL_REVIEWER';
   const isContractOwner = role === 'CONTRACT_OWNER';

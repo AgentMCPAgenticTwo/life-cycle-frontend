@@ -1,11 +1,14 @@
 // The single place the app talks to the backend.
 //
-// Every request carries the X-User-Role / X-User-Id headers the API's header-auth scheme
-// expects; a missing role header is 401 and a disallowed role is 403, and both surface as a
-// thrown ApiError for the screen's error state to render.
+// Every request carries the signed-in user's `Authorization: Bearer <accessToken>`
+// header. A 401 means the access token expired — this module refreshes it once
+// (via the httpOnly refresh cookie) and retries the original request; if the
+// refresh itself fails the session is cleared and the user is sent to /login.
 //
 // There is deliberately no mock/dev fallback here: a failed call throws. Returning fake data
 // on error hides broken integration until it reaches production.
+
+import { useAuthStore } from '@/store/authStore';
 
 /**
  * The API's error body shape.
@@ -30,29 +33,63 @@ if (!BASE_URL) {
   );
 }
 
-// Dev-auth identity, derived from THIS project's contract: the role is one the API's
-// endpoints actually accept, and the id is in the id format the backend types its id
-// columns as. An id in the wrong shape (a string key against a uuid column) is rejected
-// by the database rather than by validation, so it surfaces as a 500, not a 400.
-// Replace with the signed-in user's role/id once real auth exists: the API has no login
-// flow, it trusts these headers (see CLAUDE.md, Authentication).
-export const authHeaders = {
-  role: 'TENANT_ADMIN',
-  userId: '00000000-0000-0000-0000-000000000001',
-};
+const AUTH_PATH_PREFIX = '/auth/';
 
-async function request(path, init = {}) {
+let refreshPromise = null;
+
+/**
+ * Exchanges the httpOnly refresh cookie for a new access token, rotating the
+ * refresh token server-side. Concurrent callers share one in-flight request
+ * so a burst of 401s only triggers a single refresh call.
+ * @returns {Promise<string>} the new access token
+ */
+export function refreshSession() {
+  if (!refreshPromise) {
+    refreshPromise = fetch(`${BASE_URL}/auth/refresh`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+    })
+      .then(async (response) => {
+        if (!response.ok) throw new Error('refresh failed');
+        const body = await response.json();
+        useAuthStore.getState().setAccessToken(body.accessToken);
+        return body.accessToken;
+      })
+      .finally(() => {
+        refreshPromise = null;
+      });
+  }
+  return refreshPromise;
+}
+
+async function request(path, init = {}, { skipAuthRetry = false } = {}) {
   const isForm = init.body instanceof FormData;
+  const { accessToken } = useAuthStore.getState();
+
   const response = await fetch(`${BASE_URL}${path}`, {
     ...init,
+    credentials: 'include',
     headers: {
       // Do not set Content-Type for FormData — the browser adds the multipart boundary.
       ...(isForm ? {} : { 'Content-Type': 'application/json' }),
-      'X-User-Role': authHeaders.role,
-      'X-User-Id': authHeaders.userId,
+      ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
       ...(init.headers || {}),
     },
   });
+
+  if (response.status === 401 && !skipAuthRetry && !path.startsWith(AUTH_PATH_PREFIX)) {
+    try {
+      await refreshSession();
+      return await request(path, init, { skipAuthRetry: true });
+    } catch {
+      useAuthStore.getState().clearSession();
+      if (typeof window !== 'undefined') {
+        window.location.href = '/login';
+      }
+      throw new HttpError(401, { error: 'Your session has expired. Please sign in again.', details: [] });
+    }
+  }
 
   if (!response.ok) {
     let body = { error: `HTTP ${response.status}`, details: [] };

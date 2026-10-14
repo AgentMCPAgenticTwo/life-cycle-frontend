@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useApproverUsers } from '@/features/approvals/hooks/useApproverUsers';
-import { authHeaders } from '@/services/http';
+import { useAuth } from '@/shared/hooks/useAuth';
 
 const DATE_PATTERN = /^\d{2}\/\d{2}\/\d{4}$/;
 
@@ -18,13 +18,14 @@ function toIsoDate(ddmmyyyy) {
  * enforced server-side and surfaced here via the returned error message.
  */
 export default function DelegateModal({ onConfirm, onClose, isSubmitting, error }) {
+  const { userId } = useAuth();
   const { data, isLoading: usersLoading, error: usersError } = useApproverUsers();
   const [delegateToUserId, setDelegateToUserId] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [formError, setFormError] = useState(null);
 
-  const eligibleUsers = (data?.items || []).filter((user) => user.id !== authHeaders.userId);
+  const eligibleUsers = (data?.items || []).filter((user) => user.id !== userId);
 
   function handleConfirm() {
     if (!delegateToUserId) {

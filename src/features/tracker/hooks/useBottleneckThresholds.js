@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { getBottleneckThresholds } from '@/services/trackerService';
-import { authHeaders } from '@/services/http';
+import { useAuth } from '@/shared/hooks/useAuth';
 
 /**
  * Fetches the tenant-configured stuck-flag thresholds per stage (UC10-BR-002).
@@ -11,10 +11,11 @@ import { authHeaders } from '@/services/http';
  * @returns {{ thresholds: {stage: string, thresholdDays: number}[] }}
  */
 export function useBottleneckThresholds() {
+  const { role } = useAuth();
   const [thresholds, setThresholds] = useState([]);
 
   useEffect(() => {
-    if (authHeaders.role !== 'TENANT_ADMIN') return;
+    if (role !== 'TENANT_ADMIN') return;
     let cancelled = false;
     getBottleneckThresholds()
       .then((response) => {
@@ -26,7 +27,7 @@ export function useBottleneckThresholds() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [role]);
 
   return { thresholds };
 }

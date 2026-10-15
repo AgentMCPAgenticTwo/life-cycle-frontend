@@ -215,21 +215,24 @@ export default function ClauseAnalysisPage() {
                 {retryMutation.isLoading ? 'Refreshing…' : 'Refresh Analysis'}
               </button>
             )}
-            {!isTenantAdmin &&
-              (proceedResult ? (
-                <Link
-                  to={negotiationPath}
-                  className="rounded-md bg-emerald-500 px-4 py-2 text-sm font-semibold text-neutral-950 hover:bg-emerald-400"
-                >
-                  Go to Negotiation →
-                </Link>
-              ) : (
-                <ProceedToNegotiationButton
-                  enabled={data.proceedToNegotiationEnabled}
-                  isLoading={proceedMutation.isLoading}
-                  onProceed={handleProceed}
-                />
-              ))}
+            {!isTenantAdmin && !proceedResult && (
+              <ProceedToNegotiationButton
+                enabled={data.proceedToNegotiationEnabled}
+                isLoading={proceedMutation.isLoading}
+                onProceed={handleProceed}
+              />
+            )}
+            {/* The proceed step is idempotent and leaves no stored flag, so a reviewer who
+                already completed it and comes back to this screen would otherwise have no way
+                through. Offer the link whenever nothing blocks negotiation. */}
+            {!isTenantAdmin && (proceedResult || data.proceedToNegotiationEnabled) && (
+              <Link
+                to={negotiationPath}
+                className="rounded-md bg-emerald-500 px-4 py-2 text-sm font-semibold text-neutral-950 hover:bg-emerald-400"
+              >
+                Go to Negotiation →
+              </Link>
+            )}
           </div>
         </div>
       </header>

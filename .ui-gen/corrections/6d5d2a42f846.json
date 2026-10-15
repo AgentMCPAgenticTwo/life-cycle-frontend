@@ -1,0 +1,751 @@
+{
+  "trace_id": "6d5d2a42f846",
+  "branch": "ui-correction/6d5d2a42f846",
+  "maintenance_branch": "ui-correction/6d5d2a42f846",
+  "status": "SUCCESS",
+  "summary": "On the Clause Analysis screen, the \"Go to Negotiation →\" link now renders whenever negotiation isn't blocked (`proceedToNegotiationEnabled`), not only immediately after a successful proceed in the same session — so a Legal Reviewer returning to a contract that already completed Proceed to Negotiation has a way through. Lint, build and the screen tests pass.\n\nReading taken: the counterparty email body (\"Secure link reference / One-time password / expires at\") is composed server-side in `life-cycle-backend` (`app/services/lifecycle_negotiation.py::_issue_external_link`); adding a clickable `Review link: {app_base_url}/negotiation/external/{token}` line to match the signer mail format is backend work, which I left for that repository — the frontend route `/negotiation/external/:linkToken` already exists to receive it.",
+  "files_changed": [
+    "src/pages/ClauseAnalysisPage.jsx"
+  ],
+  "lines_changed": 33,
+  "blockers": [
+    "Not applied -- Add the clickable review link line to the 'Sent to counterparty' email so it matches the signing-link mail format: the email body is composed in the backend repository (life-cycle-backend, app/services/lifecycle_negotiation.py); no frontend code builds that message",
+    "Visual verification failed: The clause-analysis route at http://localhost:5199/contracts/<id>/clause-analysis (and /contracts and / as well) renders a completely blank white page, so no header, no Proceed to Negotiation button and no 'Go to Negotiation →' link are visible; the change could not be visually confirmed."
+  ],
+  "visual_check": {
+    "verdict": "fail",
+    "evidence": "The clause-analysis route at http://localhost:5199/contracts/<id>/clause-analysis (and /contracts and / as well) renders a completely blank white page, so no header, no Proceed to Negotiation button and no 'Go to Negotiation →' link are visible; the change could not be visually confirmed.",
+    "screenshot_path": "/tmp/actual.png"
+  },
+  "context_sharing": {
+    "target": "frontend",
+    "branch": "ui-correction/6d5d2a42f846",
+    "base_path": "/api/v1/lifecycle",
+    "endpoints": [
+      {
+        "method": "GET",
+        "path": "/api/v1/lifecycle/contracts/{contractId}/clause-analysis",
+        "request_fields": [
+          {
+            "name": "contractId",
+            "type": "string"
+          }
+        ],
+        "response_fields": [
+          {
+            "name": "contractId",
+            "type": "string"
+          },
+          {
+            "name": "fileFormatSupported",
+            "type": "boolean"
+          },
+          {
+            "name": "analysisStatus",
+            "type": "string"
+          },
+          {
+            "name": "clauses",
+            "type": "array"
+          },
+          {
+            "name": "overallContractRiskScore",
+            "type": "string"
+          },
+          {
+            "name": "metadata",
+            "type": "object"
+          },
+          {
+            "name": "proceedToNegotiationEnabled",
+            "type": "boolean"
+          },
+          {
+            "name": "askAiEnabled",
+            "type": "boolean"
+          }
+        ],
+        "purpose": "Load clause analysis for a contract"
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/lifecycle/contracts/{contractId}/clauses/{clauseId}/accept-suggestion",
+        "request_fields": [
+          {
+            "name": "contractId",
+            "type": "string"
+          },
+          {
+            "name": "clauseId",
+            "type": "string"
+          }
+        ],
+        "response_fields": [
+          {
+            "name": "clauseId",
+            "type": "string"
+          },
+          {
+            "name": "clauseText",
+            "type": "string"
+          },
+          {
+            "name": "clauseCategory",
+            "type": "string"
+          },
+          {
+            "name": "libraryMatchStatus",
+            "type": "string"
+          },
+          {
+            "name": "riskScore",
+            "type": "string"
+          },
+          {
+            "name": "aiExplanation",
+            "type": "string"
+          },
+          {
+            "name": "suggestedText",
+            "type": "string"
+          },
+          {
+            "name": "status",
+            "type": "string"
+          },
+          {
+            "name": "isMandatory",
+            "type": "boolean"
+          },
+          {
+            "name": "mandatoryClauseFlag",
+            "type": "boolean"
+          },
+          {
+            "name": "mandatoryClauseFlagLabel",
+            "type": "string"
+          },
+          {
+            "name": "version",
+            "type": "number"
+          },
+          {
+            "name": "updatedAt",
+            "type": "string"
+          },
+          {
+            "name": "updatedBy",
+            "type": "string"
+          }
+        ],
+        "purpose": "Accept the AI suggested text for a clause"
+      },
+      {
+        "method": "PUT",
+        "path": "/api/v1/lifecycle/contracts/{contractId}/clauses/{clauseId}",
+        "request_fields": [
+          {
+            "name": "clauseText",
+            "type": "string"
+          },
+          {
+            "name": "expectedVersion",
+            "type": "number"
+          }
+        ],
+        "response_fields": [
+          {
+            "name": "clauseId",
+            "type": "string"
+          },
+          {
+            "name": "clauseText",
+            "type": "string"
+          },
+          {
+            "name": "version",
+            "type": "number"
+          },
+          {
+            "name": "status",
+            "type": "string"
+          }
+        ],
+        "purpose": "Edit clause text with optimistic concurrency (409 on conflict)"
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/lifecycle/contracts/{contractId}/clauses/{clauseId}/reject",
+        "request_fields": [
+          {
+            "name": "reason",
+            "type": "string"
+          }
+        ],
+        "response_fields": [
+          {
+            "name": "clauseId",
+            "type": "string"
+          },
+          {
+            "name": "status",
+            "type": "string"
+          }
+        ],
+        "purpose": "Reject a clause suggestion"
+      },
+      {
+        "method": "PUT",
+        "path": "/api/v1/lifecycle/contracts/{contractId}/metadata",
+        "request_fields": [
+          {
+            "name": "parties",
+            "type": "string"
+          },
+          {
+            "name": "contractValue",
+            "type": "number"
+          },
+          {
+            "name": "startDate",
+            "type": "date"
+          },
+          {
+            "name": "endDate",
+            "type": "date"
+          },
+          {
+            "name": "renewalTerms",
+            "type": "string"
+          },
+          {
+            "name": "paymentTerms",
+            "type": "string"
+          },
+          {
+            "name": "keyObligations",
+            "type": "string"
+          }
+        ],
+        "response_fields": [
+          {
+            "name": "parties",
+            "type": "string"
+          },
+          {
+            "name": "partiesLabel",
+            "type": "string"
+          },
+          {
+            "name": "contractValue",
+            "type": "number"
+          },
+          {
+            "name": "contractValueLabel",
+            "type": "string"
+          },
+          {
+            "name": "startDate",
+            "type": "date"
+          },
+          {
+            "name": "startDateLabel",
+            "type": "string"
+          },
+          {
+            "name": "endDate",
+            "type": "date"
+          },
+          {
+            "name": "endDateLabel",
+            "type": "string"
+          },
+          {
+            "name": "renewalTerms",
+            "type": "string"
+          },
+          {
+            "name": "renewalTermsLabel",
+            "type": "string"
+          },
+          {
+            "name": "paymentTerms",
+            "type": "string"
+          },
+          {
+            "name": "paymentTermsLabel",
+            "type": "string"
+          },
+          {
+            "name": "keyObligations",
+            "type": "string"
+          },
+          {
+            "name": "keyObligationsLabel",
+            "type": "string"
+          }
+        ],
+        "purpose": "Update extracted contract metadata"
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/lifecycle/contracts/{contractId}/ask-ai",
+        "request_fields": [
+          {
+            "name": "question",
+            "type": "string"
+          }
+        ],
+        "response_fields": [
+          {
+            "name": "answer",
+            "type": "string"
+          },
+          {
+            "name": "disclaimer",
+            "type": "string"
+          },
+          {
+            "name": "relatedClauseIds",
+            "type": "array"
+          }
+        ],
+        "purpose": "Ask a question about the contract"
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/lifecycle/contracts/{contractId}/proceed-to-negotiation",
+        "request_fields": [
+          {
+            "name": "contractId",
+            "type": "string"
+          }
+        ],
+        "response_fields": [
+          {
+            "name": "contractId",
+            "type": "string"
+          },
+          {
+            "name": "negotiationStatus",
+            "type": "string"
+          },
+          {
+            "name": "routedAt",
+            "type": "string"
+          },
+          {
+            "name": "clauses",
+            "type": "array"
+          },
+          {
+            "name": "overallContractRiskScore",
+            "type": "string"
+          },
+          {
+            "name": "metadata",
+            "type": "object"
+          },
+          {
+            "name": "askAiAvailable",
+            "type": "boolean"
+          }
+        ],
+        "purpose": "Move the contract into negotiation; idempotent, stores no flag"
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/lifecycle/contracts/{contractId}/retry-extraction",
+        "request_fields": [
+          {
+            "name": "contractId",
+            "type": "string"
+          }
+        ],
+        "response_fields": [
+          {
+            "name": "contractId",
+            "type": "string"
+          },
+          {
+            "name": "fileFormatSupported",
+            "type": "boolean"
+          },
+          {
+            "name": "analysisStatus",
+            "type": "string"
+          },
+          {
+            "name": "clauses",
+            "type": "array"
+          },
+          {
+            "name": "overallContractRiskScore",
+            "type": "string"
+          },
+          {
+            "name": "metadata",
+            "type": "object"
+          },
+          {
+            "name": "proceedToNegotiationEnabled",
+            "type": "boolean"
+          },
+          {
+            "name": "askAiEnabled",
+            "type": "boolean"
+          }
+        ],
+        "purpose": "Re-run AI extraction and return refreshed clause analysis"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/lifecycle/contracts/{contractId}/audit-log",
+        "request_fields": [
+          {
+            "name": "page",
+            "type": "number"
+          },
+          {
+            "name": "pageSize",
+            "type": "number"
+          }
+        ],
+        "response_fields": [
+          {
+            "name": "items",
+            "type": "array"
+          },
+          {
+            "name": "page",
+            "type": "number"
+          },
+          {
+            "name": "pageSize",
+            "type": "number"
+          },
+          {
+            "name": "totalCount",
+            "type": "number"
+          }
+        ],
+        "purpose": "Paged audit log for the contract"
+      }
+    ],
+    "types": {
+      "ClauseResponse": [
+        {
+          "name": "clauseId",
+          "type": "string"
+        },
+        {
+          "name": "clauseText",
+          "type": "string"
+        },
+        {
+          "name": "clauseCategory",
+          "type": "string"
+        },
+        {
+          "name": "libraryMatchStatus",
+          "type": "string"
+        },
+        {
+          "name": "riskScore",
+          "type": "string"
+        },
+        {
+          "name": "aiExplanation",
+          "type": "string"
+        },
+        {
+          "name": "suggestedText",
+          "type": "string"
+        },
+        {
+          "name": "status",
+          "type": "string"
+        },
+        {
+          "name": "isMandatory",
+          "type": "boolean"
+        },
+        {
+          "name": "mandatoryClauseFlag",
+          "type": "boolean"
+        },
+        {
+          "name": "mandatoryClauseFlagLabel",
+          "type": "string"
+        },
+        {
+          "name": "version",
+          "type": "number"
+        },
+        {
+          "name": "updatedAt",
+          "type": "string"
+        },
+        {
+          "name": "updatedBy",
+          "type": "string"
+        }
+      ],
+      "ContractMetadataResponse": [
+        {
+          "name": "parties",
+          "type": "string"
+        },
+        {
+          "name": "partiesLabel",
+          "type": "string"
+        },
+        {
+          "name": "contractValue",
+          "type": "number"
+        },
+        {
+          "name": "contractValueLabel",
+          "type": "string"
+        },
+        {
+          "name": "startDate",
+          "type": "string"
+        },
+        {
+          "name": "startDateLabel",
+          "type": "string"
+        },
+        {
+          "name": "endDate",
+          "type": "string"
+        },
+        {
+          "name": "endDateLabel",
+          "type": "string"
+        },
+        {
+          "name": "renewalTerms",
+          "type": "string"
+        },
+        {
+          "name": "renewalTermsLabel",
+          "type": "string"
+        },
+        {
+          "name": "paymentTerms",
+          "type": "string"
+        },
+        {
+          "name": "paymentTermsLabel",
+          "type": "string"
+        },
+        {
+          "name": "keyObligations",
+          "type": "string"
+        },
+        {
+          "name": "keyObligationsLabel",
+          "type": "string"
+        }
+      ],
+      "ClauseAnalysisResponse": [
+        {
+          "name": "contractId",
+          "type": "string"
+        },
+        {
+          "name": "fileFormatSupported",
+          "type": "boolean"
+        },
+        {
+          "name": "analysisStatus",
+          "type": "string"
+        },
+        {
+          "name": "clauses",
+          "type": "array"
+        },
+        {
+          "name": "overallContractRiskScore",
+          "type": "string"
+        },
+        {
+          "name": "metadata",
+          "type": "object"
+        },
+        {
+          "name": "proceedToNegotiationEnabled",
+          "type": "boolean"
+        },
+        {
+          "name": "askAiEnabled",
+          "type": "boolean"
+        }
+      ],
+      "EditClauseRequest": [
+        {
+          "name": "clauseText",
+          "type": "string"
+        },
+        {
+          "name": "expectedVersion",
+          "type": "number"
+        }
+      ],
+      "RejectClauseRequest": [
+        {
+          "name": "reason",
+          "type": "string"
+        }
+      ],
+      "UpdateMetadataRequest": [
+        {
+          "name": "parties",
+          "type": "string"
+        },
+        {
+          "name": "contractValue",
+          "type": "number"
+        },
+        {
+          "name": "startDate",
+          "type": "string"
+        },
+        {
+          "name": "endDate",
+          "type": "string"
+        },
+        {
+          "name": "renewalTerms",
+          "type": "string"
+        },
+        {
+          "name": "paymentTerms",
+          "type": "string"
+        },
+        {
+          "name": "keyObligations",
+          "type": "string"
+        }
+      ],
+      "AskAIRequest": [
+        {
+          "name": "question",
+          "type": "string"
+        }
+      ],
+      "AskAIResponse": [
+        {
+          "name": "answer",
+          "type": "string"
+        },
+        {
+          "name": "disclaimer",
+          "type": "string"
+        },
+        {
+          "name": "relatedClauseIds",
+          "type": "array"
+        }
+      ],
+      "ProceedToNegotiationResponse": [
+        {
+          "name": "contractId",
+          "type": "string"
+        },
+        {
+          "name": "negotiationStatus",
+          "type": "string"
+        },
+        {
+          "name": "routedAt",
+          "type": "string"
+        },
+        {
+          "name": "clauses",
+          "type": "array"
+        },
+        {
+          "name": "overallContractRiskScore",
+          "type": "string"
+        },
+        {
+          "name": "metadata",
+          "type": "object"
+        },
+        {
+          "name": "askAiAvailable",
+          "type": "boolean"
+        }
+      ],
+      "AuditLogEntryResponse": [
+        {
+          "name": "id",
+          "type": "string"
+        },
+        {
+          "name": "userId",
+          "type": "string"
+        },
+        {
+          "name": "userName",
+          "type": "string"
+        },
+        {
+          "name": "timestamp",
+          "type": "string"
+        },
+        {
+          "name": "clauseId",
+          "type": "string"
+        },
+        {
+          "name": "actionType",
+          "type": "string"
+        },
+        {
+          "name": "fieldName",
+          "type": "string"
+        },
+        {
+          "name": "beforeText",
+          "type": "string"
+        },
+        {
+          "name": "afterText",
+          "type": "string"
+        }
+      ],
+      "PagedAuditLogResponse": [
+        {
+          "name": "items",
+          "type": "array"
+        },
+        {
+          "name": "page",
+          "type": "number"
+        },
+        {
+          "name": "pageSize",
+          "type": "number"
+        },
+        {
+          "name": "totalCount",
+          "type": "number"
+        }
+      ]
+    },
+    "notes": "The page relies on `analysisStatus === 'Failed'` and `libraryMatchStatus` values 'Missing' and 'Deviated' as exact strings; PUT clauses/{clauseId} must return 409 for a stale `expectedVersion` so the conflict modal shows. proceed-to-negotiation must be idempotent — the UI calls it and also offers the negotiation link whenever `proceedToNegotiationEnabled` is true, with no stored flag; `retry-extraction` must return a full ClauseAnalysisResponse, not a status only."
+  },
+  "usage": {
+    "num_turns": 25,
+    "duration_ms": 95595,
+    "total_cost_usd": 0.7190145,
+    "input_tokens": 3225,
+    "output_tokens": 5464,
+    "cache_creation_input_tokens": 46359,
+    "cache_read_input_tokens": 1159175,
+    "is_error": false
+  }
+}

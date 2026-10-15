@@ -1,5 +1,15 @@
 # Knowledge Update Log
 
+## 2026-10-15
+
+* **Update**: [esignature](/modules/esignature.md) — documented the post-signature state of
+  `src/pages/SigningPortalPage.jsx`: `Signed` joined `TERMINAL_STATUSES` and the confirmation
+  panel now renders outside the current-turn branch, wording itself from
+  `signResult.contractStatus` (`Executed` = all signers done). Mode `update`, trace
+  `7ac3665310c8`, commit `790bf9c29c52d0c057380652721cfafdc0de124f`. No new routes,
+  components or directories, so overview, architecture and every `index.md` were left
+  untouched.
+
 ## 2026-10-14
 
 * **Update**: [shared](/modules/shared.md), [services](/modules/services.md),

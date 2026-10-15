@@ -4,10 +4,10 @@ title: src/features/clause-analysis
 description: AI-assisted clause extraction/review screen -- per-clause accept/reject/edit, risk scoring, metadata editing, Ask-AI, and extraction-failure/conflict handling.
 resource: https://github.com/AgentMCPAgenticThree/life-cycle-frontend/tree/main/src/features/clause-analysis
 tags: [frontend, clause-analysis, ai]
-generated: { by: sage-maintenance/claude-code, at: 2026-10-14T04:55:25Z }
+generated: { by: sage-maintenance/claude-code, at: 2026-10-15T05:48:30Z }
 sources:
   - id: cbm-graph
-    resource: codebase-memory-mcp project life-cycle-frontend @ 2980c74caa4fa3952f31f5cbaeff19b40c6dd55c
+    resource: codebase-memory-mcp project life-cycle-frontend @ 1ac008b0b45597d08aafa01f656559e7bbd5b48c
     title: Codebase knowledge graph
 status: stable
 ---
@@ -56,3 +56,15 @@ the negotiation tracker flow.
 
 `src/pages/ClauseAnalysisPage.jsx` (route `/contracts/:contractId/clause-analysis`)
 — part of the `lifecycle-uc4-uc5` generation module.
+
+Header actions in that page gate on role and on `data.proceedToNegotiationEnabled`:
+
+| Condition | Rendered |
+|---|---|
+| `isTenantAdmin` | neither action (read-only viewer) |
+| not admin, no `proceedResult` | `ProceedToNegotiationButton` (`handleProceed`) |
+| not admin, `proceedResult` **or** `proceedToNegotiationEnabled` | "Go to Negotiation →" `Link` to the [negotiation](/modules/negotiation.md) tracker |
+
+The two conditions overlap on purpose: the proceed call is idempotent and leaves
+no stored flag, so a reviewer who already proceeded and re-enters the screen
+still gets a way through to the tracker rather than a dead end.

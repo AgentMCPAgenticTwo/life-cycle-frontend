@@ -2,6 +2,14 @@
 
 ## 2026-10-15
 
+* **Update**: [clause-analysis](/modules/clause-analysis.md) — documented the header-action
+  gating in `src/pages/ClauseAnalysisPage.jsx`: the "Go to Negotiation →" `Link` is no longer
+  the `else` branch of `proceedResult` but renders whenever `proceedResult ||
+  data.proceedToNegotiationEnabled`, so a reviewer who already proceeded is not dead-ended on
+  re-entry. Mode `update`, trace `6d5d2a42f846`, commit
+  `1ac008b0b45597d08aafa01f656559e7bbd5b48c`. No new routes, components or directories, so
+  overview, architecture and every `index.md` were left untouched.
+
 * **Update**: [esignature](/modules/esignature.md) — documented the post-signature state of
   `src/pages/SigningPortalPage.jsx`: `Signed` joined `TERMINAL_STATUSES` and the confirmation
   panel now renders outside the current-turn branch, wording itself from

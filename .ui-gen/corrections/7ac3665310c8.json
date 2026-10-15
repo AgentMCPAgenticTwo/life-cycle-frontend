@@ -1,0 +1,416 @@
+{
+  "trace_id": "7ac3665310c8",
+  "branch": "ui-correction/7ac3665310c8",
+  "maintenance_branch": "ui-correction/7ac3665310c8",
+  "status": "SUCCESS",
+  "summary": "**What I changed (frontend):** `src/pages/SigningPortalPage.jsx` — the whole post-OTP/signed UI was nested inside `session.isCurrentTurn`, but the backend only sets `isCurrentTurn` for `Sent`/`Viewed` signers. So the moment Anita signed and the session refetched, the portal flipped to \"Waiting on an earlier signer\" instead of confirming the signature. `Signed` is now a terminal status rendered outside the current-turn gate, with a regression test in `src/__tests__/SigningPortalPage.test.jsx`. Lint, build and tests pass.\n\n**Left for the backend repo (`life-cycle-backend`):** the signer email itself. `app/services/signers.py:352-356` sends only \"You have been asked to sign … Open your signing link and enter the one-time password sent to you\" — it never includes the session reference, the OTP or the expiry, unlike `app/services/lifecycle_negotiation.py:505-511` which does. Making the signing email match that shape (secure link reference = the signer/session id used in `/sign/<sessionId>`, the generated OTP, and `link_expires_at`) is backend work; the same applies to the next-signer and resend dispatches in `app/services/signing_sessions.py`. I did not fake it here.\n\nReading taken: the email-content part is the counterpart's, so here I fixed the one thing in this repo that breaks the sign→executed flow.",
+  "files_changed": [
+    "src/__tests__/SigningPortalPage.test.jsx",
+    "src/pages/SigningPortalPage.jsx"
+  ],
+  "lines_changed": 26,
+  "blockers": [
+    "Not applied -- Include secure link reference, OTP and expiry in the signer email (like the counterparty review email): Email bodies are generated in the backend repo (app/services/signers.py, app/services/signing_sessions.py) which is not editable here",
+    "Not applied -- Walkthrough steps (read backend terminal email, sign out/in, open link, verify OTP, sign): Manual runtime steps against a running backend, not code changes in this repository",
+    "Visual verification failed: The /sign/<sessionId> route at localhost:5199 rendered a completely blank white page, so nothing from the signing portal (OTP entry, link reference, or the new post-sign 'You have signed this document.' confirmation) is visible. Additionally, the diff only adds a post-signature Signed state in SigningPortalPage.jsx and does not touch the email/notification content the instruction asked about."
+  ],
+  "visual_check": {
+    "verdict": "fail",
+    "evidence": "The /sign/<sessionId> route at localhost:5199 rendered a completely blank white page, so nothing from the signing portal (OTP entry, link reference, or the new post-sign 'You have signed this document.' confirmation) is visible. Additionally, the diff only adds a post-signature Signed state in SigningPortalPage.jsx and does not touch the email/notification content the instruction asked about.",
+    "screenshot_path": "/tmp/actual.png"
+  },
+  "context_sharing": {
+    "target": "frontend",
+    "branch": "ui-correction/7ac3665310c8",
+    "base_path": "/api/v1",
+    "endpoints": [
+      {
+        "method": "GET",
+        "path": "/api/v1/signing-sessions/{sessionId}",
+        "request_fields": [
+          {
+            "name": "sessionId",
+            "type": "string"
+          }
+        ],
+        "response_fields": [
+          {
+            "name": "sessionId",
+            "type": "string"
+          },
+          {
+            "name": "contractId",
+            "type": "string"
+          },
+          {
+            "name": "signerId",
+            "type": "string"
+          },
+          {
+            "name": "signerName",
+            "type": "string"
+          },
+          {
+            "name": "signerEmail",
+            "type": "string"
+          },
+          {
+            "name": "signerStatus",
+            "type": "enum"
+          },
+          {
+            "name": "isCurrentTurn",
+            "type": "boolean"
+          },
+          {
+            "name": "otpVerified",
+            "type": "boolean"
+          },
+          {
+            "name": "documentUrl",
+            "type": "string"
+          },
+          {
+            "name": "signaturePadAvailable",
+            "type": "boolean"
+          },
+          {
+            "name": "declineAvailable",
+            "type": "boolean"
+          },
+          {
+            "name": "reminderFrequencyDays",
+            "type": "number"
+          },
+          {
+            "name": "linkExpired",
+            "type": "boolean"
+          },
+          {
+            "name": "blockedMessage",
+            "type": "string"
+          }
+        ],
+        "purpose": "Load the signing session for the signing portal"
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/signing-sessions/{sessionId}/otp/verify",
+        "request_fields": [
+          {
+            "name": "otpCode",
+            "type": "string"
+          }
+        ],
+        "response_fields": [
+          {
+            "name": "signerStatus",
+            "type": "enum"
+          },
+          {
+            "name": "documentUrl",
+            "type": "string"
+          },
+          {
+            "name": "signaturePadAvailable",
+            "type": "boolean"
+          },
+          {
+            "name": "attemptsRemaining",
+            "type": "number"
+          },
+          {
+            "name": "lockedUntil",
+            "type": "date"
+          },
+          {
+            "name": "errorMessage",
+            "type": "string"
+          }
+        ],
+        "purpose": "Verify the 6-digit OTP and unlock the document viewer and signature pad"
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/signing-sessions/{sessionId}/otp/resend",
+        "request_fields": [],
+        "response_fields": [
+          {
+            "name": "sessionId",
+            "type": "string"
+          },
+          {
+            "name": "contractId",
+            "type": "string"
+          },
+          {
+            "name": "signerId",
+            "type": "string"
+          },
+          {
+            "name": "signerName",
+            "type": "string"
+          },
+          {
+            "name": "signerEmail",
+            "type": "string"
+          },
+          {
+            "name": "signerStatus",
+            "type": "enum"
+          },
+          {
+            "name": "isCurrentTurn",
+            "type": "boolean"
+          },
+          {
+            "name": "otpVerified",
+            "type": "boolean"
+          },
+          {
+            "name": "documentUrl",
+            "type": "string"
+          },
+          {
+            "name": "signaturePadAvailable",
+            "type": "boolean"
+          },
+          {
+            "name": "declineAvailable",
+            "type": "boolean"
+          },
+          {
+            "name": "reminderFrequencyDays",
+            "type": "number"
+          },
+          {
+            "name": "linkExpired",
+            "type": "boolean"
+          },
+          {
+            "name": "blockedMessage",
+            "type": "string"
+          }
+        ],
+        "purpose": "Resend the OTP / signing link and return the refreshed session"
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/signing-sessions/{sessionId}/sign",
+        "request_fields": [
+          {
+            "name": "signatureData",
+            "type": "string"
+          },
+          {
+            "name": "signatureType",
+            "type": "enum"
+          }
+        ],
+        "response_fields": [
+          {
+            "name": "signerId",
+            "type": "string"
+          },
+          {
+            "name": "signerStatus",
+            "type": "enum"
+          },
+          {
+            "name": "contractStatus",
+            "type": "enum"
+          },
+          {
+            "name": "nextSignerId",
+            "type": "string"
+          }
+        ],
+        "purpose": "Apply the signer's signature to the contract"
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/signing-sessions/{sessionId}/decline",
+        "request_fields": [
+          {
+            "name": "reason",
+            "type": "string"
+          }
+        ],
+        "response_fields": [
+          {
+            "name": "signerId",
+            "type": "string"
+          },
+          {
+            "name": "signerStatus",
+            "type": "enum"
+          },
+          {
+            "name": "contractStatus",
+            "type": "enum"
+          },
+          {
+            "name": "reason",
+            "type": "string"
+          }
+        ],
+        "purpose": "Record a decline to sign with a mandatory reason"
+      }
+    ],
+    "types": {
+      "SigningSessionResponse": [
+        {
+          "name": "sessionId",
+          "type": "string"
+        },
+        {
+          "name": "contractId",
+          "type": "string"
+        },
+        {
+          "name": "signerId",
+          "type": "string"
+        },
+        {
+          "name": "signerName",
+          "type": "string"
+        },
+        {
+          "name": "signerEmail",
+          "type": "string"
+        },
+        {
+          "name": "signerStatus",
+          "type": "enum"
+        },
+        {
+          "name": "isCurrentTurn",
+          "type": "boolean"
+        },
+        {
+          "name": "otpVerified",
+          "type": "boolean"
+        },
+        {
+          "name": "documentUrl",
+          "type": "string"
+        },
+        {
+          "name": "signaturePadAvailable",
+          "type": "boolean"
+        },
+        {
+          "name": "declineAvailable",
+          "type": "boolean"
+        },
+        {
+          "name": "reminderFrequencyDays",
+          "type": "number"
+        },
+        {
+          "name": "linkExpired",
+          "type": "boolean"
+        },
+        {
+          "name": "blockedMessage",
+          "type": "string"
+        }
+      ],
+      "VerifyOtpRequest": [
+        {
+          "name": "otpCode",
+          "type": "string"
+        }
+      ],
+      "VerifyOtpResponse": [
+        {
+          "name": "signerStatus",
+          "type": "enum"
+        },
+        {
+          "name": "documentUrl",
+          "type": "string"
+        },
+        {
+          "name": "signaturePadAvailable",
+          "type": "boolean"
+        },
+        {
+          "name": "attemptsRemaining",
+          "type": "number"
+        },
+        {
+          "name": "lockedUntil",
+          "type": "date"
+        },
+        {
+          "name": "errorMessage",
+          "type": "string"
+        }
+      ],
+      "ApplySignatureRequest": [
+        {
+          "name": "signatureData",
+          "type": "string"
+        },
+        {
+          "name": "signatureType",
+          "type": "enum"
+        }
+      ],
+      "ApplySignatureResponse": [
+        {
+          "name": "signerId",
+          "type": "string"
+        },
+        {
+          "name": "signerStatus",
+          "type": "enum"
+        },
+        {
+          "name": "contractStatus",
+          "type": "enum"
+        },
+        {
+          "name": "nextSignerId",
+          "type": "string"
+        }
+      ],
+      "DeclineSignatureRequest": [
+        {
+          "name": "reason",
+          "type": "string"
+        }
+      ],
+      "DeclineSignatureResponse": [
+        {
+          "name": "signerId",
+          "type": "string"
+        },
+        {
+          "name": "signerStatus",
+          "type": "enum"
+        },
+        {
+          "name": "contractStatus",
+          "type": "enum"
+        },
+        {
+          "name": "reason",
+          "type": "string"
+        }
+      ]
+    },
+    "notes": "signerStatus values are 'Sent'|'Viewed'|'Signed'|'Declined'|'Expired'; signatureType is 'Draw'|'Type'|'Upload'; contractStatus is 'Pending Signature'|'Executed' on sign and 'Signature Declined' on decline. The backend must keep returning signerStatus 'Signed' even though isCurrentTurn drops to false after signing — the portal relies on signerStatus, not isCurrentTurn, to confirm a completed signature."
+  },
+  "usage": {
+    "num_turns": 19,
+    "duration_ms": 112333,
+    "total_cost_usd": 0.7373877,
+    "input_tokens": 3084,
+    "output_tokens": 6344,
+    "cache_creation_input_tokens": 63308,
+    "cache_read_input_tokens": 839019,
+    "is_error": false
+  }
+}

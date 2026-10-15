@@ -8,7 +8,10 @@ import { useResendOtp } from '@/features/esignature/hooks/useResendOtp';
 import { useApplySignature } from '@/features/esignature/hooks/useApplySignature';
 import { useDeclineSignature } from '@/features/esignature/hooks/useDeclineSignature';
 
-const TERMINAL_STATUSES = ['Declined', 'Expired'];
+// Once a signer signs, the backend drops isCurrentTurn (it only stays true for Sent/Viewed),
+// so "Signed" has to be rendered outside the current-turn branch or the portal falls back to
+// the "waiting on an earlier signer" message right after a successful signature.
+const TERMINAL_STATUSES = ['Declined', 'Expired', 'Signed'];
 
 export default function SigningPortalPage() {
   const { sessionId } = useParams();
@@ -114,6 +117,17 @@ export default function SigningPortalPage() {
                 {declineResult?.reason ? `Reason: ${declineResult.reason}` : 'The Contract Owner has been notified.'}
               </p>
             )}
+          </div>
+        )}
+
+        {!isLoading && !error && session && !session.linkExpired && session.signerStatus === 'Signed' && (
+          <div role="status" className="rounded-xl border border-emerald-700/40 bg-emerald-500/10 px-6 py-8 text-center">
+            <h2 className="text-lg font-semibold text-emerald-300">You have signed this document.</h2>
+            <p className="mt-2 text-sm text-emerald-200">
+              {signResult?.contractStatus === 'Executed'
+                ? 'All signers have completed signing — the contract is now Executed.'
+                : 'The signing link has been sent to the next signer in sequence.'}
+            </p>
           </div>
         )}
 

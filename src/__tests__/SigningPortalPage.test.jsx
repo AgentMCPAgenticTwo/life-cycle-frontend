@@ -143,4 +143,14 @@ describe('SigningPortalPage', () => {
       expect(http.post).toHaveBeenCalledWith(`/api/v1/signing-sessions/${SESSION_ID}/decline`, { reason: 'Terms changed' })
     );
   });
+
+  it('confirms the signature once signed, even though the turn has moved on', async () => {
+    // The backend reports isCurrentTurn only for Sent/Viewed, so a Signed session arrives
+    // with isCurrentTurn false — the portal must still confirm the signature.
+    mockSession({ ...BASE_SESSION, signerStatus: 'Signed', isCurrentTurn: false, otpVerified: true });
+    renderPage();
+
+    await waitFor(() => screen.getByText('You have signed this document.'));
+    expect(screen.queryByText('Waiting on an earlier signer')).toBeNull();
+  });
 });

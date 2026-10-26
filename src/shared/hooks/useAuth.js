@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { useAuthStore } from '@/store/authStore';
-import { refreshSession } from '@/services/http';
+import { refreshSession, scheduleProactiveRefresh, clearScheduledRefresh } from '@/services/http';
 import * as authService from '@/services/authService';
 
 /**
@@ -21,6 +21,7 @@ export function useAuth() {
     async (email, password) => {
       const response = await authService.login({ email, password });
       setSession({ user: response.user, accessToken: response.accessToken });
+      scheduleProactiveRefresh(response.accessToken);
       return response.user;
     },
     [setSession]
@@ -30,6 +31,7 @@ export function useAuth() {
     try {
       await authService.logout();
     } finally {
+      clearScheduledRefresh();
       clearSession();
     }
   }, [clearSession]);

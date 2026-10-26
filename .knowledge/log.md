@@ -1,5 +1,17 @@
 # Knowledge Update Log
 
+## 2026-10-26
+
+* **Update**: [contract-repository](/modules/contract-repository.md) — documented the
+  `ContractDetailsTab.jsx` field-name fix: it now reads `id`, `contractType`,
+  `counterpartyName`, `contractValue`/`currency` and `contractOwnerName` off the
+  `ContractDetailResponse` DTO (`src/services/contractRepositoryService.js`) instead of
+  the generated-run's `contractId`/`counterparty`/`value`/`owner`, and
+  `formatCurrency(value, currency = 'USD')` in `utils/format.js` now takes the row's
+  currency. Mode `update`, trace `3f7431802a3d`, commit
+  `e65c8529ee9bb23788b7fb597b34811e58b5019e`. No files, directories or routes were
+  added, so overview, architecture and every `index.md` were left untouched.
+
 ## 2026-10-15
 
 * **Update**: [clause-analysis](/modules/clause-analysis.md) — documented the header-action

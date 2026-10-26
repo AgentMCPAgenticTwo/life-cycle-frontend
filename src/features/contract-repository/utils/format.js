@@ -15,10 +15,10 @@ export function formatDateTime(value) {
   return `${formatDate(value)} ${time}`;
 }
 
-export function formatCurrency(value) {
+export function formatCurrency(value, currency = 'USD') {
   if (value === null || value === undefined) return '—';
   try {
-    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value);
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(value);
   } catch {
     return String(value);
   }

@@ -1,0 +1,1108 @@
+{
+  "trace_id": "3f7431802a3d",
+  "branch": "ui-correction/3f7431802a3d",
+  "maintenance_branch": "ui-correction/3f7431802a3d",
+  "status": "SUCCESS",
+  "summary": "Good, this is a JS project (no TS typecheck). Build and lint/tests already pass.\n\nFixed the Details tab (`ContractDetailsTab.jsx`) to read the real backend field names (`id`, `contractType`, `counterpartyName`, `contractValue`/`currency`, `contractOwnerName`) instead of the fictional ones it previously read (`contractId`, `counterparty`, `value`, `owner`), and added the previously-missing \"Type\" row. Also made `formatCurrency` accept a currency code (it was hardcoded to USD) and updated the `ContractDetailResponse` JSDoc and the screen test's mock data to match reality.\n\nI deliberately left `ContractDetailPage.jsx`'s header/hero-banner fields (which have the same stale field names) untouched since the request named only the Details tab.",
+  "files_changed": [
+    "src/__tests__/ContractDetailPage.test.jsx",
+    "src/features/contract-repository/components/ContractDetailsTab.jsx",
+    "src/features/contract-repository/utils/format.js",
+    "src/services/contractRepositoryService.js"
+  ],
+  "lines_changed": 42,
+  "blockers": [
+    "Not applied -- Fixing the same stale field names (counterparty/value/owner) in ContractDetailPage.jsx's header banner: out of scope — the request named only the Details tab"
+  ],
+  "visual_check": {
+    "verdict": "skipped",
+    "evidence": "verifier did not return parseable JSON",
+    "screenshot_path": ""
+  },
+  "context_sharing": {
+    "target": "frontend",
+    "branch": "ui-correction/3f7431802a3d",
+    "base_path": "/api/v1",
+    "endpoints": [
+      {
+        "method": "GET",
+        "path": "/api/v1/contracts",
+        "request_fields": [],
+        "response_fields": [
+          {
+            "name": "items",
+            "type": "array"
+          },
+          {
+            "name": "totalCount",
+            "type": "number"
+          }
+        ],
+        "purpose": "Search/filter/sort/paginate contracts"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/contracts/{contractId}",
+        "request_fields": [],
+        "response_fields": [
+          {
+            "name": "id",
+            "type": "string"
+          },
+          {
+            "name": "contractName",
+            "type": "string"
+          },
+          {
+            "name": "contractType",
+            "type": "string"
+          },
+          {
+            "name": "counterpartyName",
+            "type": "string"
+          },
+          {
+            "name": "status",
+            "type": "string"
+          },
+          {
+            "name": "contractValue",
+            "type": "number"
+          },
+          {
+            "name": "currency",
+            "type": "string"
+          },
+          {
+            "name": "startDate",
+            "type": "string"
+          },
+          {
+            "name": "endDate",
+            "type": "string"
+          },
+          {
+            "name": "contractOwnerName",
+            "type": "string"
+          },
+          {
+            "name": "lastModified",
+            "type": "string"
+          },
+          {
+            "name": "folderTags",
+            "type": "array"
+          },
+          {
+            "name": "availableTabs",
+            "type": "array"
+          }
+        ],
+        "purpose": "Get contract detail"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/contracts/{contractId}/document",
+        "request_fields": [],
+        "response_fields": [
+          {
+            "name": "contractId",
+            "type": "string"
+          },
+          {
+            "name": "documentUrl",
+            "type": "string"
+          },
+          {
+            "name": "fileName",
+            "type": "string"
+          },
+          {
+            "name": "fileType",
+            "type": "enum"
+          },
+          {
+            "name": "fileSizeBytes",
+            "type": "number"
+          },
+          {
+            "name": "isOversized",
+            "type": "boolean"
+          },
+          {
+            "name": "isCorruptedOrMissing",
+            "type": "boolean"
+          },
+          {
+            "name": "downloadEnabled",
+            "type": "boolean"
+          },
+          {
+            "name": "unavailableComment",
+            "type": "string"
+          }
+        ],
+        "purpose": "Get contract document metadata"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/contracts/{contractId}/document/download",
+        "request_fields": [],
+        "response_fields": [
+          {
+            "name": "success",
+            "type": "boolean"
+          },
+          {
+            "name": "fileUrl",
+            "type": "string"
+          },
+          {
+            "name": "errorMessage",
+            "type": "string"
+          }
+        ],
+        "purpose": "Download current document file"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/contracts/{contractId}/versions",
+        "request_fields": [],
+        "response_fields": [
+          {
+            "name": "items",
+            "type": "array"
+          },
+          {
+            "name": "totalCount",
+            "type": "number"
+          }
+        ],
+        "purpose": "List contract versions"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/contracts/{contractId}/activity-log",
+        "request_fields": [],
+        "response_fields": [
+          {
+            "name": "items",
+            "type": "array"
+          },
+          {
+            "name": "totalCount",
+            "type": "number"
+          }
+        ],
+        "purpose": "List activity log entries"
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/contracts/{contractId}/folder-tags",
+        "request_fields": [
+          {
+            "name": "folderTagIds",
+            "type": "array"
+          }
+        ],
+        "response_fields": [
+          {
+            "name": "contractId",
+            "type": "string"
+          },
+          {
+            "name": "folderTags",
+            "type": "array"
+          }
+        ],
+        "purpose": "Assign folder/tags to a contract"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/folder-tags",
+        "request_fields": [],
+        "response_fields": [
+          {
+            "name": "id",
+            "type": "string"
+          },
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "kind",
+            "type": "enum"
+          }
+        ],
+        "purpose": "List folder tag options"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/contracts/{contractId}/obligations",
+        "request_fields": [],
+        "response_fields": [
+          {
+            "name": "items",
+            "type": "array"
+          },
+          {
+            "name": "totalCount",
+            "type": "number"
+          }
+        ],
+        "purpose": "List obligations for a contract"
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/contracts/{contractId}/obligations",
+        "request_fields": [
+          {
+            "name": "obligationDescription",
+            "type": "string"
+          },
+          {
+            "name": "obligationType",
+            "type": "enum"
+          },
+          {
+            "name": "owner",
+            "type": "string"
+          },
+          {
+            "name": "dueDate",
+            "type": "string"
+          },
+          {
+            "name": "status",
+            "type": "enum"
+          }
+        ],
+        "response_fields": [
+          {
+            "name": "obligationId",
+            "type": "string"
+          },
+          {
+            "name": "contractId",
+            "type": "string"
+          },
+          {
+            "name": "obligationDescription",
+            "type": "string"
+          },
+          {
+            "name": "obligationType",
+            "type": "enum"
+          },
+          {
+            "name": "owner",
+            "type": "string"
+          },
+          {
+            "name": "dueDate",
+            "type": "string"
+          },
+          {
+            "name": "status",
+            "type": "enum"
+          },
+          {
+            "name": "source",
+            "type": "enum"
+          },
+          {
+            "name": "confirmationLabel",
+            "type": "enum"
+          },
+          {
+            "name": "evidenceReference",
+            "type": "string"
+          },
+          {
+            "name": "readOnly",
+            "type": "boolean"
+          }
+        ],
+        "purpose": "Manually add an obligation"
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/v1/contracts/{contractId}/obligations/{obligationId}",
+        "request_fields": [
+          {
+            "name": "obligationDescription",
+            "type": "string"
+          },
+          {
+            "name": "obligationType",
+            "type": "enum"
+          },
+          {
+            "name": "owner",
+            "type": "string"
+          },
+          {
+            "name": "dueDate",
+            "type": "string"
+          },
+          {
+            "name": "status",
+            "type": "enum"
+          },
+          {
+            "name": "evidenceReference",
+            "type": "string"
+          }
+        ],
+        "response_fields": [
+          {
+            "name": "obligationId",
+            "type": "string"
+          },
+          {
+            "name": "contractId",
+            "type": "string"
+          },
+          {
+            "name": "obligationDescription",
+            "type": "string"
+          },
+          {
+            "name": "obligationType",
+            "type": "enum"
+          },
+          {
+            "name": "owner",
+            "type": "string"
+          },
+          {
+            "name": "dueDate",
+            "type": "string"
+          },
+          {
+            "name": "status",
+            "type": "enum"
+          },
+          {
+            "name": "source",
+            "type": "enum"
+          },
+          {
+            "name": "confirmationLabel",
+            "type": "enum"
+          },
+          {
+            "name": "evidenceReference",
+            "type": "string"
+          },
+          {
+            "name": "readOnly",
+            "type": "boolean"
+          }
+        ],
+        "purpose": "Edit obligation fields"
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/contracts/{contractId}/obligations/{obligationId}/accept",
+        "request_fields": [],
+        "response_fields": [
+          {
+            "name": "obligationId",
+            "type": "string"
+          },
+          {
+            "name": "contractId",
+            "type": "string"
+          },
+          {
+            "name": "obligationDescription",
+            "type": "string"
+          },
+          {
+            "name": "obligationType",
+            "type": "enum"
+          },
+          {
+            "name": "owner",
+            "type": "string"
+          },
+          {
+            "name": "dueDate",
+            "type": "string"
+          },
+          {
+            "name": "status",
+            "type": "enum"
+          },
+          {
+            "name": "source",
+            "type": "enum"
+          },
+          {
+            "name": "confirmationLabel",
+            "type": "enum"
+          },
+          {
+            "name": "evidenceReference",
+            "type": "string"
+          },
+          {
+            "name": "readOnly",
+            "type": "boolean"
+          }
+        ],
+        "purpose": "Accept an AI-suggested obligation"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/contracts/{contractId}/renewal",
+        "request_fields": [],
+        "response_fields": [
+          {
+            "name": "contractId",
+            "type": "string"
+          },
+          {
+            "name": "renewalAlertBanner",
+            "type": "string"
+          },
+          {
+            "name": "contractEndDate",
+            "type": "string"
+          },
+          {
+            "name": "noticePeriod",
+            "type": "string"
+          },
+          {
+            "name": "alertThresholdDays",
+            "type": "number"
+          },
+          {
+            "name": "renewEnabled",
+            "type": "boolean"
+          },
+          {
+            "name": "amendEnabled",
+            "type": "boolean"
+          },
+          {
+            "name": "terminateEnabled",
+            "type": "boolean"
+          },
+          {
+            "name": "actionInProgress",
+            "type": "boolean"
+          },
+          {
+            "name": "linkedContractId",
+            "type": "string"
+          },
+          {
+            "name": "linkedContractRelation",
+            "type": "enum"
+          },
+          {
+            "name": "obligations",
+            "type": "array"
+          },
+          {
+            "name": "terminationReason",
+            "type": "string"
+          },
+          {
+            "name": "effectiveTerminationDate",
+            "type": "string"
+          }
+        ],
+        "purpose": "Get renewal panel data"
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/contracts/{contractId}/renew",
+        "request_fields": [],
+        "response_fields": [
+          {
+            "name": "originalContractId",
+            "type": "string"
+          },
+          {
+            "name": "originalContractStatus",
+            "type": "enum"
+          },
+          {
+            "name": "linkedContractId",
+            "type": "string"
+          },
+          {
+            "name": "linkedContractReference",
+            "type": "string"
+          },
+          {
+            "name": "terminationReason",
+            "type": "string"
+          },
+          {
+            "name": "effectiveTerminationDate",
+            "type": "string"
+          },
+          {
+            "name": "contractEndDate",
+            "type": "string"
+          },
+          {
+            "name": "noticePeriod",
+            "type": "string"
+          },
+          {
+            "name": "renewalAlertBanner",
+            "type": "string"
+          },
+          {
+            "name": "obligations",
+            "type": "array"
+          }
+        ],
+        "purpose": "Create a linked renewal contract"
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/contracts/{contractId}/amend",
+        "request_fields": [],
+        "response_fields": [
+          {
+            "name": "originalContractId",
+            "type": "string"
+          },
+          {
+            "name": "originalContractStatus",
+            "type": "enum"
+          },
+          {
+            "name": "linkedContractId",
+            "type": "string"
+          },
+          {
+            "name": "linkedContractReference",
+            "type": "string"
+          },
+          {
+            "name": "terminationReason",
+            "type": "string"
+          },
+          {
+            "name": "effectiveTerminationDate",
+            "type": "string"
+          },
+          {
+            "name": "contractEndDate",
+            "type": "string"
+          },
+          {
+            "name": "noticePeriod",
+            "type": "string"
+          },
+          {
+            "name": "renewalAlertBanner",
+            "type": "string"
+          },
+          {
+            "name": "obligations",
+            "type": "array"
+          }
+        ],
+        "purpose": "Create a linked amendment contract"
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/contracts/{contractId}/terminate",
+        "request_fields": [
+          {
+            "name": "terminationReason",
+            "type": "string"
+          },
+          {
+            "name": "effectiveTerminationDate",
+            "type": "string"
+          }
+        ],
+        "response_fields": [
+          {
+            "name": "originalContractId",
+            "type": "string"
+          },
+          {
+            "name": "originalContractStatus",
+            "type": "enum"
+          },
+          {
+            "name": "linkedContractId",
+            "type": "string"
+          },
+          {
+            "name": "linkedContractReference",
+            "type": "string"
+          },
+          {
+            "name": "terminationReason",
+            "type": "string"
+          },
+          {
+            "name": "effectiveTerminationDate",
+            "type": "string"
+          },
+          {
+            "name": "contractEndDate",
+            "type": "string"
+          },
+          {
+            "name": "noticePeriod",
+            "type": "string"
+          },
+          {
+            "name": "renewalAlertBanner",
+            "type": "string"
+          },
+          {
+            "name": "obligations",
+            "type": "array"
+          }
+        ],
+        "purpose": "Terminate a contract with reason and effective date"
+      }
+    ],
+    "types": {
+      "FolderTagOptionResponse": [
+        {
+          "name": "id",
+          "type": "string"
+        },
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "kind",
+          "type": "enum"
+        }
+      ],
+      "ContractListItemResponse": [
+        {
+          "name": "contractId",
+          "type": "string"
+        },
+        {
+          "name": "contractName",
+          "type": "string"
+        },
+        {
+          "name": "counterparty",
+          "type": "string"
+        },
+        {
+          "name": "status",
+          "type": "string"
+        },
+        {
+          "name": "value",
+          "type": "number"
+        },
+        {
+          "name": "startDate",
+          "type": "string"
+        },
+        {
+          "name": "endDate",
+          "type": "string"
+        },
+        {
+          "name": "owner",
+          "type": "string"
+        },
+        {
+          "name": "lastModified",
+          "type": "string"
+        },
+        {
+          "name": "folderTags",
+          "type": "array"
+        },
+        {
+          "name": "indexingInProgress",
+          "type": "boolean"
+        }
+      ],
+      "ContractDetailResponse": [
+        {
+          "name": "id",
+          "type": "string"
+        },
+        {
+          "name": "contractName",
+          "type": "string"
+        },
+        {
+          "name": "contractType",
+          "type": "string"
+        },
+        {
+          "name": "counterpartyName",
+          "type": "string"
+        },
+        {
+          "name": "status",
+          "type": "string"
+        },
+        {
+          "name": "contractValue",
+          "type": "number"
+        },
+        {
+          "name": "currency",
+          "type": "string"
+        },
+        {
+          "name": "startDate",
+          "type": "string"
+        },
+        {
+          "name": "endDate",
+          "type": "string"
+        },
+        {
+          "name": "contractOwnerName",
+          "type": "string"
+        },
+        {
+          "name": "lastModified",
+          "type": "string"
+        },
+        {
+          "name": "folderTags",
+          "type": "array"
+        },
+        {
+          "name": "availableTabs",
+          "type": "array"
+        }
+      ],
+      "ContractDocumentResponse": [
+        {
+          "name": "contractId",
+          "type": "string"
+        },
+        {
+          "name": "documentUrl",
+          "type": "string"
+        },
+        {
+          "name": "fileName",
+          "type": "string"
+        },
+        {
+          "name": "fileType",
+          "type": "enum"
+        },
+        {
+          "name": "fileSizeBytes",
+          "type": "number"
+        },
+        {
+          "name": "isOversized",
+          "type": "boolean"
+        },
+        {
+          "name": "isCorruptedOrMissing",
+          "type": "boolean"
+        },
+        {
+          "name": "downloadEnabled",
+          "type": "boolean"
+        },
+        {
+          "name": "unavailableComment",
+          "type": "string"
+        }
+      ],
+      "DocumentDownloadResponse": [
+        {
+          "name": "success",
+          "type": "boolean"
+        },
+        {
+          "name": "fileUrl",
+          "type": "string"
+        },
+        {
+          "name": "errorMessage",
+          "type": "string"
+        }
+      ],
+      "ContractVersionResponse": [
+        {
+          "name": "versionId",
+          "type": "string"
+        },
+        {
+          "name": "versionNumber",
+          "type": "number"
+        },
+        {
+          "name": "createdAt",
+          "type": "string"
+        },
+        {
+          "name": "createdBy",
+          "type": "string"
+        },
+        {
+          "name": "changeSummary",
+          "type": "string"
+        }
+      ],
+      "ActivityLogEntryResponse": [
+        {
+          "name": "entryId",
+          "type": "string"
+        },
+        {
+          "name": "contractId",
+          "type": "string"
+        },
+        {
+          "name": "actionType",
+          "type": "enum"
+        },
+        {
+          "name": "performedBy",
+          "type": "string"
+        },
+        {
+          "name": "performedAt",
+          "type": "string"
+        },
+        {
+          "name": "details",
+          "type": "string"
+        }
+      ],
+      "ObligationResponse": [
+        {
+          "name": "obligationId",
+          "type": "string"
+        },
+        {
+          "name": "contractId",
+          "type": "string"
+        },
+        {
+          "name": "obligationDescription",
+          "type": "string"
+        },
+        {
+          "name": "obligationType",
+          "type": "enum"
+        },
+        {
+          "name": "owner",
+          "type": "string"
+        },
+        {
+          "name": "dueDate",
+          "type": "string"
+        },
+        {
+          "name": "status",
+          "type": "enum"
+        },
+        {
+          "name": "source",
+          "type": "enum"
+        },
+        {
+          "name": "confirmationLabel",
+          "type": "enum"
+        },
+        {
+          "name": "evidenceReference",
+          "type": "string"
+        },
+        {
+          "name": "readOnly",
+          "type": "boolean"
+        }
+      ],
+      "CreateObligationRequest": [
+        {
+          "name": "obligationDescription",
+          "type": "string"
+        },
+        {
+          "name": "obligationType",
+          "type": "enum"
+        },
+        {
+          "name": "owner",
+          "type": "string"
+        },
+        {
+          "name": "dueDate",
+          "type": "string"
+        },
+        {
+          "name": "status",
+          "type": "enum"
+        }
+      ],
+      "UpdateObligationRequest": [
+        {
+          "name": "obligationDescription",
+          "type": "string"
+        },
+        {
+          "name": "obligationType",
+          "type": "enum"
+        },
+        {
+          "name": "owner",
+          "type": "string"
+        },
+        {
+          "name": "dueDate",
+          "type": "string"
+        },
+        {
+          "name": "status",
+          "type": "enum"
+        },
+        {
+          "name": "evidenceReference",
+          "type": "string"
+        }
+      ],
+      "RenewalPanelResponse": [
+        {
+          "name": "contractId",
+          "type": "string"
+        },
+        {
+          "name": "renewalAlertBanner",
+          "type": "string"
+        },
+        {
+          "name": "contractEndDate",
+          "type": "string"
+        },
+        {
+          "name": "noticePeriod",
+          "type": "string"
+        },
+        {
+          "name": "alertThresholdDays",
+          "type": "number"
+        },
+        {
+          "name": "renewEnabled",
+          "type": "boolean"
+        },
+        {
+          "name": "amendEnabled",
+          "type": "boolean"
+        },
+        {
+          "name": "terminateEnabled",
+          "type": "boolean"
+        },
+        {
+          "name": "actionInProgress",
+          "type": "boolean"
+        },
+        {
+          "name": "linkedContractId",
+          "type": "string"
+        },
+        {
+          "name": "linkedContractRelation",
+          "type": "enum"
+        },
+        {
+          "name": "obligations",
+          "type": "array"
+        },
+        {
+          "name": "terminationReason",
+          "type": "string"
+        },
+        {
+          "name": "effectiveTerminationDate",
+          "type": "string"
+        }
+      ],
+      "TerminateContractRequest": [
+        {
+          "name": "terminationReason",
+          "type": "string"
+        },
+        {
+          "name": "effectiveTerminationDate",
+          "type": "string"
+        }
+      ],
+      "LinkedContractActionResponse": [
+        {
+          "name": "originalContractId",
+          "type": "string"
+        },
+        {
+          "name": "originalContractStatus",
+          "type": "enum"
+        },
+        {
+          "name": "linkedContractId",
+          "type": "string"
+        },
+        {
+          "name": "linkedContractReference",
+          "type": "string"
+        },
+        {
+          "name": "terminationReason",
+          "type": "string"
+        },
+        {
+          "name": "effectiveTerminationDate",
+          "type": "string"
+        },
+        {
+          "name": "contractEndDate",
+          "type": "string"
+        },
+        {
+          "name": "noticePeriod",
+          "type": "string"
+        },
+        {
+          "name": "renewalAlertBanner",
+          "type": "string"
+        },
+        {
+          "name": "obligations",
+          "type": "array"
+        }
+      ]
+    },
+    "notes": "ContractDetailsTab.jsx consumes a 'contract' object shaped like ContractDetailResponse (fields: id, contractType, counterpartyName, status, startDate, endDate, contractValue, currency, contractOwnerName) but the service module's JSDoc comment labels this as keyed to a 'ContractResponse' type name that does not exist in contractRepositoryService.js — only ContractDetailResponse is defined there. The test file ContractDetailPage.test.jsx mocks GET /api/v1/contracts/{contractId}, /document, /versions, and /activity-log with response shapes matching ContractDetailResponse, ContractDocumentResponse, and paged {items, totalCount} envelopes respectively."
+  },
+  "usage": {
+    "num_turns": 28,
+    "duration_ms": 156653,
+    "total_cost_usd": 1.04261,
+    "input_tokens": 3539,
+    "output_tokens": 11963,
+    "cache_creation_input_tokens": 56379,
+    "cache_read_input_tokens": 1711720,
+    "is_error": false
+  }
+}

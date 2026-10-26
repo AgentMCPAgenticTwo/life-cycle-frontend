@@ -4,10 +4,10 @@ title: src/features/contract-repository
 description: Contract search/repository list, contract detail tabs (details, document, versions, activity log), and obligations/renewal workflows.
 resource: https://github.com/AgentMCPAgenticThree/life-cycle-frontend/tree/main/src/features/contract-repository
 tags: [frontend, contract-repository, obligations]
-generated: { by: sage-maintenance/claude-code, at: 2026-10-14T12:33:45Z }
+generated: { by: sage-maintenance/claude-code, at: 2026-10-26T08:50:12Z }
 sources:
   - id: cbm-graph
-    resource: codebase-memory-mcp project life-cycle-frontend @ f7c53e07c639c02ca5973ae775bd63b8c6ccc08a
+    resource: codebase-memory-mcp project life-cycle-frontend @ e65c8529ee9bb23788b7fb597b34811e58b5019e
     title: Codebase knowledge graph
 status: stable
 ---
@@ -31,6 +31,14 @@ query down so matched text is highlighted in the results table.
 `ContractDetailsTab.jsx`, `ContractDocumentTab.jsx` (+ `.test.jsx`),
 `ContractVersionsTab.jsx`, `ContractActivityLogTab.jsx`, `DownloadButton.jsx`
 (+ `.test.jsx`).
+
+`ContractDetailsTab.jsx` renders `id`, `contractType`, `counterpartyName`,
+`status`, `startDate`/`endDate`, `contractValue`/`currency` and
+`contractOwnerName` — these field names were corrected to match the
+`ContractDetailResponse` DTO exactly (the generated version used
+`contractId`/`counterparty`/`value`/`owner`, which left the tab blank against
+the real API). `formatCurrency(value, currency = 'USD')` in `utils/format.js`
+now takes the row's `currency` instead of hard-coding `'USD'`.
 
 ## Obligations & renewal
 

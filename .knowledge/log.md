@@ -1,5 +1,21 @@
 # Knowledge Update Log
 
+## 2026-10-26
+
+* **Update**: [services](/modules/services.md) and [shared](/modules/shared.md) — documented
+  the reworked access-token refresh flow. `src/services/http.js` gained proactive renewal
+  (`accessTokenExpiryMs`, `scheduleTokenRenewal`, `stopTokenRenewal`, `RENEWAL_SKEW_MS`,
+  `MAX_TIMEOUT_MS`) armed from a `useAuthStore.subscribe` hook, a shared-promise
+  `refreshSession` that POSTs `/auth/refresh` with no body or `Content-Type`, and a narrowed
+  `NON_REFRESHABLE_PATHS` set (`/auth/login`, `/auth/refresh`, `/auth/logout`) so `/auth/me`
+  and `/auth/change-password` now retry after a 401. `src/shared/hooks/useAuth.js` got its
+  first concept coverage, including `restoreSession`'s early return when a session is already
+  in memory. Also corrected the `http.js` description to the bearer-token reality (the
+  `X-User-Role`/`X-User-Id` dev headers are gone) in both services.md and
+  [conventions](/conventions.md), and re-synced [modules/index.md](/modules/index.md). Mode `update`, trace `458a1fe5addc`, commit
+  `7581a5dfb9310727b699037e534651679b3bb36b`. No new routes or directories, so overview and
+  architecture were left untouched.
+
 ## 2026-10-15
 
 * **Update**: [clause-analysis](/modules/clause-analysis.md) — documented the header-action

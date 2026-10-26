@@ -67,16 +67,28 @@ async function request(path, init = {}, { skipAuthRetry = false, raw = false } =
   const isForm = init.body instanceof FormData;
   const { accessToken } = useAuthStore.getState();
 
-  const response = await fetch(`${BASE_URL}${path}`, {
-    ...init,
-    credentials: 'include',
-    headers: {
-      // Do not set Content-Type for FormData — the browser adds the multipart boundary.
-      ...(isForm ? {} : { 'Content-Type': 'application/json' }),
-      ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
-      ...(init.headers || {}),
-    },
-  });
+  let response;
+  try {
+    response = await fetch(`${BASE_URL}${path}`, {
+      ...init,
+      credentials: 'include',
+      headers: {
+        // Do not set Content-Type for FormData — the browser adds the multipart boundary.
+        ...(isForm ? {} : { 'Content-Type': 'application/json' }),
+        ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+        ...(init.headers || {}),
+      },
+    });
+  } catch {
+    // The request never reached the API (server down, wrong VITE_API_BASE_URL, CORS,
+    // offline). `fetch` rejects with a bare TypeError reading "Failed to fetch" — give
+    // it the HttpError shape every screen's error state already renders so the user
+    // gets an actionable message with a Retry instead of the browser's wording.
+    throw new HttpError(0, {
+      error: `Unable to reach the server at ${BASE_URL}. Check that the API is running and try again.`,
+      details: [],
+    });
+  }
 
   if (response.status === 401 && !skipAuthRetry && !path.startsWith(AUTH_PATH_PREFIX)) {
     try {

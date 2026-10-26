@@ -4,10 +4,10 @@ title: Frontend conventions
 description: The non-negotiable rules this repo's generated code follows for API access, auth headers, ids, testing and module isolation.
 resource: https://github.com/AgentMCPAgenticThree/life-cycle-frontend/tree/main/CLAUDE.md
 tags: [frontend, conventions]
-generated: { by: sage-maintenance/claude-code, at: 2026-10-13T06:17:20Z }
+generated: { by: sage-maintenance/claude-code, at: 2026-10-26T08:16:04Z }
 sources:
   - id: cbm-graph
-    resource: codebase-memory-mcp project life-cycle-frontend @ 49e9748c4f7780464fab1d3fc10815d84e990e6f
+    resource: codebase-memory-mcp project life-cycle-frontend @ 73f6f7a9b545e029eaee4d442b58026bd50c5c13
     title: Codebase knowledge graph
 status: stable
 ---
@@ -17,9 +17,9 @@ Full text lives in the root `CLAUDE.md`; this file is the condensed, graph-check
 ## API layer
 
 - All network calls go through [`src/services/http.js`](/modules/services.md) — feature code never calls `fetch` directly.
-- `VITE_API_BASE_URL` is required; the client throws at startup if missing (no mock fallback).
+- `VITE_API_BASE_URL` is required; the client throws at startup if missing (no mock fallback). It points at the backend (`http://localhost:8000`), never at the Vite dev-server port.
 - Every request carries `X-User-Role` and `X-User-Id`, attached centrally in `http.js`.
-- Non-2xx responses throw `HttpError` with `{ error, details }`.
+- Non-2xx responses throw `HttpError` with `{ error, details }`. A transport failure (server unreachable, CORS, offline) throws the same shape with status `0` instead of a bare `TypeError`, so error states render it unchanged.
 - One service module per resource group (see [modules/services.md](/modules/services.md) for the full list) — exactly the paths/fields declared in each module's contract in `CLAUDE.md`.
 - Multipart endpoints send `FormData` and never set `Content-Type` manually.
 

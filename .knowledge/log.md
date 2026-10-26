@@ -1,5 +1,17 @@
 # Knowledge Update Log
 
+## 2026-10-26
+
+* **Update**: [services](/modules/services.md) and [conventions](/conventions.md) — the
+  `fetch` call in `request` (`src/services/http.js`) is now wrapped in `try`/`catch` and
+  rethrows transport failures (server down, wrong `VITE_API_BASE_URL`, CORS, offline) as an
+  `HttpError` with status `0` and a message naming `BASE_URL`, so screens render them through
+  the existing error state instead of a bare "Failed to fetch" `TypeError`. `.env.example`
+  was also corrected to point `VITE_API_BASE_URL` at the backend (`http://localhost:8000`)
+  rather than the Vite dev-server port. Mode `update`, trace `b7ffd6bde69f`, commit
+  `73f6f7a9b545e029eaee4d442b58026bd50c5c13`. No new routes, components or directories, so
+  overview, architecture and every `index.md` were left untouched.
+
 ## 2026-10-15
 
 * **Update**: [clause-analysis](/modules/clause-analysis.md) — documented the header-action

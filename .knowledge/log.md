@@ -2,6 +2,17 @@
 
 ## 2026-10-26
 
+* **Update**: [services](/modules/services.md), [shared](/modules/shared.md) — documented
+  the refresh-token fix in `src/services/http.js`: new `scheduleProactiveRefresh` /
+  `clearScheduledRefresh` exports and `readTokenExpiry`, which arm a timer to refresh the
+  access token ~60s before its JWT `exp` claim instead of waiting for a reactive 401, and
+  are wired into `src/shared/hooks/useAuth.js`'s `login`/`logout`. Also corrected
+  `services.md`'s stale claim that `http.js` attaches `X-User-Role`/`X-User-Id` — it already
+  used `Authorization: Bearer <accessToken>` — and added the previously-undocumented
+  `src/shared/hooks/useAuth.js` to `shared.md` (retitled in `modules/index.md` to match).
+  Mode `update`, trace `8eaf9ad68d6a`, commit `56a4d78b23d089f6cbac46533abb845483a97044`. No
+  new routes or directories, so overview and architecture were left untouched.
+
 * **No-op check**: the only changed file, `.github/workflows/ui-correction.yml`, is the
   sage-maintenance GitHub Actions workflow that applies one-sentence corrections to an
   existing `ui-correction/<trace_id>` branch — CI/CD provisioning, not application source

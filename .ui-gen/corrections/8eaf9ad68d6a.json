@@ -1,0 +1,179 @@
+{
+  "trace_id": "8eaf9ad68d6a",
+  "branch": "ui-correction/8eaf9ad68d6a",
+  "maintenance_branch": "ui-correction/8eaf9ad68d6a",
+  "status": "SUCCESS",
+  "summary": "All 154 tests pass, lint is clean.\n\n## Summary\n\nInvestigated the frontend's existing refresh-token implementation (`src/services/http.js`, `src/store/authStore.js`, `src/shared/hooks/useAuth.js`) against the backend contract (`/tmp/sage-refs/life-cycle-backend`): the reactive 401-retry-via-refresh-cookie flow was already correctly wired (verified with a behavioral test exercising the full fetch-401-refresh-retry sequence), and CORS/cookie settings line up on the backend side. The gap was that renewal only happened *reactively*, after a request already failed with 401 — there was no proactive renewal \"when it expires\" as the request asked for.\n\nAdded proactive token renewal to `src/services/http.js`:\n- `readTokenExpiry` decodes the JWT's `exp` claim client-side (no new dependency).\n- `scheduleProactiveRefresh` sets a timer to call `refreshSession()` ~60s before the token's actual expiry, rescheduling itself after every successful refresh.\n- `clearScheduledRefresh` cancels the timer on logout or when a refresh ultimately fails (session cleared).\n\nWired it into `src/shared/hooks/useAuth.js` so a fresh login also schedules its own proactive renewal, and logout cancels the pending timer. The existing reactive 401-retry path is left untouched as a fallback for cases where the token lacks a readable `exp` or the proactive refresh was missed.\n\nAdded `src/services/http.test.js` covering: 401-retry success, refresh failure clearing the session, the proactive timer firing before expiry, and rescheduling after a successful refresh. Full test suite (154 tests), lint, and production build all pass.",
+  "files_changed": [
+    "src/services/http.js",
+    "src/services/http.test.js",
+    "src/shared/hooks/useAuth.js"
+  ],
+  "lines_changed": 171,
+  "blockers": [
+    "Not applied -- root cause of refresh token not working: verified via static review and a behavioral test that the existing reactive 401-retry-via-httpOnly-cookie flow (http.js, authStore.js, useAuth.js) was already correct and working against the backend contract; no bug found there, so the only real gap was the missing proactive renewal, which was implemented"
+  ],
+  "visual_check": {
+    "verdict": "skipped",
+    "evidence": "verifier did not return parseable JSON",
+    "screenshot_path": ""
+  },
+  "context_sharing": {
+    "target": "frontend",
+    "branch": "ui-correction/8eaf9ad68d6a",
+    "base_path": "",
+    "endpoints": [
+      {
+        "method": "POST",
+        "path": "/auth/refresh",
+        "request_fields": [],
+        "response_fields": [
+          {
+            "name": "accessToken",
+            "type": "string"
+          }
+        ],
+        "purpose": "exchange httpOnly refresh cookie for a new access token"
+      },
+      {
+        "method": "POST",
+        "path": "/auth/login",
+        "request_fields": [
+          {
+            "name": "email",
+            "type": "string"
+          },
+          {
+            "name": "password",
+            "type": "string"
+          }
+        ],
+        "response_fields": [
+          {
+            "name": "accessToken",
+            "type": "string"
+          },
+          {
+            "name": "user",
+            "type": "object"
+          }
+        ],
+        "purpose": "authenticate user and start a session"
+      },
+      {
+        "method": "POST",
+        "path": "/auth/logout",
+        "request_fields": [],
+        "response_fields": [],
+        "purpose": "end the current session"
+      },
+      {
+        "method": "GET",
+        "path": "/auth/me",
+        "request_fields": [],
+        "response_fields": [
+          {
+            "name": "id",
+            "type": "string"
+          },
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "email",
+            "type": "string"
+          },
+          {
+            "name": "role",
+            "type": "string"
+          },
+          {
+            "name": "tenantId",
+            "type": "string"
+          },
+          {
+            "name": "mustChangePassword",
+            "type": "boolean"
+          }
+        ],
+        "purpose": "get the current signed-in user"
+      },
+      {
+        "method": "POST",
+        "path": "/auth/change-password",
+        "request_fields": [
+          {
+            "name": "currentPassword",
+            "type": "string"
+          },
+          {
+            "name": "newPassword",
+            "type": "string"
+          }
+        ],
+        "response_fields": [],
+        "purpose": "change the signed-in user's password"
+      }
+    ],
+    "types": {
+      "ApiError": [
+        {
+          "name": "error",
+          "type": "string"
+        },
+        {
+          "name": "details",
+          "type": "array"
+        }
+      ],
+      "AuthUserResponse": [
+        {
+          "name": "id",
+          "type": "string"
+        },
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "email",
+          "type": "string"
+        },
+        {
+          "name": "role",
+          "type": "string"
+        },
+        {
+          "name": "tenantId",
+          "type": "string"
+        },
+        {
+          "name": "mustChangePassword",
+          "type": "boolean"
+        }
+      ],
+      "LoginResponse": [
+        {
+          "name": "accessToken",
+          "type": "string"
+        },
+        {
+          "name": "user",
+          "type": "object"
+        }
+      ]
+    },
+    "notes": "All requests use Authorization: Bearer <accessToken> (not X-User-Role/X-User-Id as CLAUDE.md's module contracts describe) plus credentials: include for an httpOnly refresh cookie; 401 triggers one silent refresh-and-retry via POST /auth/refresh except for paths under /auth/. Error body shape is {error: string, details: string[]}."
+  },
+  "usage": {
+    "num_turns": 46,
+    "duration_ms": 254070,
+    "total_cost_usd": 1.7066256,
+    "input_tokens": 3819,
+    "output_tokens": 19018,
+    "cache_creation_input_tokens": 79251,
+    "cache_read_input_tokens": 3111442,
+    "is_error": false
+  }
+}

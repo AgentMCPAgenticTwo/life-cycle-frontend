@@ -7,7 +7,7 @@ mapping between the two.
 
 * [App routing](app-routing.md) - Declares every route in the SPA and decides which screens get the sidebar app shell.
 * [src/pages](pages.md) - Route-level screens, one file per route, each composing components and hooks from one or more src/features/<feature> directories.
-* [src/shared](shared.md) - The app shell (sidebar navigation + responsive layout) that wraps every authenticated route, plus the shared file-download util; no shared UI primitives exist yet.
+* [src/shared](shared.md) - The app shell (sidebar navigation + responsive layout), the shared file-download util, and the useAuth hook every screen reads identity/session actions from; no shared UI primitives exist yet.
 * [src/features/dashboard](dashboard.md) - Status summary, my-tasks and high-risk-contracts panels shown on the landing DashboardPage, filterable by owner/counterparty/date range.
 * [src/features/contracts](contracts.md) - New-contract drafting flow -- type/industry/template selection, third-party paper upload, counterparty panel, and the role guard on /contracts/new.
 * [src/features/contract-repository](contract-repository.md) - Contract search/repository list, contract detail tabs, and obligations/renewal workflows.

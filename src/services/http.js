@@ -35,7 +35,58 @@ if (!BASE_URL) {
 
 const AUTH_PATH_PREFIX = '/auth/';
 
+// Refresh this many ms before the access token's own `exp` claim to leave time
+// for the request to complete before the token actually expires.
+const REFRESH_SKEW_MS = 60 * 1000;
+
 let refreshPromise = null;
+let refreshTimer = null;
+
+/**
+ * Reads the `exp` claim (seconds since epoch) out of a JWT without verifying
+ * it — verification is the backend's job, this is only used to time the next
+ * proactive refresh.
+ * @param {string} token
+ * @returns {number|null} epoch milliseconds, or null if it can't be read
+ */
+function readTokenExpiry(token) {
+  try {
+    const [, payload] = token.split('.');
+    const decoded = JSON.parse(atob(payload.replace(/-/g, '+').replace(/_/g, '/')));
+    return typeof decoded.exp === 'number' ? decoded.exp * 1000 : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Cancels any pending proactive refresh — called on logout/session clear. */
+export function clearScheduledRefresh() {
+  if (refreshTimer) {
+    clearTimeout(refreshTimer);
+    refreshTimer = null;
+  }
+}
+
+/**
+ * Schedules a proactive refresh shortly before the given access token expires,
+ * so the session renews automatically in the background instead of waiting
+ * for a request to fail with 401 first. Silently does nothing if the token
+ * carries no readable `exp` claim — the reactive 401 retry in `request` below
+ * still covers that case.
+ * @param {string} accessToken
+ */
+export function scheduleProactiveRefresh(accessToken) {
+  clearScheduledRefresh();
+  const expiresAt = readTokenExpiry(accessToken);
+  if (expiresAt === null) return;
+  const delay = Math.max(expiresAt - Date.now() - REFRESH_SKEW_MS, 0);
+  refreshTimer = setTimeout(() => {
+    refreshSession().catch(() => {
+      // A failed proactive refresh is not fatal here: the next API call will
+      // hit the reactive 401 path below and send the user to /login.
+    });
+  }, delay);
+}
 
 /**
  * Exchanges the httpOnly refresh cookie for a new access token, rotating the
@@ -54,6 +105,7 @@ export function refreshSession() {
         if (!response.ok) throw new Error('refresh failed');
         const body = await response.json();
         useAuthStore.getState().setAccessToken(body.accessToken);
+        scheduleProactiveRefresh(body.accessToken);
         return body.accessToken;
       })
       .finally(() => {
@@ -83,6 +135,7 @@ async function request(path, init = {}, { skipAuthRetry = false, raw = false } =
       await refreshSession();
       return await request(path, init, { skipAuthRetry: true, raw });
     } catch {
+      clearScheduledRefresh();
       useAuthStore.getState().clearSession();
       if (typeof window !== 'undefined') {
         window.location.href = '/login';

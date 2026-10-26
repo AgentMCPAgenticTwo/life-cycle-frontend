@@ -31,14 +31,16 @@ import { http } from '@/services/http';
 
 /**
  * @typedef {Object} ContractDetailResponse
- * @property {string} contractId
+ * @property {string} id
  * @property {string} contractName
- * @property {string} counterparty
+ * @property {string} contractType
+ * @property {string} counterpartyName
  * @property {string} status
- * @property {number} [value]
+ * @property {number} [contractValue]
+ * @property {string} [currency]
  * @property {string} [startDate]
  * @property {string} [endDate]
- * @property {string} owner
+ * @property {string} contractOwnerName
  * @property {string} lastModified
  * @property {FolderTagOptionResponse[]} [folderTags]
  * @property {string[]} availableTabs

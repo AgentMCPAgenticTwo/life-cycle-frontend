@@ -33,7 +33,12 @@ if (!BASE_URL) {
   );
 }
 
-const AUTH_PATH_PREFIX = '/auth/';
+// Only the login and refresh calls themselves must skip the refresh-and-retry
+// dance (login has no token to refresh, and retrying the refresh call on its
+// own 401 would loop forever). Every other `/auth/*` call (e.g. `/auth/me`,
+// `/auth/change-password`) carries a real access token and should get the
+// same silent-refresh treatment as any other authenticated request.
+const NO_AUTH_RETRY_PATHS = new Set(['/auth/login', '/auth/refresh']);
 
 let refreshPromise = null;
 
@@ -78,7 +83,7 @@ async function request(path, init = {}, { skipAuthRetry = false, raw = false } =
     },
   });
 
-  if (response.status === 401 && !skipAuthRetry && !path.startsWith(AUTH_PATH_PREFIX)) {
+  if (response.status === 401 && !skipAuthRetry && !NO_AUTH_RETRY_PATHS.has(path)) {
     try {
       await refreshSession();
       return await request(path, init, { skipAuthRetry: true, raw });

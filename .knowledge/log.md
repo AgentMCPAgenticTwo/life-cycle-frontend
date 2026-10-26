@@ -1,5 +1,18 @@
 # Knowledge Update Log
 
+## 2026-10-26
+
+* **Update**: [services](/modules/services.md) — documented the `http.js` auth-retry fix:
+  the old `AUTH_PATH_PREFIX` check (which skipped the refresh-and-retry dance for every
+  `/auth/*` call) was replaced with `NO_AUTH_RETRY_PATHS`, a set containing only
+  `/auth/login` and `/auth/refresh`, so authenticated `/auth/*` calls like `/auth/me` now
+  get silently refreshed and retried on a 401 instead of failing straight through. New
+  `src/services/http.test.js` covers the refresh-and-retry path, the `/auth/me` case, and
+  the no-loop case when `/auth/refresh` itself 401s. Mode `update`, trace `43d3a167217b`,
+  commit `1d0288b50c339ffef40ea7f9482bda792e9d4415`. `.github/workflows/ui-correction.yml`
+  also changed but is CI config with no corresponding concept. No new routes, components
+  or directories, so overview, architecture and every `index.md` were left untouched.
+
 ## 2026-10-15
 
 * **Update**: [clause-analysis](/modules/clause-analysis.md) — documented the header-action

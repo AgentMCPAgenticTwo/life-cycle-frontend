@@ -4,10 +4,10 @@ title: src/services
 description: One typed client module per REST resource group, all built on the shared HTTP client (http.js) that attaches auth headers and normalizes errors.
 resource: https://github.com/AgentMCPAgenticThree/life-cycle-frontend/tree/main/src/services
 tags: [frontend, services, api]
-generated: { by: sage-maintenance/claude-code, at: 2026-10-14T12:33:45Z }
+generated: { by: sage-maintenance/claude-code, at: 2026-10-26T07:05:31Z }
 sources:
   - id: cbm-graph
-    resource: codebase-memory-mcp project life-cycle-frontend @ f7c53e07c639c02ca5973ae775bd63b8c6ccc08a
+    resource: codebase-memory-mcp project life-cycle-frontend @ 1d0288b50c339ffef40ea7f9482bda792e9d4415
     title: Codebase knowledge graph
 status: stable
 ---
@@ -23,6 +23,14 @@ and `X-User-Id` to every call, and converts non-2xx responses into a thrown
 
 `request` also handles the 401 → `refreshSession` → retry path, and takes a
 `raw` option that returns the `Response` untouched instead of parsing JSON.
+The retry is skipped only for the two paths in `NO_AUTH_RETRY_PATHS`
+(`/auth/login`, `/auth/refresh` — login has no token to refresh, and retrying
+the refresh call on its own 401 would loop forever); every other `/auth/*`
+call (e.g. `/auth/me`) gets the same silent-refresh-and-retry treatment as
+any other authenticated request. `http.test.js` covers all three cases:
+refresh-and-retry on an expired request, refresh-and-retry on an
+authenticated `/auth/me` call, and no retry loop when `/auth/refresh` itself
+401s.
 
 ### File downloads
 

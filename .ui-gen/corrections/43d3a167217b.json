@@ -1,0 +1,62 @@
+{
+  "trace_id": "43d3a167217b",
+  "branch": "ui-correction/43d3a167217b",
+  "maintenance_branch": "ui-correction/43d3a167217b",
+  "status": "SUCCESS",
+  "summary": "Build succeeds. All four checks (typecheck, lint, test, build) pass.\n\nRoot cause: `src/services/http.js` excluded every path under `/auth/` from the silent refresh-and-retry on a 401, instead of only the two paths that genuinely need to skip it (`/auth/login`, which has no token to refresh; `/auth/refresh` itself, to avoid a loop). That meant an expired access token on `/auth/me` (used during session restore) or `/auth/change-password` failed immediately instead of transparently refreshing — i.e. refresh-token-based recovery silently didn't apply to those calls while it worked everywhere else, matching the reported \"access token only working, refresh flow not working\" symptom.\n\nFix: replaced the `path.startsWith('/auth/')` prefix check with an exact-match exclusion set (`/auth/login`, `/auth/refresh`), so all other authenticated endpoints — including the `/auth/*` ones — get the same refresh-and-retry treatment. Added `src/services/http.test.js` covering: refresh+retry on a normal endpoint, refresh+retry on an authenticated `/auth/*` endpoint, and no infinite loop when the refresh call itself 401s.",
+  "files_changed": [
+    "src/services/http.js",
+    "src/services/http.test.js"
+  ],
+  "lines_changed": 68,
+  "blockers": [
+    "Visual verification failed: The entire app (including /login and the root route) renders a blank white page in the dev server — the frontend throws at startup due to a missing VITE_API_BASE_URL env var, so no UI (including login/token-refresh behavior) can be visually verified."
+  ],
+  "visual_check": {
+    "verdict": "fail",
+    "evidence": "The entire app (including /login and the root route) renders a blank white page in the dev server — the frontend throws at startup due to a missing VITE_API_BASE_URL env var, so no UI (including login/token-refresh behavior) can be visually verified.",
+    "screenshot_path": "/tmp/actual.png"
+  },
+  "context_sharing": {
+    "target": "frontend",
+    "branch": "ui-correction/43d3a167217b",
+    "base_path": "",
+    "endpoints": [
+      {
+        "method": "POST",
+        "path": "/auth/refresh",
+        "request_fields": [],
+        "response_fields": [
+          {
+            "name": "accessToken",
+            "type": "string"
+          }
+        ],
+        "purpose": "Exchange the httpOnly refresh cookie for a new access token"
+      }
+    ],
+    "types": {
+      "ApiError": [
+        {
+          "name": "error",
+          "type": "string"
+        },
+        {
+          "name": "details",
+          "type": "array"
+        }
+      ]
+    },
+    "notes": "This module authenticates via `Authorization: Bearer <accessToken>` plus an httpOnly refresh cookie (credentials: 'include'), with silent refresh-and-retry on 401, not via X-User-Role/X-User-Id headers as described elsewhere in this repo's conventions — that is a mismatch the other side must account for. Error bodies are shaped as { error: string, details: string[] }. No endpoints under /api/v1/* are implemented in these two files themselves; /api/v1/contracts appears only as a literal path string in a test mock and is not evidence of a real contract."
+  },
+  "usage": {
+    "num_turns": 40,
+    "duration_ms": 251748,
+    "total_cost_usd": 1.6062097999999998,
+    "input_tokens": 3682,
+    "output_tokens": 18190,
+    "cache_creation_input_tokens": 93995,
+    "cache_read_input_tokens": 2525316,
+    "is_error": false
+  }
+}

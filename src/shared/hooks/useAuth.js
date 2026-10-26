@@ -46,12 +46,22 @@ export function useAuth() {
    * Restores a session on initial load (full page refresh) from the httpOnly
    * refresh cookie. Clears the session instead of throwing when there is no
    * valid cookie — that is the normal "not signed in yet" case.
+   *
+   * A session already held in memory is left alone: this runs when the guarded
+   * routes first mount, which is also what happens immediately after signing in.
+   * Rotating the just-issued refresh cookie there bought nothing, and any hiccup
+   * in that extra round-trip threw the user straight back to /login.
    */
   const restoreSession = useCallback(async () => {
+    const existing = useAuthStore.getState();
+    if (existing.accessToken && existing.user) {
+      setInitializing(false);
+      return;
+    }
     try {
-      await refreshSession();
+      const accessToken = await refreshSession();
       const me = await authService.getCurrentUser();
-      setSession({ user: me, accessToken: useAuthStore.getState().accessToken });
+      setSession({ user: me, accessToken });
     } catch {
       clearSession();
     } finally {

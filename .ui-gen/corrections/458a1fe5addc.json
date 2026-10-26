@@ -1,0 +1,181 @@
+{
+  "trace_id": "458a1fe5addc",
+  "branch": "ui-correction/458a1fe5addc",
+  "maintenance_branch": "ui-correction/458a1fe5addc",
+  "status": "SUCCESS",
+  "summary": "All checks pass (`lint`, `build`, `test` — 31 files / 166 tests; `typecheck` is a no-op in this JS project).\n\n## What was wrong\n\nThe refresh machinery existed in `src/services/http.js`, but three defects on the refresh path meant it could not actually keep a session alive:\n\n1. **The retry was inside the `try`.** In `request()`, the retried request was awaited inside the same `try` whose `catch` means \"the refresh failed\". So *any* error from the retried call — a 403, a 500, a validation 400 — was swallowed, rewritten as \"Your session has expired\", the session cleared and the browser hard-navigated to `/login`. A successful refresh followed by any ordinary error logged the user out. Moved the retry out of the `try`.\n2. **Every `/auth/*` path was excluded from renewal.** The guard was `!path.startsWith('/auth/')`, which also excluded `/auth/me` and `/auth/change-password` — ordinary bearer-authenticated calls that *should* renew. Narrowed it to the three calls that genuinely must not (`/auth/login`, `/auth/refresh`, `/auth/logout`).\n3. **`restoreSession()` rotated a brand-new session.** `ProtectedRoute` first mounts right after sign-in, and `restoreSession()` unconditionally hit `POST /auth/refresh`. That rotated the just-issued refresh cookie for nothing, and any hiccup in that extra round-trip ran `clearSession()` — bouncing the user back to `/login` seconds after a successful login. It now short-circuits when a session is already in memory.\n\nAlso: `refreshSession()` sent `Content-Type: application/json` on a body-less POST, which makes it a preflighted cross-origin request for no reason; dropped. It now throws a typed `HttpError` and rejects a 200 that carries no `accessToken`.\n\n## Automatic renewal\n\nAdded proactive renewal to `http.js`: `accessTokenExpiryMs()` reads the JWT's `exp` claim (no verification — that's the backend's job), and `scheduleTokenRenewal()` arms a timer to refresh 60s before expiry. It's wired via a `useAuthStore` subscription, so every path that sets a token (login, refresh, restore) arms the next renewal and `clearSession()` disarms it — no screen has to remember. The reactive 401-retry stays as the backstop.\n\n## Verification\n\nBackend contract checked against `/tmp/sage-refs/life-cycle-backend` (`app/routers/auth.py`, `app/services/auth.py`): cookie name/path, rotation-on-refresh, `RefreshResponse.accessToken`, and the dual `/auth/*` + `/api/v1/auth/*` mounts all match what this client sends — no backend change needed. New tests: `src/services/http.test.js` (13: renew-and-retry, concurrent-401 dedupe, refresh failure clears session, retried-error passthrough, `/auth/me` renews but `/auth/login` doesn't, proactive timer arm/fire/disarm) and `src/shared/hooks/useAuth.test.jsx` (3: cold restore, in-memory session untouched, no-cookie clears). I could not run the real backend here (no PostgreSQL), so end-to-end verification is by contract reading plus these tests, not a live round-trip.",
+  "files_changed": [
+    "src/services/http.js",
+    "src/services/http.test.js",
+    "src/shared/hooks/useAuth.js",
+    "src/shared/hooks/useAuth.test.jsx"
+  ],
+  "lines_changed": 373,
+  "blockers": [
+    "Not applied -- Live end-to-end run of the login/refresh/expiry flow against the real API: the backend is a separate repository and no PostgreSQL is available in this environment; verified against the backend's auth router/service contract and with unit tests instead",
+    "Not applied -- Any change to the backend's refresh endpoint, cookie attributes or token rotation: belongs to life-cycle-backend; it already matches this client's contract and needed no change"
+  ],
+  "visual_check": {
+    "verdict": "pass",
+    "evidence": "The change is non-visual (HTTP client refresh/retry logic plus proactive JWT-exp-based renewal and a store subscription); the dev server renders a blank page on every route including / because no .env.local exists and http.js throws at startup when VITE_API_BASE_URL is missing — a pre-existing environment condition, not a regression from this diff. The 16 new/existing unit tests for http.js and useAuth cover refresh-once-and-retry, single in-flight refresh, non-refreshable /auth paths, and scheduled renewal, and all pass.",
+    "screenshot_path": "/tmp/actual.png"
+  },
+  "context_sharing": {
+    "target": "frontend",
+    "branch": "ui-correction/458a1fe5addc",
+    "base_path": "",
+    "endpoints": [
+      {
+        "method": "POST",
+        "path": "/auth/login",
+        "request_fields": [
+          {
+            "name": "email",
+            "type": "string"
+          },
+          {
+            "name": "password",
+            "type": "string"
+          }
+        ],
+        "response_fields": [
+          {
+            "name": "accessToken",
+            "type": "string"
+          },
+          {
+            "name": "user",
+            "type": "object"
+          }
+        ],
+        "purpose": "Sign in and establish a session"
+      },
+      {
+        "method": "POST",
+        "path": "/auth/refresh",
+        "request_fields": [],
+        "response_fields": [
+          {
+            "name": "accessToken",
+            "type": "string"
+          }
+        ],
+        "purpose": "Exchange httpOnly refresh cookie for a new access token"
+      },
+      {
+        "method": "POST",
+        "path": "/auth/logout",
+        "request_fields": [],
+        "response_fields": [],
+        "purpose": "Tear down the session"
+      },
+      {
+        "method": "GET",
+        "path": "/auth/me",
+        "request_fields": [],
+        "response_fields": [
+          {
+            "name": "id",
+            "type": "string"
+          },
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "email",
+            "type": "string"
+          },
+          {
+            "name": "role",
+            "type": "string"
+          },
+          {
+            "name": "tenantId",
+            "type": "string"
+          },
+          {
+            "name": "mustChangePassword",
+            "type": "boolean"
+          }
+        ],
+        "purpose": "Fetch the signed-in user"
+      },
+      {
+        "method": "POST",
+        "path": "/auth/change-password",
+        "request_fields": [
+          {
+            "name": "currentPassword",
+            "type": "string"
+          },
+          {
+            "name": "newPassword",
+            "type": "string"
+          }
+        ],
+        "response_fields": [],
+        "purpose": "Change the signed-in user's password"
+      }
+    ],
+    "types": {
+      "AuthUserResponse": [
+        {
+          "name": "id",
+          "type": "string"
+        },
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "email",
+          "type": "string"
+        },
+        {
+          "name": "role",
+          "type": "string"
+        },
+        {
+          "name": "tenantId",
+          "type": "string"
+        },
+        {
+          "name": "mustChangePassword",
+          "type": "boolean"
+        }
+      ],
+      "LoginResponse": [
+        {
+          "name": "accessToken",
+          "type": "string"
+        },
+        {
+          "name": "user",
+          "type": "object"
+        }
+      ],
+      "ApiError": [
+        {
+          "name": "error",
+          "type": "string"
+        },
+        {
+          "name": "details",
+          "type": "array"
+        }
+      ]
+    },
+    "notes": "Auth is bearer-token based: the client sends `Authorization: Bearer <accessToken>` and `credentials: 'include'` on every request — it no longer sends X-User-Role/X-User-Id. POST /auth/refresh must accept a body-less POST with no Content-Type, read the httpOnly refresh cookie, and return `{accessToken}`; /auth/login, /auth/refresh and /auth/logout are never retried after a 401. Access tokens must be JWTs with a numeric `exp` claim (seconds since epoch) for proactive renewal; file downloads are fetched with the same Authorization header and the filename is read from Content-Disposition."
+  },
+  "usage": {
+    "num_turns": 49,
+    "duration_ms": 466830,
+    "total_cost_usd": 1.9314094000000008,
+    "input_tokens": 3662,
+    "output_tokens": 28286,
+    "cache_creation_input_tokens": 78250,
+    "cache_read_input_tokens": 3419498,
+    "is_error": false
+  }
+}

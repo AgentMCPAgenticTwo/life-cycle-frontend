@@ -1,5 +1,14 @@
 # Knowledge Update Log
 
+## 2026-10-26
+
+* **No-op check**: the only changed file, `.github/workflows/ui-correction.yml`, is the
+  sage-maintenance GitHub Actions workflow that applies one-sentence corrections to an
+  existing `ui-correction/<trace_id>` branch — CI/CD provisioning, not application source
+  under `src/`. No existing concept describes CI workflows, and this change doesn't affect
+  overview, architecture or any module, so no concept file was touched. Mode `update`, trace
+  `6fde8f5a3824`, commit `1594f95f3027f12784284baaa2f0c748a7fb7c8e`.
+
 ## 2026-10-15
 
 * **Update**: [clause-analysis](/modules/clause-analysis.md) — documented the header-action

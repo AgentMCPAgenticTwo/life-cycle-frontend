@@ -4,10 +4,10 @@ title: src/services
 description: One typed client module per REST resource group, all built on the shared HTTP client (http.js) that attaches auth headers and normalizes errors.
 resource: https://github.com/AgentMCPAgenticThree/life-cycle-frontend/tree/main/src/services
 tags: [frontend, services, api]
-generated: { by: sage-maintenance/claude-code, at: 2026-10-14T12:33:45Z }
+generated: { by: sage-maintenance/claude-code, at: 2026-10-26T08:16:04Z }
 sources:
   - id: cbm-graph
-    resource: codebase-memory-mcp project life-cycle-frontend @ f7c53e07c639c02ca5973ae775bd63b8c6ccc08a
+    resource: codebase-memory-mcp project life-cycle-frontend @ 73f6f7a9b545e029eaee4d442b58026bd50c5c13
     title: Codebase knowledge graph
 status: stable
 ---
@@ -23,6 +23,22 @@ and `X-User-Id` to every call, and converts non-2xx responses into a thrown
 
 `request` also handles the 401 → `refreshSession` → retry path, and takes a
 `raw` option that returns the `Response` untouched instead of parsing JSON.
+
+### Transport failures also arrive as `HttpError`
+
+The `fetch` call inside `request` is wrapped in `try`/`catch`. When the request
+never reaches the API — server down, wrong `VITE_API_BASE_URL`, CORS, offline —
+`fetch` rejects with a bare `TypeError` ("Failed to fetch"), which no screen's
+error state knows how to render. The catch converts it into an `HttpError` with
+**status `0`** and a message naming `BASE_URL` ("Unable to reach the server at
+…"), so the same loading/empty/error/populated contract in
+[conventions.md](/conventions.md) covers connectivity failures and the user gets
+a Retry rather than browser wording. Status `0` is the marker for "no HTTP
+response at all" — distinct from any status the API itself returns.
+
+`.env.example` documents the matching trap: `VITE_API_BASE_URL` is the
+**backend's** URL (`http://localhost:8000`), not the Vite dev-server port.
+Pointing it at the dev server makes every API call hit the SPA and fail.
 
 ### File downloads
 

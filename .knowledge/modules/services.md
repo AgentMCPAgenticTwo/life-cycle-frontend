@@ -1,13 +1,13 @@
 ---
 type: Module
 title: src/services
-description: One typed client module per REST resource group, all built on the shared HTTP client (http.js) that attaches auth headers and normalizes errors.
+description: One typed client module per REST resource group, all built on the shared HTTP client (http.js) that attaches the bearer token, renews it, and normalizes errors.
 resource: https://github.com/AgentMCPAgenticThree/life-cycle-frontend/tree/main/src/services
 tags: [frontend, services, api]
-generated: { by: sage-maintenance/claude-code, at: 2026-10-14T12:33:45Z }
+generated: { by: sage-maintenance/claude-code, at: 2026-10-26T07:50:32Z }
 sources:
   - id: cbm-graph
-    resource: codebase-memory-mcp project life-cycle-frontend @ f7c53e07c639c02ca5973ae775bd63b8c6ccc08a
+    resource: codebase-memory-mcp project life-cycle-frontend @ 7581a5dfb9310727b699037e534651679b3bb36b
     title: Codebase knowledge graph
 status: stable
 ---
@@ -16,13 +16,35 @@ status: stable
 
 Every other service module imports this. `post` (13 callers) and `request` (5
 callers, direct) are the single busiest functions in the whole dependency
-graph — see [architecture.md](/architecture.md#hotspots). Per `CLAUDE.md`:
-reads `VITE_API_BASE_URL` (throws at startup if unset), attaches `X-User-Role`
-and `X-User-Id` to every call, and converts non-2xx responses into a thrown
-`HttpError` carrying `{ error, details }`.
+graph — see [architecture.md](/architecture.md#hotspots). It reads
+`VITE_API_BASE_URL` (throws at startup if unset — no mock fallback), sends
+`credentials: 'include'`, attaches `Authorization: Bearer <accessToken>` read from
+`useAuthStore` (not the old `X-User-Role`/`X-User-Id` dev headers), skips
+`Content-Type` for `FormData` bodies, and converts non-2xx responses into a thrown
+`HttpError` carrying `{ error, details }`. `request` takes a `raw` option that
+returns the `Response` untouched instead of parsing JSON, and maps `204` to
+`undefined`.
 
-`request` also handles the 401 → `refreshSession` → retry path, and takes a
-`raw` option that returns the `Response` untouched instead of parsing JSON.
+### Access-token renewal
+
+Both halves of the token lifecycle live in this module, so no screen has to arm
+anything itself.
+
+| Symbol | Role |
+|---|---|
+| `accessTokenExpiryMs(token)` | Base64-decodes the JWT payload and returns `exp * 1000`; `null` for an opaque/unreadable token, which falls back to 401 recovery. |
+| `scheduleTokenRenewal(token)` / `stopTokenRenewal()` | Arm/cancel the single `renewalTimer`, firing `RENEWAL_SKEW_MS` (60s) before expiry and clamped to `MAX_TIMEOUT_MS`; the timer is `unref`'d so tests do not hang. |
+| `refreshSession()` | POSTs `/auth/refresh` with the httpOnly cookie and **no body or `Content-Type`** (a preflight there can drop the cookie), stores the new token, and shares one in-flight `refreshPromise` across concurrent callers. |
+| `useAuthStore.subscribe(...)` | Re-arms renewal on every access-token change and disarms on `clearSession()`. |
+
+Reactive path: a `401` on a refreshable path refreshes once and retries with
+`skipAuthRetry: true`. `NON_REFRESHABLE_PATHS` (`/auth/login`, `/auth/refresh`,
+`/auth/logout`) are excluded via `isRefreshable`; `/auth/me` and
+`/auth/change-password` are ordinary bearer calls and *do* retry. When the refresh
+itself fails, the session is cleared and `redirectToLogin()` navigates to `/login`.
+
+`refreshSession` is also called directly by
+[`useAuth().restoreSession`](/modules/shared.md#srcsharedhooks).
 
 ### File downloads
 

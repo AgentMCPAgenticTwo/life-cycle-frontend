@@ -7,7 +7,7 @@ mapping between the two.
 
 * [App routing](app-routing.md) - Declares every route in the SPA and decides which screens get the sidebar app shell.
 * [src/pages](pages.md) - Route-level screens, one file per route, each composing components and hooks from one or more src/features/<feature> directories.
-* [src/shared](shared.md) - The app shell (sidebar navigation + responsive layout) that wraps every authenticated route, plus the shared file-download util; no shared UI primitives exist yet.
+* [src/shared](shared.md) - The app shell (sidebar navigation + responsive layout) that wraps every authenticated route, plus the shared auth hook and file-download util; no shared UI primitives exist yet.
 * [src/features/dashboard](dashboard.md) - Status summary, my-tasks and high-risk-contracts panels shown on the landing DashboardPage, filterable by owner/counterparty/date range.
 * [src/features/contracts](contracts.md) - New-contract drafting flow -- type/industry/template selection, third-party paper upload, counterparty panel, and the role guard on /contracts/new.
 * [src/features/contract-repository](contract-repository.md) - Contract search/repository list, contract detail tabs, and obligations/renewal workflows.
@@ -18,5 +18,5 @@ mapping between the two.
 * [src/features/templates](templates.md) - Template and clause library -- editing, versioning, activate/deactivate lifecycle.
 * [src/features/settings-admin](settings-admin.md) - Tenant-admin screen -- users, routing/approval rules, integrations, notifications, audit log.
 * [src/features/tracker](tracker.md) - Reporting screen with ownership/cycle-time/bottleneck/turnaround tabs, export, and estimated-turnaround override.
-* [src/services](services.md) - One typed client module per REST resource group, built on the shared HTTP client.
+* [src/services](services.md) - One typed client module per REST resource group, all built on the shared HTTP client (http.js) that attaches the bearer token, renews it, and normalizes errors.
 * [src/store](store.md) - Zustand slices, one per feature's UI/filter state.

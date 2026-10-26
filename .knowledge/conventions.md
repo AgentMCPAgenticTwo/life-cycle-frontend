@@ -4,10 +4,10 @@ title: Frontend conventions
 description: The non-negotiable rules this repo's generated code follows for API access, auth headers, ids, testing and module isolation.
 resource: https://github.com/AgentMCPAgenticThree/life-cycle-frontend/tree/main/CLAUDE.md
 tags: [frontend, conventions]
-generated: { by: sage-maintenance/claude-code, at: 2026-10-13T06:17:20Z }
+generated: { by: sage-maintenance/claude-code, at: 2026-10-26T07:50:32Z }
 sources:
   - id: cbm-graph
-    resource: codebase-memory-mcp project life-cycle-frontend @ 49e9748c4f7780464fab1d3fc10815d84e990e6f
+    resource: codebase-memory-mcp project life-cycle-frontend @ 7581a5dfb9310727b699037e534651679b3bb36b
     title: Codebase knowledge graph
 status: stable
 ---
@@ -18,7 +18,7 @@ Full text lives in the root `CLAUDE.md`; this file is the condensed, graph-check
 
 - All network calls go through [`src/services/http.js`](/modules/services.md) — feature code never calls `fetch` directly.
 - `VITE_API_BASE_URL` is required; the client throws at startup if missing (no mock fallback).
-- Every request carries `X-User-Role` and `X-User-Id`, attached centrally in `http.js`.
+- Every request carries `Authorization: Bearer <accessToken>`, attached centrally in `http.js` from `useAuthStore` — the `X-User-Role`/`X-User-Id` dev headers `CLAUDE.md` still describes were replaced by real auth. Renewal (proactive + 401 retry) also lives in `http.js`; see [services](/modules/services.md#access-token-renewal).
 - Non-2xx responses throw `HttpError` with `{ error, details }`.
 - One service module per resource group (see [modules/services.md](/modules/services.md) for the full list) — exactly the paths/fields declared in each module's contract in `CLAUDE.md`.
 - Multipart endpoints send `FormData` and never set `Content-Type` manually.

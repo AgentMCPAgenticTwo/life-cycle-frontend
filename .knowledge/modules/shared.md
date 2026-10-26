@@ -1,13 +1,13 @@
 ---
 type: Module
 title: src/shared
-description: The app shell (sidebar navigation + responsive layout) that wraps every authenticated route, plus the shared file-download util; no shared UI primitives exist yet.
+description: The app shell (sidebar navigation + responsive layout) that wraps every authenticated route, plus the shared auth hook and file-download util; no shared UI primitives exist yet.
 resource: https://github.com/AgentMCPAgenticThree/life-cycle-frontend/tree/main/src/shared
 tags: [frontend, shared, layout]
-generated: { by: sage-maintenance/claude-code, at: 2026-10-14T12:33:45Z }
+generated: { by: sage-maintenance/claude-code, at: 2026-10-26T07:50:32Z }
 sources:
   - id: cbm-graph
-    resource: codebase-memory-mcp project life-cycle-frontend @ f7c53e07c639c02ca5973ae775bd63b8c6ccc08a
+    resource: codebase-memory-mcp project life-cycle-frontend @ 7581a5dfb9310727b699037e534651679b3bb36b
     title: Codebase knowledge graph
 status: stable
 ---
@@ -16,6 +16,25 @@ status: stable
 
 - `AppLayout.jsx` — layout shell rendered by the `<Route element={<AppLayout />}>` wrapper group in [app-routing](/modules/app-routing.md). Holds `isSidebarOpen` state, renders `SidebarNav` plus a mobile-only hamburger header, and an `<Outlet />` for the matched page.
 - `SidebarNav.jsx` (+ `SidebarNav.test.jsx`) — persistent sidebar on `md+` screens, slide-in drawer below that breakpoint; takes `isOpen`/`onClose` from `AppLayout`.
+
+## `src/shared/hooks`
+
+- `useAuth.js` (+ `useAuth.test.jsx`) — the single entry point for the signed-in
+  user's identity and session actions, replacing the old dev
+  `authHeaders.role` / `authHeaders.userId` constants. Reads `user`,
+  `accessToken` and `isInitializing` from [`authStore`](/modules/store.md) and
+  exposes `role`, `userId`, `isAuthenticated`, plus four actions:
+
+  | Action | Behaviour |
+  |---|---|
+  | `login(email, password)` | `authService.login` → `setSession({ user, accessToken })`. |
+  | `logout()` | `authService.logout()` in a `try`, `clearSession()` in the `finally`, so a failed call still signs the user out locally. |
+  | `changePassword(current, new)` | `authService.changePassword` then `setUser({ mustChangePassword: false })`. |
+  | `restoreSession()` | On a full page reload, exchanges the httpOnly cookie via [`refreshSession`](/modules/services.md#access-token-renewal) then `authService.getCurrentUser()`. **Returns early when a token and user are already in memory** — re-rotating the just-issued cookie right after login bought nothing and bounced the user back to `/login` on any hiccup. A failure is `clearSession()`, not a throw ("not signed in yet" is normal); `setInitializing(false)` runs in the `finally` either way. |
+
+  Consumers: `components/ProtectedRoute.jsx` (the route guard used by
+  [app-routing](/modules/app-routing.md)), `components/SidebarNav.jsx`, and
+  role-gated hooks such as `useBottleneckThresholds` in [tracker](/modules/tracker.md).
 
 ## `src/shared/utils`
 

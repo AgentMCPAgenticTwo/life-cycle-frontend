@@ -1,0 +1,374 @@
+{
+  "trace_id": "9644b89da82c",
+  "branch": "ui-correction/9644b89da82c",
+  "maintenance_branch": "ui-correction/9644b89da82c",
+  "status": "SUCCESS",
+  "summary": "Fixed the Details tab to read the field names the contract-detail endpoint actually returns (per the backend's `ContractResponse`): `id`, `contractType`, `counterpartyName`, `contractValue` + `currency`, `contractOwnerName` (dates `startDate`/`endDate` were already correct), and added the previously-omitted Contract Type row now that a real field exists. `formatCurrency` gained an optional currency argument (defaults to USD, so existing callers are unchanged), and the detail page header, which reads the same response, was corrected the same way. Test fixture updated; lint, tests and build pass.\n\nReading taken: scoped to the contract detail response consumers (Details tab + its page header); the repository list table uses the separate list-item DTO and was left alone.",
+  "files_changed": [
+    "src/__tests__/ContractDetailPage.test.jsx",
+    "src/features/contract-repository/components/ContractDetailsTab.jsx",
+    "src/features/contract-repository/utils/format.js",
+    "src/pages/ContractDetailPage.jsx"
+  ],
+  "lines_changed": 43,
+  "blockers": [
+    "Visual verification failed: The contract detail route (/contracts/<id>) and the repository list both render a completely blank white page in the dev server at localhost:5199 — no .env.local exists, so VITE_API_BASE_URL is unset and the HTTP client throws at startup, meaning the Details tab cannot be visually confirmed. Code-level evidence is positive (fields now read id/contractType/counterpartyName/contractValue+currency/contractOwnerName/startDate/endDate, matching the backend ContractResponse DTO, and the 6 ContractDetailPage tests pass), but nothing is visibly satisfied in the screenshot."
+  ],
+  "conventions": [],
+  "visual_check": {
+    "verdict": "fail",
+    "evidence": "The contract detail route (/contracts/<id>) and the repository list both render a completely blank white page in the dev server at localhost:5199 — no .env.local exists, so VITE_API_BASE_URL is unset and the HTTP client throws at startup, meaning the Details tab cannot be visually confirmed. Code-level evidence is positive (fields now read id/contractType/counterpartyName/contractValue+currency/contractOwnerName/startDate/endDate, matching the backend ContractResponse DTO, and the 6 ContractDetailPage tests pass), but nothing is visibly satisfied in the screenshot.",
+    "screenshot_path": "/tmp/actual.png"
+  },
+  "context_sharing": {
+    "target": "frontend",
+    "branch": "ui-correction/9644b89da82c",
+    "base_path": "/api/v1",
+    "endpoints": [
+      {
+        "method": "GET",
+        "path": "/api/v1/contracts/{contractId}",
+        "request_fields": [
+          {
+            "name": "contractId",
+            "type": "string"
+          }
+        ],
+        "response_fields": [
+          {
+            "name": "id",
+            "type": "string"
+          },
+          {
+            "name": "contractId",
+            "type": "string"
+          },
+          {
+            "name": "contractName",
+            "type": "string"
+          },
+          {
+            "name": "contractType",
+            "type": "string"
+          },
+          {
+            "name": "counterpartyName",
+            "type": "string"
+          },
+          {
+            "name": "status",
+            "type": "string"
+          },
+          {
+            "name": "contractValue",
+            "type": "number"
+          },
+          {
+            "name": "currency",
+            "type": "string"
+          },
+          {
+            "name": "startDate",
+            "type": "date"
+          },
+          {
+            "name": "endDate",
+            "type": "date"
+          },
+          {
+            "name": "contractOwnerName",
+            "type": "string"
+          },
+          {
+            "name": "lastModified",
+            "type": "date"
+          },
+          {
+            "name": "folderTags",
+            "type": "array"
+          },
+          {
+            "name": "availableTabs",
+            "type": "array"
+          }
+        ],
+        "purpose": "Core contract metadata for the Contract Detail page / Details tab"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/contracts/{contractId}/versions",
+        "request_fields": [
+          {
+            "name": "contractId",
+            "type": "string"
+          }
+        ],
+        "response_fields": [
+          {
+            "name": "items",
+            "type": "array"
+          },
+          {
+            "name": "totalCount",
+            "type": "number"
+          }
+        ],
+        "purpose": "Version history; page uses highest versionNumber as Current Version"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/contracts/{contractId}/activity-log",
+        "request_fields": [
+          {
+            "name": "contractId",
+            "type": "string"
+          }
+        ],
+        "response_fields": [
+          {
+            "name": "items",
+            "type": "array"
+          },
+          {
+            "name": "totalCount",
+            "type": "number"
+          }
+        ],
+        "purpose": "Read-only activity entries; latest performedAt drives the 'Last activity' line"
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/contracts/{contractId}/document",
+        "request_fields": [
+          {
+            "name": "contractId",
+            "type": "string"
+          }
+        ],
+        "response_fields": [
+          {
+            "name": "contractId",
+            "type": "string"
+          },
+          {
+            "name": "documentUrl",
+            "type": "string"
+          },
+          {
+            "name": "fileName",
+            "type": "string"
+          },
+          {
+            "name": "fileType",
+            "type": "string"
+          },
+          {
+            "name": "fileSizeBytes",
+            "type": "number"
+          },
+          {
+            "name": "isOversized",
+            "type": "boolean"
+          },
+          {
+            "name": "isCorruptedOrMissing",
+            "type": "boolean"
+          },
+          {
+            "name": "downloadEnabled",
+            "type": "boolean"
+          },
+          {
+            "name": "unavailableComment",
+            "type": "string"
+          }
+        ],
+        "purpose": "Document tab payload rendered alongside Details"
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/contracts/{contractId}/folder-tags",
+        "request_fields": [
+          {
+            "name": "contractId",
+            "type": "string"
+          },
+          {
+            "name": "folderTagIds",
+            "type": "array"
+          }
+        ],
+        "response_fields": [
+          {
+            "name": "contractId",
+            "type": "string"
+          },
+          {
+            "name": "folderTags",
+            "type": "array"
+          }
+        ],
+        "purpose": "Assign folders/tags; control shown only for TENANT_ADMIN and CONTRACT_OWNER"
+      }
+    ],
+    "types": {
+      "ContractDetailResponse": [
+        {
+          "name": "contractId",
+          "type": "string"
+        },
+        {
+          "name": "contractName",
+          "type": "string"
+        },
+        {
+          "name": "counterparty",
+          "type": "string"
+        },
+        {
+          "name": "status",
+          "type": "string"
+        },
+        {
+          "name": "value",
+          "type": "number"
+        },
+        {
+          "name": "startDate",
+          "type": "date"
+        },
+        {
+          "name": "endDate",
+          "type": "date"
+        },
+        {
+          "name": "owner",
+          "type": "string"
+        },
+        {
+          "name": "lastModified",
+          "type": "date"
+        },
+        {
+          "name": "folderTags",
+          "type": "array"
+        },
+        {
+          "name": "availableTabs",
+          "type": "array"
+        }
+      ],
+      "ContractVersionResponse": [
+        {
+          "name": "versionId",
+          "type": "string"
+        },
+        {
+          "name": "versionNumber",
+          "type": "number"
+        },
+        {
+          "name": "createdAt",
+          "type": "date"
+        },
+        {
+          "name": "createdBy",
+          "type": "string"
+        },
+        {
+          "name": "changeSummary",
+          "type": "string"
+        }
+      ],
+      "ActivityLogEntryResponse": [
+        {
+          "name": "entryId",
+          "type": "string"
+        },
+        {
+          "name": "contractId",
+          "type": "string"
+        },
+        {
+          "name": "actionType",
+          "type": "enum"
+        },
+        {
+          "name": "performedBy",
+          "type": "string"
+        },
+        {
+          "name": "performedAt",
+          "type": "date"
+        },
+        {
+          "name": "details",
+          "type": "string"
+        }
+      ],
+      "ContractDocumentResponse": [
+        {
+          "name": "contractId",
+          "type": "string"
+        },
+        {
+          "name": "documentUrl",
+          "type": "string"
+        },
+        {
+          "name": "fileName",
+          "type": "string"
+        },
+        {
+          "name": "fileType",
+          "type": "string"
+        },
+        {
+          "name": "fileSizeBytes",
+          "type": "number"
+        },
+        {
+          "name": "isOversized",
+          "type": "boolean"
+        },
+        {
+          "name": "isCorruptedOrMissing",
+          "type": "boolean"
+        },
+        {
+          "name": "downloadEnabled",
+          "type": "boolean"
+        },
+        {
+          "name": "unavailableComment",
+          "type": "string"
+        }
+      ],
+      "FolderTagOptionResponse": [
+        {
+          "name": "id",
+          "type": "string"
+        },
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "kind",
+          "type": "enum"
+        }
+      ]
+    },
+    "notes": "The changed UI code reads the detail response as id, contractType, counterpartyName, contractValue, currency, contractOwnerName — which do NOT match the ContractVersionResponse-era typedef ContractDetailResponse in src/services/contractRepositoryService.js (contractId, counterparty, value, owner, no contractType/currency); the backend must return the field names the components actually read or those rows render as '—'. availableTabs values are matched character-for-character against 'Details','Document','Versions','Clauses','Approvals','Signatures','Obligations','Activity Log'."
+  },
+  "usage": {
+    "num_turns": 24,
+    "duration_ms": 107347,
+    "total_cost_usd": 0.6077735999999999,
+    "input_tokens": 3227,
+    "output_tokens": 5341,
+    "cache_creation_input_tokens": 34114,
+    "cache_read_input_tokens": 1040582,
+    "is_error": false
+  }
+}

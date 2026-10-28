@@ -18,14 +18,17 @@ vi.mock('@/shared/hooks/useAuth', () => ({ useAuth: () => authState }));
 const CONTRACT_ID = '11111111-1111-1111-1111-111111111111';
 
 const CONTRACT = {
+  id: CONTRACT_ID,
   contractId: CONTRACT_ID,
   contractName: 'Master Services Agreement',
-  counterparty: 'Northbridge Logistics Inc.',
+  contractType: 'MSA',
+  counterpartyName: 'Northbridge Logistics Inc.',
   status: 'Executed',
-  value: 184500,
+  contractValue: 184500,
+  currency: 'USD',
   startDate: '2025-02-01',
   endDate: '2026-01-31',
-  owner: 'Priya Anand',
+  contractOwnerName: 'Priya Anand',
   lastModified: '2026-10-02T10:00:00Z',
   folderTags: [],
   availableTabs: ['Details', 'Document', 'Versions', 'Clauses', 'Approvals', 'Signatures', 'Obligations', 'Activity Log'],

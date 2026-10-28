@@ -122,7 +122,7 @@ export default function ContractDetailPage() {
         <div className="mt-2 flex flex-wrap items-start justify-between gap-4">
           <div>
             <h1 className="text-2xl font-semibold tracking-tight">{contract.contractName}</h1>
-            <p className="mt-1 text-sm text-neutral-500">Counterparty: {contract.counterparty}</p>
+            <p className="mt-1 text-sm text-neutral-500">Counterparty: {contract.counterpartyName}</p>
           </div>
           <div className="flex shrink-0 items-center gap-2">
             {canManageFolderTags && (
@@ -146,9 +146,11 @@ export default function ContractDetailPage() {
           )}
           <div className="mt-3 flex flex-wrap gap-2">
             <span className="rounded-full bg-black/15 px-3 py-1 text-xs font-medium">
-              Contract Value: {formatCurrency(contract.value)}
+              Contract Value: {formatCurrency(contract.contractValue, contract.currency)}
             </span>
-            <span className="rounded-full bg-black/15 px-3 py-1 text-xs font-medium">Owner: {contract.owner}</span>
+            <span className="rounded-full bg-black/15 px-3 py-1 text-xs font-medium">
+              Owner: {contract.contractOwnerName}
+            </span>
             <span className="rounded-full bg-black/15 px-3 py-1 text-xs font-medium">
               Effective: {formatDate(contract.startDate)}
             </span>

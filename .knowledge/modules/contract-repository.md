@@ -4,10 +4,10 @@ title: src/features/contract-repository
 description: Contract search/repository list, contract detail tabs (details, document, versions, activity log), and obligations/renewal workflows.
 resource: https://github.com/AgentMCPAgenticThree/life-cycle-frontend/tree/main/src/features/contract-repository
 tags: [frontend, contract-repository, obligations]
-generated: { by: sage-maintenance/claude-code, at: 2026-10-14T12:33:45Z }
+generated: { by: sage-maintenance/claude-code, at: 2026-10-28T05:52:13Z }
 sources:
   - id: cbm-graph
-    resource: codebase-memory-mcp project life-cycle-frontend @ f7c53e07c639c02ca5973ae775bd63b8c6ccc08a
+    resource: codebase-memory-mcp project life-cycle-frontend @ d5bd4c769c741b5a61dedfa7d8524f22c8417414
     title: Codebase knowledge graph
 status: stable
 ---
@@ -42,6 +42,20 @@ query down so matched text is highlighted in the results table.
 ## Utils
 
 `utils/format.js` — `formatDate` is a top-10 hotspot (6 callers across this directory).
+`formatCurrency(value, currency = 'USD')` takes the contract's own `currency` code as its
+second argument rather than hard-coding USD, and its `catch` fallback renders
+`` `${currency || ''} ${value}` `` so an unsupported ISO code still shows the unit instead
+of a bare number. `null`/`undefined` renders `—`. Callers: `ContractDetailsTab.jsx` and
+`src/pages/ContractDetailPage.jsx`, both of which pass `contract.contractValue` and
+`contract.currency`.
+
+### Detail field names follow `ContractDetailResponse`
+
+`ContractDetailsTab.jsx` and `ContractDetailPage.jsx` read `counterpartyName`,
+`contractValue`, `currency` and `contractOwnerName` — the DTO names in `CLAUDE.md`'s
+`life-cycle-uc8-uc9` contract. The shorter `counterparty` / `value` / `owner` spellings are
+**not** on the response, so using them renders blank cells against a 200 response rather
+than an error. `ContractDetailsTab.jsx` is the canonical list of the detail fields.
 
 ## Hooks (`hooks/`)
 

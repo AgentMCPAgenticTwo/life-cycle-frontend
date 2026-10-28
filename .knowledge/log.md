@@ -1,5 +1,21 @@
 # Knowledge Update Log
 
+## 2026-10-28
+
+* **Update**: [contract-repository](/modules/contract-repository.md) — documented that the
+  contract detail screens read the `ContractDetailResponse` field names
+  (`counterpartyName`, `contractValue`, `currency`, `contractOwnerName`) rather than the
+  shorter `counterparty`/`value`/`owner` spellings, which render blank against a 200
+  response; and that `formatCurrency` in
+  `src/features/contract-repository/utils/format.js` now takes the contract's `currency` as
+  a second argument (defaulting to `USD`) with a `"<code> <value>"` fallback on an
+  unsupported ISO code. Affects `src/pages/ContractDetailPage.jsx` and
+  `src/features/contract-repository/components/ContractDetailsTab.jsx`. Mode `update`,
+  trace `9644b89da82c`, commit `d5bd4c769c741b5a61dedfa7d8524f22c8417414`. No new routes,
+  modules or directories — overview, architecture and the index files were already accurate
+  and were left untouched; `.github/workflows/ui-correction.yml` is CI provisioning, not
+  application source, and no concept describes it.
+
 ## 2026-10-26
 
 * **Update**: [services](/modules/services.md), [shared](/modules/shared.md) — documented

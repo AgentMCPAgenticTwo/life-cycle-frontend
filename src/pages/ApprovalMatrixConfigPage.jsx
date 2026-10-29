@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { v4 as uuidv4 } from 'uuid';
 import ApprovalMatrixRuleCard from '@/features/approvals/components/ApprovalMatrixRuleCard';
 import { useApprovalMatrixConfig } from '@/features/approvals/hooks/useApprovalMatrixConfig';
 import { useUpdateApprovalMatrixConfig } from '@/features/approvals/hooks/useUpdateApprovalMatrixConfig';
@@ -11,7 +12,7 @@ const ALLOWED_ROLES = ['TENANT_ADMIN'];
 
 function emptyRule() {
   return {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     contractType: '',
     valueMin: undefined,
     valueMax: undefined,
